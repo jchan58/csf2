@@ -29,6 +29,6 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     byteval/=16;
     d--;
   }
-
-
 }
+
+
