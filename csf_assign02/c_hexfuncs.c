@@ -31,4 +31,16 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   }
 }
 
+// Convert a byte value (in the range 0-255) to a printable character
+// value.  If byteval is already a printable character, it is returned
+// unmodified.  If byteval is not a printable character, then the
+// ASCII code for '.' should be returned.
+char hex_to_printable(unsigned char byteval){
+  //non-printable characters are 0-31; for them return a .
+  if(byteval >= 0 && byteval <= 31){
+    return 46;
+  }
 
+  //otherwise return the byteval unmodified
+  return byteval;
+}
