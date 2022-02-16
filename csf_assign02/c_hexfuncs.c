@@ -5,6 +5,25 @@
 
 // TODO: add function implementations here
 
+unsigned hex_read(char data_buf[]){
+  int count = 0;
+  //return the count of the character read from the standard output
+  count = read(0, data_buf, 16); 
+  return count; 
+}
+
+
+void hex_write_string(const char s[]){
+  int length = 0;
+  
+  //to find the length of s 
+  for(int k = 0; s[k] != '\0'; ++k){
+    length++; 
+  }
+  
+  write(1, s, length); 
+}
+
 // Format a byte value (in the range 0-255) as string consisting
 // of two hex digits.  The string is stored in sbuf.
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
