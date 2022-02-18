@@ -10,12 +10,15 @@
 // test fixture object
 typedef struct {
   char test_data_1[16];
+  //added in our test data
+  char test_data_2[16];
 } TestObjs;
 
 // setup function (to create the test fixture)
 TestObjs *setup(void) {
   TestObjs *objs = malloc(sizeof(TestObjs));
   strcpy(objs->test_data_1, "Hello, world!\n");
+  strcpy(objs->test_data_2, "It's Party Time");
   return objs;
 }
 
@@ -48,19 +51,79 @@ int main(int argc, char **argv) {
 void testFormatOffset(TestObjs *objs) {
   (void) objs; // suppress warning about unused parameter
   char buf[16];
+  
   hex_format_offset(1L, buf);
   ASSERT(0 == strcmp(buf, "00000001"));
   
+  //Our Tests
+  hex_format_offset(3L, buf);
+  ASSERT(0 == strcmp(buf, "00000003"));
 
+  hex_format_offset(30L, buf);
+  ASSERT(0 == strcmp(buf, "0000001E"));
+
+  hex_format_offset(400L, buf);
+  ASSERT(0 == strcmp(buf, "00000190"));
+
+  hex_format_offset(77L, buf);
+  ASSERT(0 == strcmp(buf, "0000004D"));
+
+  hex_format_offset(9213L, buf);
+  ASSERT(0 == strcmp(buf, "000023FE"));
+
+  hex_format_offset(679213L, buf);
+  ASSERT(0 == strcmp(buf, "000A5D2D"));
+
+  hex_format_offset(3938789L, buf);
+  ASSERT(0 == strcmp(buf, "003C19E5"));
+
+  hex_format_offset(78679562L, buf);
+  ASSERT(0 == strcmp(buf, "04B08E0A"));
+
+  hex_format_offset(986571987L, buf);
+  ASSERT(0 == strcmp(buf, "3ACDE4D3"));
 }
 
 void testFormatByteAsHex(TestObjs *objs) {
   char buf[8];
   hex_format_byte_as_hex(objs->test_data_1[0], buf);
   ASSERT(0 == strcmp(buf, "48"));
+
+  //Our tests
+
+  hex_format_byte_as_hex(objs->test_data_1[2], buf);
+  ASSERT(0 == strcmp(buf, "6C"));
+
+  hex_format_byte_as_hex(objs->test_data_1[7], buf);
+  ASSERT(0 == strcmp(buf, "77"));
+  
+  hex_format_byte_as_hex(objs->test_data_2[0], buf);
+  ASSERT(0 == strcmp(buf, "49"));
+
+  hex_format_byte_as_hex(objs->test_data_2[3], buf);
+  ASSERT(0 == strcmp(buf, "73"));
+
+  hex_format_byte_as_hex(objs->test_data_2[11], buf);
+  ASSERT(0 == strcmp(buf, "54"));
+
+  hex_format_byte_as_hex(objs->test_data_2[13], buf);
+  ASSERT(0 == strcmp(buf, "6D"));
 }
 
 void testHexToPrintable(TestObjs *objs) {
   ASSERT('H' == hex_to_printable(objs->test_data_1[0]));
   ASSERT('.' == hex_to_printable(objs->test_data_1[13]));
+
+  //our tests
+  ASSERT('e' == hex_to_printable(objs->test_data_1[1]));
+  ASSERT('d' == hex_to_printable(objs->test_data_1[11]));
+
+  ASSERT('s' == hex_to_printable(objs->test_data_2[3]));
+  ASSERT('m' == hex_to_printable(objs->test_data_2[13]));
+
+  ASSERT('t' == hex_to_printable(objs->test_data_2[1]));
+  ASSERT('T' == hex_to_printable(objs->test_data_2[11]));
+  
+  ASSERT('I' == hex_to_printable(objs->test_data_2[0]));
+  ASSERT('i' == hex_to_printable(objs->test_data_2[12]));
 }
