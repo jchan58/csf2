@@ -30,7 +30,7 @@ void hex_write_string(const char s[]){
 // of two hex digits.  The string is stored in sbuf.
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   int divides = 0;
-  char byteval_copy = byteval;
+  unsigned char byteval_copy = byteval;
 
   //check how many times you will divide when converting
   while(byteval_copy != 0){
@@ -38,17 +38,30 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     divides++;
   }
 
-  //make sbuf big enough
-  //char sbuf[divides - 1];
-
+  
   //we don't want to change divides
   int d = divides;
+  char temp[divides];
+
+  //convert an integer to char and put it in here 
+  char from_int = ' ';
   
   //convert decimal to hex and store it in a string
   for(int i = 0; i < divides; i++){
-    sbuf[d - 1] = byteval % 16;
+    if(byteval % 16 < 10){
+      from_int = 48 + byteval % 16;
+    }else{
+      from_int = 55 + byteval % 16;
+    }
+    temp[d - 1] = from_int;
     byteval/=16;
     d--;
+  }
+
+  
+  //move the characters to the front of the string
+  for(int i = 0; i < divides; i++){
+    sbuf[i] = temp[i];
   }
 }
 
@@ -70,14 +83,44 @@ char hex_to_printable(unsigned char byteval){
 // hex digits.  The formatted offset is stored in sbuf, which must
 // have enough room for a string of length 8.
 void hex_format_offset(unsigned offset, char sbuf[]){
-  int length = 0;
+  //get rid of sbuf's garbage values somehow
+  
+  int divides = 0;
+  unsigned offset_copy = offset;
 
-  //to find the length of s
-  for(int k = 0; s[k] != '\0'; ++k){
-    length++;
+  //check how many times you will divide when converting
+  while(offset_copy != 0){
+    offset_copy/=16;
+    divides++;
   }
 
-  write(1, s, length);
+
+  //we don't want to change divides
+  int d = divides;
+  char from_int = ' ';
+  //convert decimal to hex and store it in a string starting at index 7
+  for(int i = 0; i < divides; i++){
+    if(offset % 16 < 10){
+      from_int = 48 + offset % 16;
+    }else{
+      from_int = 55 + offset % 16;
+    }
+    sbuf[8 - d] = from_int;
+    offset/=16;
+    d++;
+  }
+
+  
+  //fill the rest of the string with 0s
+  for(int i = 0; i < 8 - divides; i++){
+    sbuf[i] = '0';
+  }
+
+  //there is always a garbage value at 8, make sure it is null-terminator (end of string)
+  sbuf[8] = '\0';
+  
+  //write out sbuf
+  write(1, sbuf ,8);
 }
 
 

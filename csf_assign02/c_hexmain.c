@@ -3,6 +3,7 @@
 #include "hexfuncs.h"  // this is the only header file which may be included!
 
 int main(int argc, char *argv[]){
+  /*
   //read the input file
   int count = 0;
   char line[16];
@@ -35,4 +36,6 @@ int main(int argc, char *argv[]){
     //write a newline
     hex_write_string("\n");
 
+  */
 }
+
