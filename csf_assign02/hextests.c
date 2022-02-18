@@ -69,7 +69,7 @@ void testFormatOffset(TestObjs *objs) {
   ASSERT(0 == strcmp(buf, "0000004D"));
 
   hex_format_offset(9213L, buf);
-  ASSERT(0 == strcmp(buf, "000023FE"));
+  ASSERT(0 == strcmp(buf, "000023FD"));
 
   hex_format_offset(679213L, buf);
   ASSERT(0 == strcmp(buf, "000A5D2D"));
