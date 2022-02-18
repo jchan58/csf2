@@ -118,6 +118,8 @@ void testHexToPrintable(TestObjs *objs) {
   ASSERT('e' == hex_to_printable(objs->test_data_1[1]));
   ASSERT('d' == hex_to_printable(objs->test_data_1[11]));
 
+  ASSERT('.' == hex_to_printable(objs->test_data_1[13]));
+
   ASSERT('s' == hex_to_printable(objs->test_data_2[3]));
   ASSERT('m' == hex_to_printable(objs->test_data_2[13]));
 

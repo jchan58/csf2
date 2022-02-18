@@ -96,7 +96,7 @@ void hex_format_offset(unsigned offset, char sbuf[]){
 
 
   //we don't want to change divides
-  int d = divides;
+  int d = 1;
   char from_int = ' ';
   //convert decimal to hex and store it in a string starting at index 7
   for(int i = 0; i < divides; i++){
