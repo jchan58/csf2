@@ -8,11 +8,15 @@ int main(int argc, char *argv[]){
   char line[16];
   char hex_sentence[16];
   char hex_printable[16];
-  //char hex_formatted_address[dont know the size];
-  //i think this is how it's done
+  unsigned offset = 0;
+  char offset_formatted[8];
+
+  //format the offset (start position of the character leading the line)
+  hex_format_offset(offset, offset_formatted);
+
+  hex_write_string(offset_formatted);
+  
   while((line_count = hex_read(line)) != 0){
-    //hex_format_offset the address 
-    //hex_write_string(write the formatted address column, and write a space
     hex_write_string(":  ");
 
     //make sure line is null terminated
@@ -39,5 +43,11 @@ int main(int argc, char *argv[]){
     //write a newline
     hex_write_string("\n");
   
+    //write the next offset
+    offset += line_count;
+    hex_format_offset(offset, offset_formatted);
+    hex_write_string(offset_formatted);
+
+  }
 }
 
