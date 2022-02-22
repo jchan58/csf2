@@ -68,11 +68,13 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   }
 
   
+  
   //move the characters to the front of the string
   for(int i = 0; i < divides; i++){
     sbuf[i] = temp[i];
   }
 
+  
   //call the function to change the values to lowercase
   toLower(sbuf, 2); 
 }
@@ -130,14 +132,14 @@ void hex_format_offset(unsigned offset, char sbuf[]){
     sbuf[i] = '0';
   }
 
-  //there is always a garbage value at 8, make sure it is null-terminator (end of string)
+  //there may be  a garbage value at 8, make sure it is null-terminator (end of string)
   sbuf[8] = '\0';
 
   //change the values of sbuf to lowercase
   toLower(sbuf, 8);
  
-  //write out sbuf
-  write(1, sbuf ,8);
+  //write out sbuf shouldn't
+  //write(1, sbuf ,8);
 }
 
 
