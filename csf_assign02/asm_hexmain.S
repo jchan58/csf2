@@ -1,12 +1,12 @@
 /* Hexdump main function, assembly language version */
 
-	.section .text
+//	.section .text
 
-	.globl main
-main:
+//	.globl main
+//main:
 	/* TODO: add your code here */
 
-	ret
+//	ret
 
 /* vim:ft=gas:
  */

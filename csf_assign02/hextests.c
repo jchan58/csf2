@@ -60,28 +60,28 @@ void testFormatOffset(TestObjs *objs) {
   ASSERT(0 == strcmp(buf, "00000003"));
 
   hex_format_offset(30L, buf);
-  ASSERT(0 == strcmp(buf, "0000001E"));
+  ASSERT(0 == strcmp(buf, "0000001e"));
 
   hex_format_offset(400L, buf);
   ASSERT(0 == strcmp(buf, "00000190"));
 
   hex_format_offset(77L, buf);
-  ASSERT(0 == strcmp(buf, "0000004D"));
+  ASSERT(0 == strcmp(buf, "0000004d"));
 
   hex_format_offset(9213L, buf);
-  ASSERT(0 == strcmp(buf, "000023FD"));
+  ASSERT(0 == strcmp(buf, "000023fd"));
 
   hex_format_offset(679213L, buf);
-  ASSERT(0 == strcmp(buf, "000A5D2D"));
+  ASSERT(0 == strcmp(buf, "000a5d2d"));
 
   hex_format_offset(3938789L, buf);
-  ASSERT(0 == strcmp(buf, "003C19E5"));
+  ASSERT(0 == strcmp(buf, "003c19e5"));
 
   hex_format_offset(78679562L, buf);
-  ASSERT(0 == strcmp(buf, "04B08E0A"));
+  ASSERT(0 == strcmp(buf, "04b08e0a"));
 
   hex_format_offset(986571987L, buf);
-  ASSERT(0 == strcmp(buf, "3ACDE4D3"));
+  ASSERT(0 == strcmp(buf, "3acde4d3"));
 }
 
 void testFormatByteAsHex(TestObjs *objs) {
@@ -92,7 +92,7 @@ void testFormatByteAsHex(TestObjs *objs) {
   //Our tests
 
   hex_format_byte_as_hex(objs->test_data_1[2], buf);
-  ASSERT(0 == strcmp(buf, "6C"));
+  ASSERT(0 == strcmp(buf, "6c"));
 
   hex_format_byte_as_hex(objs->test_data_1[7], buf);
   ASSERT(0 == strcmp(buf, "77"));
@@ -107,7 +107,7 @@ void testFormatByteAsHex(TestObjs *objs) {
   ASSERT(0 == strcmp(buf, "54"));
 
   hex_format_byte_as_hex(objs->test_data_2[13], buf);
-  ASSERT(0 == strcmp(buf, "6D"));
+  ASSERT(0 == strcmp(buf, "6d"));
 }
 
 void testHexToPrintable(TestObjs *objs) {

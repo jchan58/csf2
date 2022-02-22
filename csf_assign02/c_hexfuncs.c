@@ -26,6 +26,15 @@ void hex_write_string(const char s[]){
   write(1, s, length); 
 }
 
+//change the uppercases to lowercases for the hex values
+void toLower(char sbuf[], int length) {
+  for(int i = 0; i <= length; i++){
+    if(sbuf[i] <= 90 && sbuf[i] >= 65){
+      sbuf[i] = sbuf[i] + 32;
+    }
+  }
+}
+
 // Format a byte value (in the range 0-255) as string consisting
 // of two hex digits.  The string is stored in sbuf.
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
@@ -63,7 +72,12 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   for(int i = 0; i < divides; i++){
     sbuf[i] = temp[i];
   }
+
+  //call the function to change the values to lowercase
+  toLower(sbuf, 2); 
 }
+
+
 
 // Convert a byte value (in the range 0-255) to a printable character
 // value.  If byteval is already a printable character, it is returned
@@ -118,7 +132,10 @@ void hex_format_offset(unsigned offset, char sbuf[]){
 
   //there is always a garbage value at 8, make sure it is null-terminator (end of string)
   sbuf[8] = '\0';
-  
+
+  //change the values of sbuf to lowercase
+  toLower(sbuf, 8);
+ 
   //write out sbuf
   write(1, sbuf ,8);
 }
