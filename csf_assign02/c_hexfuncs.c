@@ -23,8 +23,7 @@ void hex_write_string(const char s[]){
   for(int k = 0; s[k] != '\0'; ++k){
     length++; 
   }
-
-
+  
   write(1, s, length); 
 }
 
@@ -43,16 +42,14 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   int divides = 0;
   unsigned char byteval_copy = byteval;
 
-  for (int i=0; i<2; i++) {
-    sbuf[i] = '0';
-  }
+  sbuf[0] = '0';
+  sbuf[1] = '0';
   
   //check how many times you will divide when converting
   while(byteval_copy != 0){
     byteval_copy/=16;
     divides++;
   }
-
   
   //we don't want to change divides
   //was d = divides and temp[divides]
@@ -79,10 +76,6 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   if(divides == 1){
     temp[0] = '0';
   }
-
-  if(divides == 0){
-    temp[1] = '0';
-  }
   
 
   //move the characters to the front of the string
@@ -90,7 +83,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     sbuf[i] = temp[i];
   }
 
-  sbuf[2] = '\0';
+  
   //call the function to change the values to lowercase
   toLower(sbuf, 2);
 }
@@ -103,8 +96,8 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 // ASCII code for '.' should be returned.
 char hex_to_printable(unsigned char byteval){
   //non-printable characters are 0-31; for them return a .
-  if(byteval <= 31 || byteval == 127){
-    return (char) 46;
+  if(byteval >= 0 && byteval <= 31){
+    return 46;
   }
 
   //otherwise return the byteval unmodified
@@ -154,35 +147,6 @@ void hex_format_offset(unsigned offset, char sbuf[]){
   //change the values of sbuf to lowercase
   toLower(sbuf, 8);
  
+  //write out sbuf shouldn't
+  //write(1, sbuf ,8);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
