@@ -43,10 +43,9 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 
   //check how many times you will divide when converting
   while(byteval_copy != 0){
-    byteval_copy/=16;
+   1 byteval_copy/=16;
     divides++;
   }
-
   
   //we don't want to change divides
   int d = divides;
