@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]){
   //read the input file
   int line_count = 0;
-  char line[17];
+  char line[17] = {'\0'};;
   char hex_byte[3];
   char hex_printable[17];
   unsigned offset = 0;
@@ -15,9 +15,11 @@ int main(int argc, char *argv[]){
   //format the offset (start position of the character leading the line)
   hex_format_offset(offset, offset_formatted);
 
-  //hex_write_string(offset_formatted);
   
   while((line_count = hex_read(line)) != 0){
+    line[line_count] = '\0'; 
+    
+    
     hex_write_string(offset_formatted);
     
     
