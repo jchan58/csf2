@@ -11,6 +11,7 @@ unsigned hex_read(char data_buf[]){
   int count = 0;
   //return the count of the character read from the standard output
   count = read(0, data_buf, 16); 
+  data_buf[count + 1] = '\0';
   return count; 
 }
 
@@ -76,7 +77,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 
   
   //call the function to change the values to lowercase
-  toLower(sbuf, 2); 
+  toLower(sbuf, 2);
 }
 
 
