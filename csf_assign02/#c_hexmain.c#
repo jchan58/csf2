@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
   char hex_byte[3];
   char hex_printable[17] = {'\0'};
   unsigned offset = 0;
-  char offset_formatted[8] = {48};
+  char offset_formatted[9] = {48};
   offset_formatted[8] = '\0';
   
   //format the offset (start position of the character leading the line)

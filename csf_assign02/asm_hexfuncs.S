@@ -56,7 +56,7 @@ hex_format_byte_as_hex:
 	movq %rdi, %r11			/* %r11 is a copy of byteval */
 	movq $0, %rcx 			/* %rcx will be used to compare */
 	movl $2, %r10d			/* %r10d will be used to store d */
-	movl $0, %r11d			/* %r11d will be used to store index */
+	movb $0, %r11b			/* %r11b will be used to store index for sbuf*/
 	movb $32, %r10b			/* %r10b is from_int and a space in begining */
 	movq $0, %rcx			/* %rcx will be used as an index in for loop */
 .whileLoop:
@@ -67,9 +67,9 @@ hex_format_byte_as_hex:
 	jmp .whileLoop 
 	
 .nextLines:
-	movb $48, (%rsi, %r11d, 1)	/* set index 0 of array equal to '0' */
-	incl %r11d			/* increment index set in %r11d */
-	movb $48, (%rsi, %r11d, 1)	/* set index 1 of array equal to '0' */
+	movb $48, (%rsi, %r11b, 1)	/* set index 0 of array equal to '0' */
+	incb %r11b			/* increment index set in %r11d */
+	movb $48, (%rsi, %r11b, 1)	/* set index 1 of array equal to '0' */
 	jmp .fillSbuf
 	
 .fillSbuf:
