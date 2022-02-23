@@ -19,11 +19,9 @@ void hex_write_string(const char s[]){
   
   int length = 0;
 
-  
-  //to find the length of s 
-  for(int k = 0; s[k] != '\0'; ++k){
-    length++; 
-  }
+  while(s[length] != '\0'){
+    length++;
+   }  
   
   write(1, s, length); 
 }
@@ -94,7 +92,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 // ASCII code for '.' should be returned.
 char hex_to_printable(unsigned char byteval){
   //non-printable characters are 0-31; for them return a .
-  if(byteval >= 0 && byteval <= 31){
+  if(byteval <= 31 || byteval > 126){
     return 46;
   }
 
