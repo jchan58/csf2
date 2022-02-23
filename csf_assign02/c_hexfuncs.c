@@ -11,13 +11,14 @@ unsigned hex_read(char data_buf[]){
   int count = 0;
   //return the count of the character read from the standard output
   count = read(0, data_buf, 16); 
-  data_buf[count] = '\0';
   return count; 
 }
 
 // Write given nul-terminated string to standard output.
 void hex_write_string(const char s[]){
+  
   int length = 0;
+
   
   //to find the length of s 
   for(int k = 0; s[k] != '\0'; ++k){
@@ -42,8 +43,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   int divides = 0;
   unsigned char byteval_copy = byteval;
 
-  sbuf[0] = '0';
-  sbuf[1] = '0';
+  
   
   //check how many times you will divide when converting
   while(byteval_copy != 0){
@@ -52,10 +52,11 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   }
   
   //we don't want to change divides
-  //was d = divides and temp[divides]
   int d = 2;
   char temp[2];
   
+  temp[0] = '0';
+  temp[1] = '0';
 
   //convert an integer to char and put it in here 
   char from_int = ' ';
@@ -72,16 +73,13 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     d--;
   }
 
-  //fill the empty leading slot with 0 if it is empty
-  if(divides == 1){
-    temp[0] = '0';
-  }
   
-
   //move the characters to the front of the string
   for(int i = 0; i < 2; i++){
     sbuf[i] = temp[i];
   }
+
+  sbuf[2] = '\0';
 
   
   //call the function to change the values to lowercase
