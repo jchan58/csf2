@@ -76,7 +76,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 
   
   //call the function to change the values to lowercase
-  toLower(sbuf, 2); 
+  toLower(sbuf, 2);
 }
 
 
