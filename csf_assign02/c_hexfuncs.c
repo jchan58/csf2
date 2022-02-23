@@ -51,10 +51,10 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   
   //we don't want to change divides
   int d = 2;
-  char temp[2];
+  //  char temp[2];
   
-  temp[0] = '0';
-  temp[1] = '0';
+  sbuf[0] = '0';
+  sbuf[1] = '0';
 
   //convert an integer to char and put it in here 
   char from_int = ' ';
@@ -64,24 +64,23 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     if(byteval % 16 < 10){
       from_int = 48 + byteval % 16;
     }else{
-      from_int = 55 + byteval % 16;
+      from_int = 87 + byteval % 16;
     }
-    temp[d - 1] = from_int;
+    sbuf[d - 1] = from_int;
     byteval/=16;
     d--;
   }
 
-  
+  /*
   //move the characters to the front of the string
   for(int i = 0; i < 2; i++){
     sbuf[i] = temp[i];
-  }
+    }*/
 
   sbuf[2] = '\0';
 
   
-  //call the function to change the values to lowercase
-  toLower(sbuf, 2);
+  
 }
 
 
