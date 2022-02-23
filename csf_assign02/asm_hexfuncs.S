@@ -53,7 +53,7 @@ hex_format_offset:
 	.globl hex_format_byte_as_hex
 	
 hex_format_byte_as_hex:
-	subq $8, rsp 			/* adjust the stack pointer */
+	subq $8, %rsp 			/* adjust the stack pointer */
 	movq $0, %r10			/* %r10d is set equal to 0 */
 	movq %rdi, %r11		/* %r11d is a copy of value in %rdi */
 	movq $0, %rcx 			/* %rcx will be used to store temp */
