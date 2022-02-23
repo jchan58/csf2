@@ -26,29 +26,25 @@ int main(int argc, char *argv[]){
     //make sure line and hex_printable are properly is null terminated
     line[line_count] = '\0';
     hex_printable[line_count] = '\0';
-    /*
-    //make sure the end of line is null terminators
-    for(int i = line_count; i < 16; i++){
-      line[i] = '\0';
-      }*/
     
     for(int i = 0; i < line_count; i++){
       //convert the sentence into a hex sentence
       hex_format_byte_as_hex(line[i], hex_byte);
-      hex_byte[2] = '\0';
       hex_write_string(hex_byte);
       hex_write_string(" ");
     }
     
     //add the appropriate blank space (2 chars + 1 space is 3)
-    for(int i = 0; i < (16-line_count) * 3; i++){
-      hex_write_string(" ");
+    for(int i = 0; i < 16-line_count; i++){
+      hex_write_string("   ");
     }
 
-    hex_write_string(" ");
-    
-    hex_write_string("  ");
-    
+
+    if(line_count == 16){
+      hex_write_string(" ");
+    }else{
+     hex_write_string(" "); 
+    }
 
     //make sure all the sentence values are printable
     for(int i = 0; i < line_count; i++){
