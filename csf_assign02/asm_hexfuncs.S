@@ -59,7 +59,7 @@ hex_format_byte_as_hex:
 	movq $0, %rcx 			/* %rcx will be used to compare */
 	movq $2, %r12			/* %r12 will be used to store d */
 	movq $0, %r8			/* %r8 will be used to store index for sbuf*/
-	movb $32, %r10b			/* %r10b is from_int and a space in begining */
+	movb $32, %r10b			/* %r10b is from_int and a space in begining(unusued?) */
 	movq $0, %rcx			/* %rcx will be used as an index in for loop */
 .whileLoop:
 	cmpq $0, %r11                 /* %r10d see if byte_copy has reached 0 */
@@ -80,15 +80,15 @@ hex_format_byte_as_hex:
 	jmp .findFromInt		/* if not jump to if statement*/
 	
 .findFromInt:
-	movq %rdi, %rax
+	movq %rdi, %rax                 /*div does rax + rdx / given */
 	movq $0, %rdx
-	movq $16, %r9
+	movq $16, %r9                   /*make 16 be 8 bytes (match sizes for operatioin*/  
 	divq %r9 			 /* divide byteval by 16 */
 	movq %rax, %rdi 		 /* byteval is quotient is in %rax */
 	cmpq $10, %rdx			 /* %rdx is reaminder */
 	jae .findElse			 /* if %rdx >= 10, do else */
-	addq $48, %rdx
-	movq $0, %r9                                /* if not add 48 to remainder */
+	addq $48, %rdx                   /* if not add 48 to remainder */
+	movq $0, %r9                      /*empty r9 (from int)*/
 	movq %rdx, %r9		         /* make from_int the above value*/
 	jmp .setSbuf			 /*then set sbuf */
 
@@ -104,9 +104,9 @@ hex_format_byte_as_hex:
 	jmp .fillSbuf			 /*go to the for loop header*/
 
 .Done:
-	movq $2, %r13
+	movq $2, %r13               /*make index 2 the right byte size (8)*/
 	movq $0, (%rsi, %r13, 1)    /* null terminate sbuf */
-	addq $8, %rsp
+	addq $8, %rsp               /*pop and realine stack pointer*/
 	popq %r13
 	popq %r12
 	ret				  /* return*/
