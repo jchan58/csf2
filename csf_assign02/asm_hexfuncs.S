@@ -52,55 +52,22 @@ hex_format_offset:
 	
 hex_format_byte_as_hex:
 	subq $8, %rsp 			/* adjust the stack pointer */
-	movq $0, %r10			/* %r10d is set equal to 0 */
-	movq %rdi, %r11		/* %r11d is a copy of value in %rdi */
-	movq $0, %rcx 			/* %rcx will be used to store temp */
+	movq $0, %r10			/* %r10 is var named divides */
+	movq %rdi, %r11			/* %r11 is a copy of byteval */
+	movq $0, %rcx 			/* %rcx will be used to compare */
+	movl $2, %r10d			/* %r10d will be used to store d */
 .whileLoop:
-	cmpq $0, %r11                 /* %r10d see if byte_copy has reached 0 */
+	cmpq %rcx, %r11                 /* %r10d see if byte_copy has reached 0 */
 	je .nextLines		      /* if it has jump to next command */
 	shrq $4, %r11 		      /* %r11d shift right four times */
 	incq %r10		      /* %r10d increment divides */
+	
 	
 .nextLines:
 	movq %r10, %rcx	      	     /* move the the value into divides */
 	
 	
 
-
-
-
-
-	
-
-/* Parameters:
- *   array (%rdi)
- *   n (%rsi) - length of the array
- *
- */
-
-	.globl toLower
-
-toLower:
-	subq $8, %rsp
-	movq $0, %r10                /* %r10d is the array index */
-	movq $32, %r11		      /* %r11d is the value that needs to be added */	
-.LLoop:
-	cmpq %rsi, %r10              /* see if index has reached length */
-	jae .LLoopDone		      /* if index >= length, done with loop */
-	jmp .IfLoop		      /* jump to the next loop */ 
-.IfLoop:
-	cmpq  $65, (%rdi, %r10, 1)
-	jbe .LLoop                    /* if sbuf[i] <= 65, reloop to for */
-        cmpq  $90, (%rdi, %r10, 1)   /*compare the values */
-        jae .LLoop 	              /* if sbuf[i] >= 90, reloop to for */
-	addq %r11, (%rdi, %r10, 1)   /* add 32 to the array element */
-	incq %r10                    /* increment index */
-	jmp .LLoop                    /* continue loop */
-	
-.LLoopDone:
-	call printf
-	addq $8, %rsp
-	ret                           /* returns %rax */
 
 
 
