@@ -1,0 +1,72 @@
+/* Assembly language implementation of hexdump functions */
+
+	.section .rodata
+
+	.section .text
+/*
+ * Prints the hex 
+ *
+ * Parameters:
+ *   byteval (%rdi) - unsigned char
+ *
+ * Returns:
+ *  the byteval
+ */
+
+	.globl hex_to_printable
+	
+hex_to_printable:
+	movq $31, %r11                /* %r11 is the store temporary value */
+	movq $0, %r10                 /* %r10 is the temp val later to compare */
+	movq %rdi, %rax               /* %rax will be returning value */
+	movl $0, %r10d
+
+.ifLoop:
+	cmpq %r10, %rdi              /* see if first parameter %rdi is >= %r10 */
+        jbe .Lp  				     /* if byteval <= 0, continue to next statement*/
+	cmpq %r11, %rdi	      	     /* see if first parameter %rdi <= %r11d */
+	jae .Lp
+	movq $46, %rax
+	jmp .Lp
+.Lp:
+	ret
+
+
+	.globl hex_format_offset
+	
+hex_format_offset:
+
+	ret
+
+
+/* Parameters:                                                                  
+ *   byteval (%rdi)                                                               
+ *   sbuf (%rsi) - the actual array passed in                                              
+ *                                                                              
+ */
+
+	.globl hex_format_byte_as_hex
+	
+hex_format_byte_as_hex:
+	subq $8, %rsp 			/* adjust the stack pointer */
+	movq $0, %r10			/* %r10 is var named divides */
+	movq %rdi, %r11			/* %r11 is a copy of byteval */
+	movq $0, %rcx 			/* %rcx will be used to compare */
+	movl $2, %r10d			/* %r10d will be used to store d */
+.whileLoop:
+	cmpq %rcx, %r11                 /* %r10d see if byte_copy has reached 0 */
+	je .nextLines		      /* if it has jump to next command */
+	shrq $4, %r11 		      /* %r11d shift right four times */
+	incq %r10		      /* %r10d increment divides */
+	jmp .whileLoop 			
+	
+.nextLines:
+	movq %r10, %rcx	      	     /* move the the value into divides */
+	
+	
+
+
+
+
+/* vim:ft=gas:
+ */
