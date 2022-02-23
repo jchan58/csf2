@@ -26,23 +26,12 @@ void hex_write_string(const char s[]){
   write(1, s, length); 
 }
 
-//change the uppercases to lowercases for the hex values
-void toLower(char sbuf[], int length) {
-  for(int i = 0; i <= length; i++){
-    if(sbuf[i] <= 90 && sbuf[i] >= 65){
-      sbuf[i] = sbuf[i] + 32;
-    }
-  }
-}
-
 // Format a byte value (in the range 0-255) as string consisting
 // of two hex digits.  The string is stored in sbuf.
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   int divides = 0;
   unsigned char byteval_copy = byteval;
-
-  
-  
+ 
   //check how many times you will divide when converting
   while(byteval_copy != 0){
     byteval_copy/=16;
@@ -51,7 +40,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   
   //we don't want to change divides
   int d = 2;
-  //  char temp[2];
+  
   
   sbuf[0] = '0';
   sbuf[1] = '0';
@@ -71,16 +60,10 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     d--;
   }
 
-  /*
-  //move the characters to the front of the string
-  for(int i = 0; i < 2; i++){
-    sbuf[i] = temp[i];
-    }*/
+
 
   sbuf[2] = '\0';
 
-  
-  
 }
 
 
@@ -123,7 +106,7 @@ void hex_format_offset(unsigned offset, char sbuf[]){
     if(offset % 16 < 10){
       from_int = 48 + offset % 16;
     }else{
-      from_int = 55 + offset % 16;
+      from_int = 87 + offset % 16;
     }
     sbuf[8 - d] = from_int;
     offset/=16;
@@ -138,10 +121,6 @@ void hex_format_offset(unsigned offset, char sbuf[]){
 
   //there may be  a garbage value at 8, make sure it is null-terminator (end of string)
   sbuf[8] = '\0';
-
-  //change the values of sbuf to lowercase
-  toLower(sbuf, 8);
  
-  //write out sbuf shouldn't
-  //write(1, sbuf ,8);
+  
 }
