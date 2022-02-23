@@ -19,21 +19,19 @@ arr:	.byte 40
 	.globl hex_to_printable
 	
 hex_to_printable:
-
-	subq $8, %rsp		      /* %rsp to adjust stack pointer*/
-	movq $31, %r11                /* %r11d is the store temporary value */
-	movq $0, %r10                 /* %r10d is the temp val later to compare */
-	movq %rsi, %rax               /* %rax will be returning value */
+	movq $31, %r11                /* %r11 is the store temporary value */
+	movq $0, %r10                 /* %r10 is the temp val later to compare */
+	movq %rdi, %rax               /* %rax will be returning value */
+	movl $0, %r10d
 
 .ifLoop:
-	cmpq %r10, %rdi              /* see if first parameter %rdi is >= %r10d */
-        jbe .LLoopDone               /* if byteval <= 0, continue to next statement*/
-	cmpq %r11, %rdi	      	     /* see if first parameter %rdi >= %r11d */
-	jae .LLp
-	
-.LLp:
-	movq $46, %rax		     /* move byteval in %rax */
-	addq $8, %rsp  		     /* adjust stack pointer alignment */
+	cmpq %r10, %rdi              /* see if first parameter %rdi is >= %r10 */
+        jbe .Lp  				     /* if byteval <= 0, continue to next statement*/
+	cmpq %r11, %rdi	      	     /* see if first parameter %rdi <= %r11d */
+	jae .Lp
+	movq $46, %rax
+	jmp .Lp
+.Lp:
 	ret
 
 
@@ -100,8 +98,9 @@ toLower:
 	jmp .LLoop                    /* continue loop */
 	
 .LLoopDone:
-	addq $8, %rsp 
-	ret                           /* doesn't return anything */
+	call printf
+	addq $8, %rsp
+	ret                           /* returns %rax */
 
 
 
