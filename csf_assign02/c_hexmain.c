@@ -5,9 +5,9 @@
 int main(int argc, char *argv[]){
   //read the input file
   int line_count = 0;
-  char line[16];
+  char line[17];
   char hex_byte[4];
-  char hex_printable[16];
+  char hex_printable[17];
   unsigned offset = 0;
   char offset_formatted[8];
   
@@ -23,26 +23,27 @@ int main(int argc, char *argv[]){
     
     hex_write_string(": ");
 
-    //make sure line is null terminated
+    //make sure line and hex_printable are properly is null terminated
     line[line_count] = '\0';
+    hex_printable[line_count] = '\0';
     
     for(int i = 0; i < line_count; i++){
       //convert the sentence into a hex sentence
       hex_format_byte_as_hex(line[i], hex_byte);
-      hex_byte[2] = '\0';
       hex_write_string(hex_byte);
       hex_write_string(" ");
     }
     
     //add the appropriate blank space (2 chars + 1 space is 3)
-    for(int i = 0; i < (16-line_count) * 3; i++){
-      hex_write_string(" ");
+    for(int i = 0; i < 16-line_count; i++){
+      hex_write_string("   ");
     }
 
-    hex_write_string(" ");
 
     if(line_count == 16){
-      hex_write_string("  ");
+      hex_write_string(" ");
+    }else{
+     hex_write_string(" "); 
     }
 
     //make sure all the sentence values are printable
@@ -61,5 +62,7 @@ int main(int argc, char *argv[]){
     offset += line_count;
     hex_format_offset(offset, offset_formatted);
   }
+
+  
 }
 

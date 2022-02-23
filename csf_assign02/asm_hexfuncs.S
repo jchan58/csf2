@@ -2,7 +2,8 @@
 
 	.section .rodata
 
-	/* TODO: add read-only data such as strings here */
+	.section .data
+arr:	.byte 40
 
 	.section .text
 /*
@@ -20,18 +21,19 @@
 hex_to_printable:
 
 	subq $8, %rsp		      /* %rsp to adjust stack pointer*/
-	movl $31, %r11d               /* %r11d is the store temporary value */
-	movl $0, %r10d                /* %r10d is the temp val later to compare */
-	movl %rsi, %eax                /* %eax will be returning value */
+	movq $31, %r11                /* %r11d is the store temporary value */
+	movq $0, %r10                 /* %r10d is the temp val later to compare */
+	movq %rsi, %rax               /* %rax will be returning value */
+
 .ifLoop:
-	cmpl %r10d, %rdi              /* see if first parameter %rdi is >= %r10d */
-        jbe .LLoopDone                /* if byteval <= 0, continue to next statement*/
-	cmpl %r11d, %rdi	      /* see if first parameter %rdi >= %r11d */
-	jae .LLoopDone
+	cmpq %r10, %rdi              /* see if first parameter %rdi is >= %r10d */
+        jbe .LLoopDone               /* if byteval <= 0, continue to next statement*/
+	cmpq %r11, %rdi	      	     /* see if first parameter %rdi >= %r11d */
+	jae .LLp
 	
-.LLoopDone:
-	addq $8, rsp		     /* adjust stack pointer alignment */
-	movl $46, %eax		     /* move byteval in %eax */
+.LLp:
+	movq $46, %rax		     /* move byteval in %rax */
+	addq $8, %rsp  		     /* adjust stack pointer alignment */
 	ret
 
 
@@ -52,17 +54,17 @@ hex_format_offset:
 	
 hex_format_byte_as_hex:
 	subq $8, rsp 			/* adjust the stack pointer */
-	movl $0, %r10d			/* %r10d is set equal to 0 */
-	movl %rdi, %r11d		/* %r11d is a copy of value in %rdi */
-	movl $0, %rcx 			/* %rcx will be used to store temp */
+	movq $0, %r10			/* %r10d is set equal to 0 */
+	movq %rdi, %r11		/* %r11d is a copy of value in %rdi */
+	movq $0, %rcx 			/* %rcx will be used to store temp */
 .whileLoop:
-	cmpl $0, %r11d                 /* %r10d see if byte_copy has reached 0 */
-	je .nextLines		       /* if it has jump to next command */
-	shrl $4, %r11d 		       /* %r11d shift right four times */
-	incl %r10d		       /* %r10d increment divides */
+	cmpq $0, %r11                 /* %r10d see if byte_copy has reached 0 */
+	je .nextLines		      /* if it has jump to next command */
+	shrq $4, %r11 		      /* %r11d shift right four times */
+	incq %r10		      /* %r10d increment divides */
 	
 .nextLines:
-	movl %r10d, %rcx	      /* move the the value into divides */
+	movq %r10, %rcx	      	     /* move the the value into divides */
 	
 	
 
@@ -74,7 +76,7 @@ hex_format_byte_as_hex:
 
 /* Parameters:
  *   array (%rdi)
- *   n (%esi) - length of the array
+ *   n (%rsi) - length of the array
  *
  */
 
@@ -82,19 +84,19 @@ hex_format_byte_as_hex:
 
 toLower:
 	subq $8, %rsp
-	movl $0, %r10d                /* %r10d is the array index */
-	movl $32, %r11d		      /* %r11d is the value that needs to be added */	
+	movq $0, %r10                /* %r10d is the array index */
+	movq $32, %r11		      /* %r11d is the value that needs to be added */	
 .LLoop:
-	cmpl %esi, %r10d              /* see if index has reached length */
+	cmpq %rsi, %r10              /* see if index has reached length */
 	jae .LLoopDone		      /* if index >= length, done with loop */
-	jmp .IfLoop		      /* jump to the if statement*/
+	jmp .IfLoop		      /* jump to the next loop */ 
 .IfLoop:
-	cmpl  $65, (%rdi, %r10, 1)
+	cmpq  $65, (%rdi, %r10, 1)
 	jbe .LLoop                    /* if sbuf[i] <= 65, reloop to for */
-        cmpl  $90, (%rdi, %r10, 1)   /*compare the values */
+        cmpq  $90, (%rdi, %r10, 1)   /*compare the values */
         jae .LLoop 	              /* if sbuf[i] >= 90, reloop to for */
-	addl %r11d, (%rdi, %r10, 1)   /* add 32 to the array element */
-	incl %r10d                    /* increment index */
+	addq %r11, (%rdi, %r10, 1)   /* add 32 to the array element */
+	incq %r10                    /* increment index */
 	jmp .LLoop                    /* continue loop */
 	
 .LLoopDone:

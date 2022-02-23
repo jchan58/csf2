@@ -11,6 +11,7 @@ unsigned hex_read(char data_buf[]){
   int count = 0;
   //return the count of the character read from the standard output
   count = read(0, data_buf, 16); 
+  data_buf[count] = '\0';
   return count; 
 }
 
@@ -43,13 +44,15 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
 
   //check how many times you will divide when converting
   while(byteval_copy != 0){
-   1 byteval_copy/=16;
+    byteval_copy/=16;
     divides++;
   }
   
   //we don't want to change divides
-  int d = divides;
-  char temp[divides];
+  //was d = divides and temp[divides]
+  int d = 2;
+  char temp[2];
+  
 
   //convert an integer to char and put it in here 
   char from_int = ' ';
@@ -66,10 +69,14 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     d--;
   }
 
+  //fill the empty leading slot with 0 if it is empty
+  if(divides == 1){
+    temp[0] = '0';
+  }
   
-  
+
   //move the characters to the front of the string
-  for(int i = 0; i < divides; i++){
+  for(int i = 0; i < 2; i++){
     sbuf[i] = temp[i];
   }
 
