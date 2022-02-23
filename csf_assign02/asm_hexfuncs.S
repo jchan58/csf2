@@ -53,7 +53,8 @@ hex_format_offset:
 hex_format_byte_as_hex:
 	pushq %r12
 	pushq %r13
-	subq $8, %rsp 			/* adjust the stack pointer */
+	pushq %r14
+	subq $32, %rsp 			/* adjust the stack pointer */
 	movq $0, %r10			/* %r10 is var named divides */
 	movq %rdi, %r11			/* %r11 is a copy of byteval */
 	movq $0, %rcx 			/* %rcx will be used to compare */
@@ -98,17 +99,20 @@ hex_format_byte_as_hex:
 	jmp .setSbuf                      /*then set sbuf */
 
 .setSbuf:
-	subq $1, %r12 			 /*subtract one from d*/
-	movq %r9, (%rsi, %r12, 1)	 /*fill sbuf[d] (is d - 1) */
+	movq %r12,%r14                   /*copy of d*/
+	decq %r14                       /*sub tract from copy of d*/
+	decq %r12 			 /*subtract one from d*/
+	movq %r9, (%rsi, %r14, 1)       /*fill sbuf[d] (is d - 1) */
 	incq %r10			 /*increment the for loop index*/
 	jmp .fillSbuf			 /*go to the for loop header*/
 
 .Done:
 	movq $2, %r13               /*make index 2 the right byte size (8)*/
 	movq $0, (%rsi, %r13, 1)    /* null terminate sbuf */
-	addq $8, %rsp               /*pop and realine stack pointer*/
+	addq $32, %rsp               /*pop and realine stack pointer*/
 	popq %r13
 	popq %r12
+	pushq %r14
 	ret				  /* return*/
 /* vim:ft=gas:
  */
