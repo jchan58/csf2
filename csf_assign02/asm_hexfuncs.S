@@ -1,9 +1,11 @@
 /* Assembly language implementation of hexdump functions */
 
 	.section .rodata
-
+hex_digits:
+	.string "0123456789abcdef"
+	
 	.section .data
-arr:	.byte 40
+
 
 	.section .text
 /*
@@ -60,8 +62,7 @@ hex_format_byte_as_hex:
 	movq %rdi, %r11			/* %r11 is a copy of byteval */
 	movq $0, %rcx 			/* %rcx will be used to compare with 0, then as the for loop i starting at 0 */
 	movq $2, %r12			/* %r12 will be used to store d*/
-	movq $0, %r8			/* %r8 will be used to store index for sbuf*/
-	movq $32, %r15			/* %r15b is from_int and a space in begining(unusued?) */
+	movq $hex_digits, %r15			/* %r15 is a string of hex characters */
 .whileLoop:
 	cmpq $0, %r11                 /* %r10d see if byte_copy has reached 0 */
 	je .nextLines		      /* if it has jump to next command */
@@ -70,36 +71,29 @@ hex_format_byte_as_hex:
 	jmp .whileLoop 
 	
 .nextLines:
-	movq $48, (%rsi, %r8, 1)	/* set index 0 of array equal to '0' */
-	incq %r8			/* increment index set in %r11d */
-	movq $48, (%rsi, %r8, 1)	/* set index 1 of array equal to '0' */
+	movb 0(%r15), %r8b
+	movb %r8b, 0(%rsi)   		/* set index 0 and 1 of array equal to '0' (put char in r8 first) */
+	movb 1(%r15), %r8b
+	movb %r8b, 1(%rsi)     
 	jmp .fillSbufForLoop
 	
 .fillSbufForLoop:
 	cmpq %r10, %rcx			/* comparing index with divides */
 	jae .Done			/* if divides i is greater than or equal to divides go to done*/
-	jmp .findFromInt		/* if not jump to if statement*/
+	jmp .setSbuf			/* if not jump to if statement*/
 	
-.findFromInt:
+.setSbuf:
 	movq %rdi, %r9                  
 	andq $15, %r9			  /* %r9 is reaminder now*/
 	shrq $4, %rdi		
-	cmpq $10, %r9			 /*divide rdi by 16 */
-	jae .findElse			 /* if %r9 >= 10, do else */
-	addq $48, %r9                   /* if not add 48 to remainder */
-	movq %r9, %r15		         /* make from_int the above value*/
-	jmp .setSbuf			 /*then set sbuf */
+					/*divide rdi by 16 */
 
-.findElse:
-	addq $87, %r9			  /* if not add 87 to remainder */
-	movq %r9, %r15			  /* make from_int the above value*/
-	jmp .setSbuf                      /*then set sbuf */
 
-.setSbuf:
 	movq %r12,%r14                   /*copy of d*/
 	decq %r14                       /*sub tract from copy of d*/
 	decq %r12 			 /*subtract one from d*/
-	movq %r15, (%rsi, %r14, 1)       /*fill sbuf[d -1] with from_int */
+	movb (%r15, %r9), %r8b            /*get hex_digit at index r9 (remainder) and store it*/
+        movb %r8b, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index 9r10 */
 	incq %rcx			 /*increment the for loop index*/
 	jmp .fillSbufForLoop			 /*go to the for loop header*/
 

@@ -40,7 +40,7 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   
   //we don't want to change divides
   int d = 2;
-  //  char temp[2];
+  
   
   sbuf[0] = '0';
   sbuf[1] = '0';
@@ -60,19 +60,11 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
     d--;
   }
 
-  /*
-  //move the characters to the front of the string
-  for(int i = 0; i < 2; i++){
-    sbuf[i] = temp[i];
-    }*/
+
 
   sbuf[2] = '\0';
 
-  
-<<<<<<< HEAD
-  
-=======
->>>>>>> 7a55dbfcff9d234c5570627af25941ae3764b4db}
+}
 
 
 
@@ -130,6 +122,5 @@ void hex_format_offset(unsigned offset, char sbuf[]){
   //there may be  a garbage value at 8, make sure it is null-terminator (end of string)
   sbuf[8] = '\0';
  
-  //write out sbuf shouldn't
-  //write(1, sbuf ,8);
+  
 }
