@@ -8,7 +8,56 @@ hex_digits:
 
 
 	.section .text
-/*
+
+
+/*                                                                             
+ * Reading from the file                                                       
+ *                                                                             
+ * Parameters:                                                                 
+ *   data_buff (%rdi) - char array                                             
+ *                                                                             
+ * Returns:                                                                    
+ *  the count of characters in the array                                       
+ */
+	
+	.globl hex_read
+	
+hex_read:
+	subq $8, %rsp 		  /* %rsp is the stack ptr so align it */
+	movq $0, %rax 		  /* %rax calls readOnly value */
+	movq $0, %rdi 		  /* %rdi is the file descriptor */
+	movq $16, %rsi 	  	  /* %rsi gives the max bytes */
+	syscall		  	  /* call the read syscall */
+	addq $8, %rsp		  /* %rsp is the stack ptr so realign it */
+	ret			  /* return the count */
+
+
+	.globl hex_write_string
+
+hex_write_string:
+	subq $8, %rsp             /* %rsp is the stack ptr so align it */
+	movq $0, %r10		  /* %r10 is the length of the string */
+	movq $0, %r11		  /* %r10 is null terminator in ascii */
+	jmp .LLoop
+.LLoop:
+	cmpq %r11, (%rdi, %r10)  /* compare the character in the array */
+	je .LNext		  /* if the value in array is null, jump */
+	incq %r10		  /* increment length */
+	jmp .LLoop		  /* jump back in while loop */
+
+.LNext:
+	movq %rdi, %rsi           /* move what we will read into second args */
+	movq $1, %rax             /* %rax is the syscall for write */
+	movq $1, %rdi		  /* %rdi stores written argument */
+	movq %r10, %rdx		  /* %r10 moves length val into %rdx */
+	syscall 		  /* make a syscall to write */
+	addq $8, %rsp		  /* adjust stack pointer */
+	ret 			  /* don't return anything */
+
+
+
+
+/*	
  * Prints the hex 
  *
  * Parameters:
