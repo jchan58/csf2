@@ -161,10 +161,12 @@ hex_format_offset:
         pushq %r15
         subq $8, %rsp                   /* adjust the stack pointer and push registers*/
         movq $0, %r10                   /* %r10 is var named divides */
-        movq %rdi, %r11                 /* %r11 is a copy of byteval */
+        movq %rdi, %r11                 /* %r11 is a copy of offset */
         movq $0, %rcx                   /* %rcx will be used to compare with 0, then as the for loop i starting at 0 */
         movq $1, %r12                   /* %r12 is used to store d*/
         movq $hex_digits, %r15                  /* %r15 is a string of hex characters */
+	jmp .LwhileLoopo
+
 .LwhileLoopo:
         cmpq $0, %r11                 /* %r10d see if offset_copy has reached 0 */
         je .LfillSbufForLoopo                 /* if it has jump to next command */
