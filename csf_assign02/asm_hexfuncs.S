@@ -24,12 +24,10 @@ hex_digits:
 	
 hex_read:
 	subq $8, %rsp 		  /* %rsp is the stack ptr so align it */
-	movq $0, %r10 		  /* this is the temporary counter */
 	movq $0, %rax 		  /* %rax calls readOnly value */
 	movq $0, %rdi 		  /* %rdi is the file descriptor */
 	movq $16, %rsi 	  	  /* %rsi gives the max bytes */
-	movq syscall, %r10	  /* call the read syscall */
-	movq %r10, %rax		  /* set the counter to %rax to return val */
+	movq syscall		  /* call the read syscall */
 	addq $8, %rsp		  /* %rsp is the stack ptr so realign it */
 	ret			  /* return the count */
 
