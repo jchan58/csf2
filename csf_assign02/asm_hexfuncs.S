@@ -21,19 +21,21 @@ hex_digits:
 	.globl hex_to_printable
 	
 hex_to_printable:
-	movq $31, %r11                /* %r11 is the store temporary value */
-	movq $0, %r10                 /* %r10 is the temp val later to compare */
+	movq $31, %r11                /* %r11 is the stores 31 */
+	movq $126, %r10                 /* %r10 stores 126*/
 	movq %rdi, %rax               /* %rax will be returning value */
-	movl $0, %r10d
 
-.ifLoop:
 	cmpq %r10, %rdi              /* see if first parameter %rdi is >= %r10 */
-        jbe .Lp  				     /* if byteval <= 0, continue to next statement*/
+        ja .LDot  				     /* if byteval <= 0, continue to next statement*/
+
 	cmpq %r11, %rdi	      	     /* see if first parameter %rdi <= %r11d */
-	jae .Lp
+	jle .LDot
+	jmp .LDone
+
+.LDot:
 	movq $46, %rax
-	jmp .Lp
-.Lp:
+	jmp .LDone
+.LDone:
 	ret
 
 
