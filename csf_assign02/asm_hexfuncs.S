@@ -27,7 +27,7 @@ hex_read:
 	movq $0, %rax 		  /* %rax calls readOnly value */
 	movq $0, %rdi 		  /* %rdi is the file descriptor */
 	movq $16, %rsi 	  	  /* %rsi gives the max bytes */
-	movq syscall		  /* call the read syscall */
+	syscall		  	  /* call the read syscall */
 	addq $8, %rsp		  /* %rsp is the stack ptr so realign it */
 	ret			  /* return the count */
 
@@ -40,7 +40,7 @@ hex_write_string:
 	movq $0, %r11		  /* %r10 is null terminator in ascii */
 	jmp .LLoop
 .LLoop:
-	cmpb  %r11, (%rdi, %r10)  /* compare the character in the array */
+	cmpq %r11, (%rdi, %r10)  /* compare the character in the array */
 	je .LNext		  /* if the value in array is null, jump */
 	incq %r10		  /* increment length */
 	jmp .LLoop		  /* jump back in while loop */
