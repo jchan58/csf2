@@ -159,7 +159,8 @@ hex_format_offset:
         pushq %r13
         pushq %r14
         pushq %r15
-        subq $8, %rsp                   /* adjust the stack pointer and push registers*/
+	pushq %rbx
+	subq $8, %rsp                   /* adjust the stack pointer and push registers*/
         movq $0, %r10                   /* %r10 is var named divides */
         movq %rdi, %r11                 /* %r11 is a copy of offset */
         movq $0, %rcx                   /* %rcx will be used to compare with 0, then as the for loop i starting at 0 */
@@ -168,7 +169,7 @@ hex_format_offset:
 	jmp .LwhileLoopo
 
 .LwhileLoopo:
-        cmpq $0, %r11                 /* %r10d see if offset_copy has reached 0 */
+        cmpq $0, %r11                 /* %r11 see if offset_copy has reached 0 */
         je .LfillSbufForLoopo                 /* if it has jump to next command */
         shrq $4, %r11                 /* %r11 shift right four times (/16)*/
         incq %r10                     /* %r10d increment divides */
@@ -176,7 +177,7 @@ hex_format_offset:
 
 .LfillSbufForLoopo:
         cmpq %r10, %rcx                 /* comparing index with divides */
-        jae .LpadSbufForLoopPreo                       /* if divides i is greater than or equal to divides go to done*/
+        jae .LpadSbufForLoopPreo                       /* if divides i is greater than or equal to divides go to pad*/
         jmp .LsetSbufo                    /* if not jump to if statement*/
 
 .LsetSbufo:
@@ -189,22 +190,22 @@ hex_format_offset:
         movq $8,%r14                   /*holds 8*/
         subq %r12,%r14                       /*sub tract d from 8*/
         incq %r12                        /*add one to d*/
-        movb (%r15, %r9), %r8b            /*get hex_digit at index r9 (remainder) and store it*/
-        movb %r8b, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index %r14 */
+        movb (%r15, %r9), %bl            /*get hex_digit at index r9 (remainder) and store it*/
+        movb %bl, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index %r14 */
 	incq %rcx                        /*increment the for loop index*/
         jmp .LfillSbufForLoopo                     /*go to the for loop header*/
 
 .LpadSbufForLoopPreo:
 	movq $0, %rcx			/*make rcx an index for the pad loop starting at 0*/
-	movb 0(%r15), %r8b 		/*store the character 0 in r8b*/
+	movb 0(%r15), %bl 		/*store the character 0 in bl*/
 	movq $8, %r14
 	subq %r10, %r14			/*make %r14 8-divides*/
 	jmp .LpadSbufForLoopo
 
 .LpadSbufForLoopo:
-	cmpq %rcx, %r14
+	cmpq %r14, %rcx
 	jae .LDoneo		/*done when rcx equals 8-divides*/
-	movb %r8b, (%rsi, %r14)
+	movb %bl, (%rsi, %r14)
 	incq %rcx
 	jmp .LpadSbufForLoopo /*increment and loop again*/
 
@@ -214,7 +215,8 @@ hex_format_offset:
         movq $8, %r13               /*make r13 sbuf's last index (8)*/
         movq $0, (%rsi, %r13, 1)    /* null terminate sbuf */
         addq $8, %rsp               /*pop and realine stack pointer*/
-        popq %r15
+	popq %rbx
+	popq %r15
         popq %r14
         popq %r13
         popq %r12
