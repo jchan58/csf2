@@ -31,7 +31,8 @@ void hex_write_string(const char s[]){
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   int divides = 0;
   unsigned char byteval_copy = byteval;
- 
+  char hex_string[16] = "0123456789abcdef";
+  
   //check how many times you will divide when converting
   while(byteval_copy != 0){
     byteval_copy/=16;
@@ -45,17 +46,10 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
   sbuf[0] = '0';
   sbuf[1] = '0';
 
-  //convert an integer to char and put it in here 
-  char from_int = ' ';
   
   //convert decimal to hex and store it in a string
   for(int i = 0; i < divides; i++){
-    if(byteval % 16 < 10){
-      from_int = 48 + byteval % 16;
-    }else{
-      from_int = 87 + byteval % 16;
-    }
-    sbuf[d - 1] = from_int;
+    sbuf[d - 1] = hex_string[byteval % 16];
     byteval/=16;
     d--;
   }
