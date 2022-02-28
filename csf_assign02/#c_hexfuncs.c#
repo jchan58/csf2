@@ -114,7 +114,6 @@ void hex_format_offset(unsigned offset, char sbuf[]){
   }
 
   //there may be  a garbage value at 8, make sure it is null-terminator (end of string)
-  sbuf[8] = '\0';
- 
+  sbuf[8] = '\0'; 
   
 }

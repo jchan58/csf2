@@ -23,11 +23,11 @@ hex_digits:
 	.globl hex_read
 	
 hex_read:
-	subq $8, %rsp 		  /* %rsp is the stack ptr so align it */
-	movq $0, %rax 		  /* %rax calls readOnly value */
-	movq $0, %rdi 		  /* %rdi is the file descriptor */
-	movq $16, %rsi 	  	  /* %rsi gives the max bytes */
-	syscall		  	  /* call the read syscall */
+	subq $8, %rsp
+       	movq %rdi, %rsi			  /* %rsp is the stack ptr so align it */
+	movq $0, %rdi 		  /* %rdi calls readOnly value */ 	
+	movq $16, %rdx 	  	  /* %rdx gives the max bytes */
+	call read		  /* call the read syscall */
 	addq $8, %rsp		  /* %rsp is the stack ptr so realign it */
 	ret			  /* return the count */
 
