@@ -37,7 +37,7 @@ hex_read:
 hex_write_string:
 	subq $8, %rsp             /* %rsp is the stack ptr so align it */
 	movq $0, %r10		  /* %r10 is the length of the string */
-	movq $0, %r11		  /* %r10 is null terminator in ascii */
+	movq $0, %r11		  /* %r11 is null terminator in ascii */
 	jmp .LLoop
 .LLoop:
 	cmpq %r11, (%rdi, %r10)  /* compare the character in the array */
@@ -47,10 +47,9 @@ hex_write_string:
 
 .LNext:
 	movq %rdi, %rsi           /* move what we will read into second args */
-	movq $1, %rax             /* %rax is the syscall for write */
 	movq $1, %rdi		  /* %rdi stores written argument */
 	movq %r10, %rdx		  /* %r10 moves length val into %rdx */
-	syscall 		  /* make a syscall to write */
+	call write 		  /* make a syscall to write */
 	addq $8, %rsp		  /* adjust stack pointer */
 	ret 			  /* don't return anything */
 
