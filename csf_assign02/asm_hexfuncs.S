@@ -205,7 +205,7 @@ hex_format_offset:
 .LpadSbufForLoopo:
 	cmpq %r14, %rcx
 	jae .LDoneo		/*done when rcx equals 8-divides*/
-	movb %bl, (%rsi, %r14)
+	movb %bl, (%rsi, %rcx)
 	incq %rcx
 	jmp .LpadSbufForLoopo /*increment and loop again*/
 
@@ -213,7 +213,7 @@ hex_format_offset:
 	
 .LDoneo:
         movq $8, %r13               /*make r13 sbuf's last index (8)*/
-        movq $0, (%rsi, %r13, 1)    /* null terminate sbuf */
+        movb $0, (%rsi, %r13, 1)    /* null terminate sbuf */
         addq $8, %rsp               /*pop and realine stack pointer*/
 	popq %rbx
 	popq %r15
