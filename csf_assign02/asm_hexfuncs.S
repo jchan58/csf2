@@ -137,13 +137,13 @@ hex_format_byte_as_hex:
 	decq %r14                       /*sub tract from copy of d*/
 	decq %r12 			 /*subtract one from d*/
 	movb (%r15, %r9), %r8b            /*get hex_digit at index r9 (remainder) and store it*/
-        movb %r8b, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index 9r10 */
+        movb %r8b, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index r14 */
 	incq %rcx			 /*increment the for loop index*/
 	jmp .LfillSbufForLoopb			 /*go to the for loop header*/
 
 .LDoneb:
 	movq $2, %r13               /*make index 2 the right byte size (8)*/
-	movq $0, (%rsi, %r13, 1)    /* null terminate sbuf */
+	movb $0, (%rsi, %r13, 1)    /* null terminate sbuf */
 	addq $8, %rsp               /*pop and realine stack pointer*/
 	popq %r15
 	popq %r14
