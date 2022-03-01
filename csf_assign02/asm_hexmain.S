@@ -4,7 +4,6 @@
 	//these strings come null terminated i think
 line:
 	.string "pppppppppppppppp"
-
 hex_byte:	
 	.string "pp"
 
@@ -30,7 +29,8 @@ newline:
 
 	.globl main
 main:
-	subq $8, %rsp
+	subq $62, %rsp			// 17 + 3 + 17 + 9 + 8 + 8	
+					//0(%rsp) mov it into a register
 	pushq %rbx
 	pushq %r12
 	pushq %r13
@@ -41,8 +41,12 @@ main:
 	movq offset_formatted, %rsi	/*put offset_formatted in rsi, arg 2 for it*/
 	call hex_format_offset
 	movq %rsi, %r12			/*store offset_formatted in r12*/
-	movq line, %r13			/*store line in %r13*/
-	movq hex_byte, %r15		/* put hex_byte in %r15*/
+	//movb line, %r13			/*store line in %r13*/
+	movq 0(%rsp), %r13
+	movq 17(%rsp), %r15
+	//movb hex_byte, %r15b		/* put hex_byte in %r15*/
+	//incb %r13b
+	//movq $1, %r13b
 	movq hex_printable, %rbx	/* put hex_printable in rbx */
 	jmp .LreadwhileLoop		/*start reading from the input*/
 
@@ -125,7 +129,7 @@ main:
 	popq %r13
 	popq %r12
 	
-	addq $8, %rsp
+	addq $62, %rsp
 	ret
 
 /* vim:ft=gas:
