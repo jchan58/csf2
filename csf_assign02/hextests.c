@@ -91,6 +91,15 @@ void testFormatByteAsHex(TestObjs *objs) {
 
   //Our tests
 
+  hex_format_byte_as_hex(objs->test_data_1[3], buf);
+  ASSERT(0 == strcmp(buf, "6c"));
+
+  hex_format_byte_as_hex(objs->test_data_1[8], buf);
+  ASSERT(0 == strcmp(buf, "6f"));
+
+  hex_format_byte_as_hex(objs->test_data_1[12], buf);
+  ASSERT(0 == strcmp(buf, "21"));
+
   hex_format_byte_as_hex(objs->test_data_1[2], buf);
   ASSERT(0 == strcmp(buf, "6c"));
 
@@ -99,6 +108,9 @@ void testFormatByteAsHex(TestObjs *objs) {
   
   hex_format_byte_as_hex(objs->test_data_2[0], buf);
   ASSERT(0 == strcmp(buf, "49"));
+
+  hex_format_byte_as_hex(objs->test_data_2[2], buf);
+  ASSERT(0 == strcmp(buf, "27"));
 
   hex_format_byte_as_hex(objs->test_data_2[3], buf);
   ASSERT(0 == strcmp(buf, "73"));
