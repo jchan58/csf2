@@ -23,11 +23,11 @@ hex_digits:
 	.globl hex_read
 	
 hex_read:
-	subq $8, %rsp
-       	movq %rdi, %rsi			  /* %rsp is the stack ptr so align it */
-	movq $0, %rdi 		  /* %rdi calls readOnly value */ 	
-	movq $16, %rdx 	  	  /* %rdx gives the max bytes */
-	call read		  /* call the read syscall */
+	subq $8, %rsp			 /* %rsp is the stack ptr so align it */
+       	movq %rdi, %rsi			  /* %make arg 1 (data_but) arg 2 for read */
+	movq $0, %rdi 		  /* %make arg 2 0 so it will read to stdin*/
+	movq $16, %rdx 	  	  /* put the max number of bytes to read in arg 3 for read*/
+	call read		  /* call the read */
 	addq $8, %rsp		  /* %rsp is the stack ptr so realign it */
 	ret			  /* return the count */
 
@@ -37,19 +37,19 @@ hex_read:
 hex_write_string:
 	subq $8, %rsp             /* %rsp is the stack ptr so align it */
 	movq $0, %r10		  /* %r10 is the length of the string */
-	movq $0, %r11		  /* %r11 is null terminator in ascii */
+	movb $0, %r11b		  /* %r11b is null terminator in ascii */
 	jmp .LLoop
 .LLoop:
-	cmpq %r11, (%rdi, %r10)  /* compare the character in the array */
+	cmpb %r11b, (%rdi, %r10)  /* compare the character in the array */
 	je .LNext		  /* if the value in array is null, jump */
 	incq %r10		  /* increment length */
 	jmp .LLoop		  /* jump back in while loop */
 
 .LNext:
-	movq %rdi, %rsi           /* move what we will read into second args */
-	movq $1, %rdi		  /* %rdi stores written argument */
+	movq %rdi, %rsi           /* move what we will read (from arg 1) into second args */
+	movq $1, %rdi		  /* %rdi stores written argument (stdout)*/
 	movq %r10, %rdx		  /* %r10 moves length val into %rdx */
-	call write 		  /* make a syscall to write */
+	call write 		  /* call write */
 	addq $8, %rsp		  /* adjust stack pointer */
 	ret 			  /* don't return anything */
 
