@@ -49,7 +49,7 @@ main:
 .LreadwhileLoop:
 	movq %r13, %rdi			/*make line the argument for hex_read*/
 	call hex_read
-	movq %rax, %r9			/*%r9 storees line count given from hex_read*/
+	movq %rax, %r9			/*%r9 stores line count given from hex_read*/
 	movq $0, %r8			/*%r8 stores 0 just for this comparison*/
 	cmpq %r9, %r8
 	je .LDone			/* if nothing is read (r9 is 0) you are done*/
@@ -67,7 +67,7 @@ main:
 .LWriteHexSentenceForLoop:
 	cmpq %r9, %r8
 	je .LSpaceFormatLoopPre		/*when index hits line count, continue */
-	movq (%r13, %r14), %rdi		/* put line[index] in %rdi for arg one of hex_format_byte */
+	movb (%r13, %r14), %dil		/* put line[index] in %rdi(dil, 1 byte %rdi) for arg one of hex_format_byte */
 	movq %r15, %rsi			/* put hex_byte in for %rsi for arg two of hex_format_byte */
 	movq %rsi, %rdi			/*put the "returned" hex_byte in rdi for arg for hex_write*/
 	call hex_write_string
@@ -99,9 +99,9 @@ main:
 .LMakeLinePrintableForLoop:
 	cmpq %r9, %r8
 	jmp .LwhileLoopEnd		/*if the index equals the line count jump to the end of the while loop*/
-	movq (%r13, %r8), %rdi		/*put line[index] in arg1 for hex_to_printable */
+	movb (%r13, %r8), %dil		/*put line[index] in arg1 for hex_to_printable */
 	call hex_to_printable
-	movq %rax, (%rbx, %r8)		/*put the printable character in hex_printable[index]*/
+	movb %al, (%rbx, %r8)		/*put the returned printable character in hex_printable[index]*/
 	incq %r8			/*increment the index*/
 
 .LwhileLoopEnd:
