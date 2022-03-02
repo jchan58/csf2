@@ -30,11 +30,11 @@ newline:
 	.globl main
 main:
 	subq $54, %rsp			// 17 + 3 + 17 + 9 + 8 + 8	
-	pushb %bl
-	pushb %r12b
-	pushb %r13b
-	pushb %r14b
-	pushb %r15b
+	pushb %rbx
+	pushb %r12
+	pushb %r13
+	pushb %r14
+	pushb %r15
 	movb 0(%rsp), %r13b             /* 0(%rsp) mov it into %r13b */
 	movb 17(%rsp), %r15b		/* 17(%rsp) move into %r15b */
 	movb 20(%rsp), %bl 		/* 20(%rsp) move into %bl */
@@ -120,11 +120,11 @@ main:
 	jmp .LreadwhileLoop		/*start the while loop again */ 
 	
 .LDone:
-	popb %bl
-	popb %r15b
-	popb %r14b
-	popb %r13b
-	popb %r12b
+	popb %rbx
+	popb %r15
+	popb %r14
+	popb %r13
+	popb %r12
 	
 	addq $54, %rsp
 	ret
