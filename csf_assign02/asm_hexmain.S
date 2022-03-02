@@ -30,18 +30,18 @@ newline:
 	.globl main
 main:
 	subq $54, %rsp			// 17 + 3 + 17 + 9 + 8 + 8	
-	pushb %rbx
-	pushb %r12
-	pushb %r13
-	pushb %r14
-	pushb %r15
-	movb 0(%rsp), %r13b             /* 0(%rsp) mov it into %r13b */
-	movb 17(%rsp), %r15b		/* 17(%rsp) move into %r15b */
-	movb 20(%rsp), %bl 		/* 20(%rsp) move into %bl */
-	movb 37(%rsp), %r12b		/* 37(%rsp) moves into %r12b */
-	movb $0, %r10b 			/* %r10b holds offset */
-	movb %r10b, %dil 		/*make offset arg 1 for hex_format_offset*/
-	movb %r12b, %sil		/*put offset_formatted in sil, arg 2 for it*/
+	pushq %rbx
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	pushq %r15
+	movb 0(%rsp), %r13b             /* 0(%rsp) mov it into %r13b stores line */
+	movb 17(%rsp), %r15b		/* 17(%rsp) move into %r15b hex_byte*/
+	movb 20(%rsp), %bl 		/* 20(%rsp) move into %bl is hex_printable */
+	movb 37(%rsp), %r12b		/* 37(%rsp) moves into %r12b off_formatted*/
+	movl $0, %r10d 			/* %r10d holds offset */
+	movl %r10d, %edi 		/*make offset arg 1 for hex_format_offset*/
+	movb %r12b, %rsi		/*put offset_formatted in sil, arg 2 for it*/
 	call hex_format_offset
 //	movq %rsi, %r12			/*store offset_formatted in r12*/
 	jmp .LreadwhileLoop		/*start reading from the input*/
@@ -49,31 +49,31 @@ main:
 .LreadwhileLoop:
 	movb %r13b, %dil		/*make line the argument for hex_read*/
 	call hex_read
-	movb %al, %r9b			/*%r9b stores line count given from hex_read*/
-	movb $0, %r8b			/*%r8b stores 0 just for this comparison*/
-	cmpb %r9b, %r8b
+	movl %eax, %r9d			/* %r9d stores line count given from hex_read*/
+	movl $0, %r8d			/*%r8d stores 0 just for this comparison*/
+	cmpl %r9d, %r8d
 	je .LDone			/* if nothing is read (r9 is 0) you are done*/
-
+	movb $0, (%r13b, %r9d) 		/* store the null terminator in line */	
 	movq %r12b, %dil		/*make offset_formated the argument for hex_write_string*/
 	call hex_write_string
 
-	movb colon_space, %r14b		/*r14 holds print formatting strings or loop counters, here put in ": "*/
+	movb $colon_space, %r14b		/*r14 holds print formatting strings or loop counters, here put in ": "*/
 	movb %r14b, %dil			/* put r14b in arg 1 for hex_write */
 	
 	call hex_write_string		/* write a ": " */
-	movb $0, %r8b                    /*make r8 the for loop index*/
+	movl $0, %r8b                    /*make r8b the for loop index*/
 	jmp .LWriteHexSentenceForLoop	/*jump to the loop */
 
 .LWriteHexSentenceForLoop:
 	cmpb %r9b, %r8b
 	je .LSpaceFormatLoopPre		/*when index hits line count, continue */
 	
-	movb (%r13b, %r8b), %dil		/* put line[index] in %rdi(dil, 1 byte %rdi) for arg one of hex_format_byte */
+	movb (%r13b, %r8b), %dil       /* put line[index] in %rdi(dil, 1 byte %rdi) for arg one of hex_format_byte */
 	movb %r15b, %sil			/* put hex_byte in for %sil for arg two of hex_format_byte */
 	movb %sil, %dil			/*put the "returned" hex_byte in dil for arg for hex_write*/
 	call hex_write_string
-	movq single_space, %r14b	/*store a space in r14b*/
-	movq %r14b, %dil			/*make the single space the arg for hex_write*/
+	movb single_space, %r14b	/*store a space in r14b*/
+	movb %r14b, %dil			/*make the single space the arg for hex_write*/
 	call hex_write_string
 	incb %r8b
 	jmp .LWriteHexSentenceForLoop	/*loop again!*/
@@ -120,11 +120,12 @@ main:
 	jmp .LreadwhileLoop		/*start the while loop again */ 
 	
 .LDone:
-	popb %rbx
-	popb %r15
-	popb %r14
-	popb %r13
-	popb %r12
+	movq $0, %eax
+	popq %rbx
+	popq %r15
+	popq %r14
+	popq %r13
+	popq %r12
 	
 	addq $54, %rsp
 	ret
