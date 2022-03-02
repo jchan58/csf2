@@ -43,7 +43,6 @@ main:
 	movb %r10b, %dil 		/*make offset arg 1 for hex_format_offset*/
 	movb %r12b, %sil		/*put offset_formatted in sil, arg 2 for it*/
 	call hex_format_offset
-//	movq %rsi, %r12			/*store offset_formatted in r12*/
 	jmp .LreadwhileLoop		/*start reading from the input*/
 
 .LreadwhileLoop:
@@ -68,19 +67,19 @@ main:
 	cmpb %r9b, %r8b
 	je .LSpaceFormatLoopPre		/*when index hits line count, continue */
 	
-	movb (%r13b, %r8b), %dil		/* put line[index] in %rdi(dil, 1 byte %rdi) for arg one of hex_format_byte */
-	movb %r15b, %sil			/* put hex_byte in for %sil for arg two of hex_format_byte */
+	movb (%r13b, %r8b), %dil	/* put line[index] in %rdi(dil, 1 byte %rdi) for arg one of hex_format_byte */
+	movb %r15b, %sil		/* put hex_byte in for %sil for arg two of hex_format_byte */
 	movb %sil, %dil			/*put the "returned" hex_byte in dil for arg for hex_write*/
 	call hex_write_string
 	movq single_space, %r14b	/*store a space in r14b*/
-	movq %r14b, %dil			/*make the single space the arg for hex_write*/
+	movq %r14b, %dil		/*make the single space the arg for hex_write*/
 	call hex_write_string
 	incb %r8b
 	jmp .LWriteHexSentenceForLoop	/*loop again!*/
 
 
 .LSpaceFormatLoopPre:
-	movb $0, %r8b                    /*make r8 the for loop index*/
+	movb $0, %r8b                   /*make r8 the for loop index*/
 	movb $16, %cl
 	subb %r9b, %cl			/* make rcx hold 16 - linecount*/
 	movb three_spaces, %r14b	/* store three spaces in %r14b */
@@ -109,14 +108,14 @@ main:
 	movb %bl, %dil			/*make hex_printable arg 1 for hex_write*/
 	call hex_write_string
 	movb newline, %r14b		/*store a newline in %r14*/
-	movb %r14b, %dil			/*put a newline in arg 1 for hex_write*/
+	movb %r14b, %dil		/*put a newline in arg 1 for hex_write*/
 	call hex_write_string
-	addb %r9b, %r10b			/* add line count to offset*/
+	addb %r9b, %r10b		/* add line count to offset*/
 
-	movb %r10b, %dil                 /*make offset arg 1 for hex_format_offset*/
+	movb %r10b, %dil                /*make offset arg 1 for hex_format_offset*/
         movb offset_formatted, %sil     /*put offset_formatted in sil, arg 2 for it*/
         call hex_format_offset
-        movb %sil, %r12b                 /*store offset_formatted in r12*/
+        movb %sil, %r12b                /*store offset_formatted in r12*/
 	jmp .LreadwhileLoop		/*start the while loop again */ 
 	
 .LDone:
