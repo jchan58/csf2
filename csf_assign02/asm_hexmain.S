@@ -21,8 +21,10 @@ newline:
 main:
 	subq $8, %rsp
 	pushq %rbp
+	pushq %r15
 	subq $56, %rsp			// 17 + 3 + 17 + 9 + 8 + 8	
 	movq %rsp, %rbp			//store where rsp points to hold the strings
+	movq $0, %r8
 	pushq %r14
 
 			/* 8(%rbp is start of line */
@@ -32,7 +34,7 @@ main:
 	movb $0, 24(%rbp, %r8, 1)              /*null terminate line */
 	movb $0, 44(%rbp, %r8, 1)  		/*null terminate hex_printable*/
 	movb $0, 28(%rbp, %r8, 1)		/*null terminate hex_byte*/
-	movb $0, 53(%rbp, %r8, 1)		/*null terminate format_offset*/		
+	movb $0, 53(%rbp, %r8, 1)		/*null terminate format_offset*/     	
 	movq $0, %r10 			/* %r10d holds offset */
 	movq %r10, %rdi 		/*make offset arg 1 for hex_format_offset*/
 	leaq 45(%rbp, %r8, 1), %rsi 	/*put offset_formatted in sil, arg 2 for it*/
