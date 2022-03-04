@@ -40,8 +40,8 @@ main:
 	movb $0, 44(%rbp, %r12, 1)  		/*null terminate hex_printable*/
 	movb $0, 27(%rbp, %r12, 1)		/*null terminate hex_byte*/
 	movb $0, 53(%rbp, %r12, 1)		/*null terminate format_offset*/     	
-	movq $0, %r10 			/* %r10 holds offset */
-	movq %r10, %rdi 		/*make offset arg 1 for hex_format_offset*/
+	movq $0, %r14 			/* %r10 holds offset */
+	movq %r14, %rdi 		/*make offset arg 1 for hex_format_offset*/
 	leaq 45(%rbp, %r12, 1), %rsi 	/*put offset_formatted in rsi, arg 2 for it*/
 	call hex_format_offset
 	jmp .LreadwhileLoop		/*start reading from the input*/
@@ -56,8 +56,8 @@ main:
 	leaq 45(%rbp, %r12, 1), %rdi 		/*make offset_formated the argument for hex_write_string*/
 	call hex_write_string
 
-	movq $colon_space, %r14		/*r14 holds print formatting strings, here put in ": "*/
-	movq %r14, %rdi			/* put r14 in arg 1 for hex_write */
+	movq $colon_space, %r11		/*r11 holds print formatting strings, here put in ": "*/
+	movq %r11, %rdi			/* put r11 in arg 1 for hex_write */
 	
 	call hex_write_string		/* write a ": " */
 	movq $0, %r12                    /*make r12 the for loop index*/
@@ -75,8 +75,8 @@ main:
 	movb $0, (%r15, %r13)		/*null terminate hex_byte*/ 
 	movq %r15, %rdi			/*make the null terminated hex_byte the argument for hex_write*/
 	call hex_write_string
-	movq $single_space, %r14		/*store a space in r14*/
-	movq %r14, %rdi			/*make the single space the arg for hex_write*/
+	movq $single_space, %r11		/*store a space in r11*/
+	movq %r11, %rdi			/*make the single space the arg for hex_write*/
 	call hex_write_string
 	incq %r12			/*increment the index in line*/
 	
@@ -87,21 +87,21 @@ main:
 	movq $0, %r12                    /*make r12 the for loop index*/
 	movq $16, %r13
 	subq %rbx, %r13			/* make r13 hold 16 - linecount*/
-	movq $three_spaces, %r14	/* store three spaces in %r14 */
 	jmp .LSpaceFormatLoop
 
 .LSpaceFormatLoop:
 	cmpq %r13, %r12			/*if loop index equals 16-linecount*/
 	je .LFormatAndLoopPrep		/*jump toformat and prepare for the next for  loop*/
-	movq %r14, %rdi         	/*make 3 spaces be the arg for hex_write*/
+	movq $three_spaces, %r11	/*store three spaces in %r11*/
+	movq %r11, %rdi         	/*make 3 spaces be the arg for hex_write*/
 	call hex_write_string		/*write three spaces*/
 	incq %r12			/*increment the loop index */
 	jmp .LSpaceFormatLoop
 	
 .LFormatAndLoopPrep:
 	movq $0, %r12			/*make r12 the loop index*/
-	movq $single_space, %r14 	/* store a space in %r14 */
-	movq %r14, %rdi 		/*move the space into arg 1 for hex write*/
+	movq $single_space, %r11 	/* store a space in %r11 */
+	movq %r11, %rdi 		/*move the space into arg 1 for hex write*/
 	call hex_write_string
 	jmp .LMakeLinePrintableForLoop	/*jump to make the line printable*/
 
@@ -115,15 +115,16 @@ main:
 	jmp .LMakeLinePrintableForLoop
 	
 .LwhileLoopEnd:
+	movq $0, %r12
 	leaq 28(%rbp, %r12, 1), %rdi		/*make hex_printable arg 1 for hex_write*/
 	call hex_write_string
-	movq $newline, %r14		  /*store a newline in %r14*/
-	movq %r14, %rdi			/*put a newline in arg 1 for hex_write*/
+	movq $newline, %r11		  /*store a newline in %r11*/
+	movq %r11, %rdi			/*put a newline in arg 1 for hex_write*/
 	call hex_write_string
-	addq %rbx, %r10			/* add line count to offset*/
+	addq %rbx, %r14			/* add line count to offset*/
 
-	movq %r10, %rdi                 /*make offset arg 1 for hex_format_offset*/
-        leaq 45(%rbp, %r12, 1), %rsi     /*put offset_formatted in sil, arg 2 for it*/
+	movq %r14, %rdi                 /*make offset arg 1 for hex_format_offset*/
+        leaq 45(%rbp, %r12, 1), %rsi     /*put offset_formatted in rsi, arg 2 for it*/
         call hex_format_offset
 	jmp .LreadwhileLoop		/*start the while loop again */ 
 	
