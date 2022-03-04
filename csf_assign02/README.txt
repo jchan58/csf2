@@ -1,6 +1,6 @@
 --Sola Oladosu
-worked on hex_format_offset, hex_format_byte_as_hex, hex_to_printable, main
+worked on c hex_format_offset, c hex_format_byte_as_hex, c hex_to_printable, all of assembly
 
 --Ji Chan
-hex_read, hex_write, hex_to_printable, MS1 asm functions
+c hex_read, c hex_write, c hex_to_printable, all of assembly
 
