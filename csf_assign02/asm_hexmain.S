@@ -40,6 +40,48 @@ main:
 	movb $0, 44(%rbp, %r12, 1)  	/*null terminate hex_printable*/
 	movb $0, 27(%rbp, %r12, 1)	/*null terminate hex_byte*/
 	movb $0, 53(%rbp, %r12, 1)	/*null terminate format_offset*/     	
+
+
+	 movb $0, 8(%rbp, %r12, 1)      /*make sure the buffers are null terminated*/
+        movb $0, 9(%rbp, %r12, 1)
+        movb $0, 10(%rbp, %r12, 1)
+        movb $0, 11(%rbp, %r12, 1)
+        movb $0, 12(%rbp, %r12, 1)
+        movb $0, 13(%rbp, %r12, 1)
+        movb $0, 14(%rbp, %r12, 1)
+        movb $0, 15(%rbp, %r12, 1)
+        movb $0, 16(%rbp, %r12, 1)
+        movb $0, 17(%rbp, %r12, 1)
+        movb $0, 18(%rbp, %r12, 1)
+        movb $0, 19(%rbp, %r12, 1)
+        movb $0, 20(%rbp, %r12, 1)
+        movb $0, 21(%rbp, %r12, 1)
+        movb $0, 22(%rbp, %r12, 1)
+        movb $0, 23(%rbp, %r12, 1)
+        movb $0, 24(%rbp, %r12, 1)
+        movb $0, 25(%rbp, %r12, 1)
+        movb $0, 26(%rbp, %r12, 1)
+        movb $0, 27(%rbp, %r12, 1)
+        movb $0, 28(%rbp, %r12, 1)
+        movb $0, 29(%rbp, %r12, 1)
+        movb $0, 30(%rbp, %r12, 1)
+        movb $0, 31(%rbp, %r12, 1)
+        movb $0, 32(%rbp, %r12, 1)
+        movb $0, 33(%rbp, %r12, 1)
+        movb $0, 34(%rbp, %r12, 1)
+        movb $0, 35(%rbp, %r12, 1)
+        movb $0, 36(%rbp, %r12, 1)
+        movb $0, 37(%rbp, %r12, 1)
+        movb $0, 38(%rbp, %r12, 1)
+        movb $0, 39(%rbp, %r12, 1)
+        movb $0, 40(%rbp, %r12, 1)
+        movb $0, 41(%rbp, %r12, 1)
+        movb $0, 42(%rbp, %r12, 1)
+        movb $0, 42(%rbp, %r12, 1)
+        movb $0, 44(%rbp, %r12, 1)
+
+	
+
 	movq $0, %r14 			/* %r10 holds offset */
 	movq %r14, %rdi 		/*make offset arg 1 for hex_format_offset*/
 	leaq 45(%rbp, %r12, 1), %rsi 	/*put offset_formatted in rsi, arg 2 for it*/

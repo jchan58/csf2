@@ -72,7 +72,7 @@ hex_to_printable:
 	sub $8, %rsp 		  /* %rsp is the stack pointer, stack alignment */
 	movb $31, %r11b           /* %r11 is the stores 31 */
 	movb $126, %r10b          /* %r10 stores 126*/
-	movb %dil, %al            /* %rax will be returning value */
+	//movb %dil, %al            /* %rax will be returning value */
 
 	cmpb %r10b, %dil          /* see if first parameter %rdi is >= %r10 */
         ja .LDot  		  /* if byteval <= 0, continue to next statement*/
@@ -82,7 +82,7 @@ hex_to_printable:
 	jmp .LDonep		  /* jump to .LDonep */
 
 .LDot:
-	movb $46, %al		  /* move . to %al */
+	movb $46, %dil		  /* move . to %dil */
 	jmp .LDonep		  /* jump to .LDonep loop */   
 .LDonep:
 	addq $8, %rsp 		  /* %rsp stack alignment */
