@@ -3,7 +3,7 @@
 #include <unistd.h>  // this is the only system header file you may include!
 #include "hexfuncs.h"
 
-// TODO: add function implementations here
+// TODO:  add function implementations here
 
 // Read up to 16 bytes from standard input into data_buf.
 // Returns the number of characters read.
