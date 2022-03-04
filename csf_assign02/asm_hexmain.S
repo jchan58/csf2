@@ -1,4 +1,5 @@
-/* Hexdump main function, assembly language version */
+
+	/* Hexdump main function, assembly language version */
 
 	.section .data
 	//these strings come null terminated i think
@@ -107,7 +108,7 @@ main:
 
 .LMakeLinePrintableForLoop:
 	cmpq %rbx, %r12
-	jmp .LwhileLoopEnd		/*if the index equals the line count jump to the end of the while loop*/
+	je .LwhileLoopEnd		/*if the index equals the line count jump to the end of the while loop*/
 	movb 8(%rbp, %r12, 1), %dil			/*put line[index] in arg1 for hex_to_printable */
 	call hex_to_printable
 	movb 28(%rbp, %r12, 1), %dil 	/*put the "returned" printable character in hex_printable*/
