@@ -120,7 +120,7 @@ hex_format_byte_as_hex:
 .LnextLinesb:
 	movb 0(%r15), %r8b
 	movb %r8b, 0(%rsi)   		/* set index 0 and 1 of array equal to '0' (put char in r8 first) */
-	movb 1(%r15), %r8b
+	movb 0(%r15), %r8b
 	movb %r8b, 1(%rsi)     
 	jmp .LfillSbufForLoopb
 	
