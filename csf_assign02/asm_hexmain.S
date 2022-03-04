@@ -111,9 +111,10 @@ main:
 	je .LwhileLoopEnd		/*if the index equals the line count jump to the end of the while loop*/
 	movb 8(%rbp, %r12, 1), %dil			/*put line[index] in arg1 for hex_to_printable */
 	call hex_to_printable
-	movb 28(%rbp, %r12, 1), %dil 	/*put the "returned" printable character in hex_printable*/
+	movb %dil, 28(%rbp, %r12, 1) 	/*put the "returned" printable character in hex_printable*/
 	incq %r12			/*increment the index*/
-
+	jmp .LMakeLinePrintableForLoop
+	
 .LwhileLoopEnd:
 	movb $0, 24(%rbp, %r12, 1)		/*null terminate line */
 	movb $0, 44(%rbp, %r12, 1)		/* null terminate hex printable*/
