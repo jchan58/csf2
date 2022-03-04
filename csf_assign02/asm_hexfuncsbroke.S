@@ -1,4 +1,3 @@
-
 /* Assembly language implementation of hexdump functions */
 
 	.section .rodata
@@ -68,7 +67,26 @@ hex_write_string:
  */
 
 	.globl hex_to_printable
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 hex_to_printable:
 	sub $8, %rsp 		  /* %rsp is the stack pointer, stack alignment */
 	movb $31, %r11b           /* %r11 is the stores 31 */
@@ -88,6 +106,7 @@ hex_to_printable:
 .LDonep:
 	addq $8, %rsp 		  /* %rsp stack alignment */
 	ret			  /* return */
+
 
 
 
@@ -119,40 +138,40 @@ hex_format_byte_as_hex:
 	
 .LnextLinesb:
 	movb 0(%r15), %r8b
-	movb %r8b, 0(%rsi)   		/* set index 0 and 1 of array equal to '0' (put char in r8 first) */
+	movb %r8b, 0(%rsi)   	      /* set index 0 and 1 of array equal to '0' (put char in r8 first) */
 	movb 1(%r15), %r8b
 	movb %r8b, 1(%rsi)     
 	jmp .LfillSbufForLoopb
 	
 .LfillSbufForLoopb:
-	cmpq %r10, %rcx			/* comparing index with divides */
-	jae .LDoneb			/* if divides i is greater than or equal to divides go to done*/
-	jmp .LsetSbufb			/* if not jump to if statement*/
+	cmpq %r10, %rcx		      /* comparing index with divides */
+	jae .LDoneb		      /* if divides i is greater than or equal to divides go to done*/
+	jmp .LsetSbufb		      /* if not jump to if statement*/
 	
 .LsetSbufb:
 	movq %rdi, %r9                  
-	andq $15, %r9			/* %r9 is reaminder now*/
+	andq $15, %r9		      /* %r9 is reaminder now*/
 	shrq $4, %rdi		
-					/*divide rdi by 16 */
+				      /*divide rdi by 16 */
 
 
-	movq %r12,%r14                  /*copy of d*/
-	decq %r14                       /*sub tract from copy of d*/
-	decq %r12 			/*subtract one from d*/
-	movb (%r15, %r9), %r8b          /*get hex_digit at index r9 (remainder) and store it*/
-        movb %r8b, (%rsi, %r14)         /*put the hex_digit in rsi(sbuf) at the appropriate index r14 */
-	incq %rcx			/*increment the for loop index*/
-	jmp .LfillSbufForLoopb	        /*go to the for loop header*/
+	movq %r12,%r14                /*copy of d*/
+	decq %r14                     /*sub tract from copy of d*/
+	decq %r12 		      /*subtract one from d*/
+	movb (%r15, %r9), %r8b        /*get hex_digit at index r9 (remainder) and store it*/
+        movb %r8b, (%rsi, %r14)       /*put the hex_digit in rsi(sbuf) at the appropriate index r14 */
+	incq %rcx		      /*increment the for loop index*/
+	jmp .LfillSbufForLoopb	      /*go to the for loop header*/
 
 .LDoneb:
-	movq $2, %r13                   /*make index 2 the right byte size (8)*/
-	movb $0, (%rsi, %r13, 1)        /* null terminate sbuf */
-	addq $8, %rsp                   /*pop and realine stack pointer*/
+	movq $2, %r13                 /*make index 2 the right byte size (8)*/
+	movb $0, (%rsi, %r13, 1)      /* null terminate sbuf */
+	addq $8, %rsp                 /*pop and realine stack pointer*/
 	popq %r15
 	popq %r14
 	popq %r13
 	popq %r12
-	ret				/* return*/
+	ret			      /* return*/
 
   .globl hex_format_offset
 
@@ -183,18 +202,18 @@ hex_format_offset:
         jmp .LsetSbufo                  /* if not jump to if statement*/
 
 .LsetSbufo:
-        movq %rdi, %r9
+        movq %rdi, %r9			/* move value in %rdi into %r9 */
         andq $15, %r9                   /* %r9 is reaminder now*/
-        shrq $4, %rdi
-                                        /*divide rdi by 16 */
+        shrq $4, %rdi			/*divide rdi by 16 */
+                                       
 
 
-        movq $8, %r14                    /*holds %r14*/
-        subq %r12, %r14                  /*subtract d from 8*/
+        movq $8, %r14                   /*holds %r14*/
+        subq %r12, %r14                 /*subtract %r12 from %r14*/
         incq %r12                       /*add one to %r12*/
-        movb (%r15, %r9), %bl           /*get hex_digit at index r9 (remainder) and store it*/
+        movb (%r15, %r9), %bl           /*get %r15 at index r9 (remainder) and store it*/
         movb %bl, (%rsi, %r14)          /*put the hex_digit in rsi(sbuf) at the appropriate index %r14 */
-	incq %rcx                       /*increment the for loop index*/
+	incq %rcx                       /*increment %rcx*/
         jmp .LfillSbufForLoopo          /*go to the for loop header*/
 
 .LpadSbufForLoopPreo:
@@ -207,8 +226,8 @@ hex_format_offset:
 .LpadSbufForLoopo:
 	cmpq %r14, %rcx
 	jae .LDoneo		       /*done when rcx equals 8-divides*/
-	movb %bl, (%rsi, %rcx)
-	incq %rcx
+	movb %bl, (%rsi, %rcx)	       /* mov the %bl into %rsi array at index %rcx
+	incq %rcx		       /* increment %rcx */
 	jmp .LpadSbufForLoopo          /*increment and loop again*/
 
 	
