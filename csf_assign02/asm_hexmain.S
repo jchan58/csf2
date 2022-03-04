@@ -59,8 +59,8 @@ main:
         movb $0, 22(%rbp, %r12, 1)
         movb $0, 23(%rbp, %r12, 1)
         movb $0, 24(%rbp, %r12, 1)
-        movb $0, 25(%rbp, %r12, 1)
-        movb $0, 26(%rbp, %r12, 1)
+        movb $48, 25(%rbp, %r12, 1)
+        movb $48, 26(%rbp, %r12, 1)
         movb $0, 27(%rbp, %r12, 1)
         movb $0, 28(%rbp, %r12, 1)
         movb $0, 29(%rbp, %r12, 1)
@@ -92,6 +92,9 @@ main:
 	leaq 8(%rbp, %r12, 1), %rdi	/*make line the argument for hex_read*/
 	call hex_read
 	movq %rax, %rbx			/* %rbx stores line count given from hex_read*/
+
+	movb $0, 24(%rbp, %r12, 1)      /*added: null terminate line */
+
 	movq $0, %r12			/*%r12 stores 0 for this comparison*/
 	cmpq %rbx, %r12
 	je .LDone			/* if nothing is read (rbx is 0) you are done*/	
@@ -158,6 +161,7 @@ main:
 	
 .LwhileLoopEnd:
 	movq $0, %r12
+	movb $0, 28(%rbp, %rbx, 1)	/*added: null terminate hex_printable*/  
 	leaq 28(%rbp, %r12, 1), %rdi	/*make hex_printable arg 1 for hex_write*/
 	call hex_write_string
 	movq $newline, %r11		/*store a newline in %r11*/
@@ -186,8 +190,8 @@ main:
 	movb $0, 22(%rbp, %r12, 1)
 	movb $0, 23(%rbp, %r12, 1)
 	movb $0, 24(%rbp, %r12, 1)
-	movb $0, 25(%rbp, %r12, 1)
-	movb $0, 26(%rbp, %r12, 1)
+	movb $48, 25(%rbp, %r12, 1)
+	movb $48, 26(%rbp, %r12, 1)
 	movb $0, 27(%rbp, %r12, 1)
 	movb $0, 28(%rbp, %r12, 1)
 	movb $0, 29(%rbp, %r12, 1)

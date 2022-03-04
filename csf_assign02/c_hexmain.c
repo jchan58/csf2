@@ -39,11 +39,9 @@ int main(int argc, char *argv[]){
     }
 
 
-    // if(line_count == 16){
+    
       hex_write_string(" ");
-      //}else{
-      //hex_write_string(" "); 
-     //}
+      
 
     //make sure all the sentence values are printable
     for(int i = 0; i < line_count; i++){
