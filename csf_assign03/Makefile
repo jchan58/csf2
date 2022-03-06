@@ -1,11 +1,11 @@
 CC=g++
 CFLAGS=-std=c++11 -Wall -Wextra -pedantic
 
-cache: main.o
-	$(CC) -o cache main.o
+csim: main.o
+	$(CC) -o csim main.o
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -g -c main.cpp
 
 clean:
-	rm -f *.o cache;
+	rm -f *.o csim;
