@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 
+using std::string;
+
 //function to check if a number is a power of 2
 int isPowerOfTwo(long num){
 
@@ -34,16 +36,11 @@ int main(int argc, char* argv[]){
   //argv[4] is write-allocate or no-write -allocate
   //argv[5] is write-through or write-back
   //argv[6] is lru or fifo evictions
-
   
   if(argc < 7){
      fprintf(stderr, "Must enter all six arguments.\n");
      return 1;
   }
-  
-  //need to check first if argv 1-3 is a number
-
-  //need to check if arg strings say right things, ex. argv[6] is only lru or fifo
 
   //think about what else could go wrong with arguments
   
@@ -86,6 +83,11 @@ int main(int argc, char* argv[]){
      return 1;
    }
 
+   //check if argv[6] is "lru" or "fifo"
+    if(strcmp(argv[6], "lru") == 0 || strcmp(argv[6], "fifo") == 0){
+    fprintf(stderr, "Evictions do not match lru or fifo.\n");
+    return 1;
+  }
    
    /*started writing read from standard in
    char* trace_line = NULL;
@@ -99,15 +101,6 @@ int main(int argc, char* argv[]){
      //do stuff
 
      }*/
-
-   /*commented out for errors
-   //opening a file
-   std::fstream file;
-   file.open(argv[7], std::fstream::in | std::fstream::out);
-   if(!file.is_open()){
-    fprintf(stderr, "Error opening file.");
-    return 1;
-    }*/
 
   return 0; 
 }
