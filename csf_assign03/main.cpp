@@ -40,8 +40,12 @@ int main(int argc, char* argv[]){
      fprintf(stderr, "Must enter all six arguments.\n");
      return 1;
   }
-
   
+  //need to check first if argv 1-3 is a number
+
+  //need to check if arg strings say right things, ex. argv[6] is only lru or fifo
+
+  //think about what else could go wrong with arguments
   
   long setNum = strtol(argv[1], NULL, 10);
   long blockNum = strtol(argv[2], NULL, 10);
@@ -96,13 +100,14 @@ int main(int argc, char* argv[]){
 
      }*/
 
+   /*commented out for errors
    //opening a file
    std::fstream file;
    file.open(argv[7], std::fstream::in | std::fstream::out);
    if(!file.is_open()){
     fprintf(stderr, "Error opening file.");
     return 1;
-   }
+    }*/
 
   return 0; 
 }
