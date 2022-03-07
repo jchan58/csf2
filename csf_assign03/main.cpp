@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <fstream>
+
 
 int main(int argc, char* argv[]){
 
@@ -55,8 +57,14 @@ int main(int argc, char* argv[]){
       return 1;
     }
   }
-
-
+   
+   //opening a file
+   std::fstream file;
+   file.open(argv[7], std::fstream::in | std::fstream::out);
+   if(!file.is_open()){
+    fprintf(stderr, "Error opening file.");
+    return 1;
+   }
     
 
   return 0; 
