@@ -2,8 +2,12 @@
 #include <string>
 #include <string.h>
 #include <ctype.h>
+#include <vector>
 
 using std::string;
+using std::cout;
+using std::endl;
+using std::vector;
 
 //function to check if a number is a power of 2
 int isPowerOfTwo(long num){
@@ -29,15 +33,15 @@ int isPowerOfTwo(long num){
 
 int main(int argc, char* argv[]){
 
-  typedef struct Slot {
+   typedef struct Slot {
     //store the tag of the slot
-    unsigned tag;
+    char* tag;
 
     //store the index of the slot
-    unsigned index; 
+    char* index;
 
     //store the offset of the slot
-    unsigned offset;
+    char* offset;
 
     //store the load timestamp of the slot
     unsigned load_stamp;
@@ -47,6 +51,8 @@ int main(int argc, char* argv[]){
 
 
   } Slot;
+
+
 
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
@@ -128,22 +134,38 @@ int main(int argc, char* argv[]){
    
     
    
-
-
-   
-   
-   /*started writing read from standard in
+   //started writing read from standard in
    char* trace_line = NULL;
 
    //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
-   int len = 13; 
+   size_t len = 13;
 
    int lineSize;
 
-   while((lineSize = readline(&trace_line, &len, stdin)) != 0){
-     //do stuff
+   char* tag = NULL;
 
-     }*/
+   char* index = NULL;
+
+   char* offset = NULL;
+
+   while((lineSize = getline(&trace_line, &len, stdin)) != 0){
+     //the tag bits are represented by characters 4-6 of the line
+     strncpy(tag, &trace_line[4], 3);
+
+     //the index bits are represented by characters 7-9 of the line
+     strncpy(index, &trace_line[7], 3);
+
+     //the offset bits are represented by characters 10-11 of the line
+     strncpy(offset, &trace_line[10], 2);
+
+     //create a slot with these properties ( I think the timestamps both start at 0?)
+     Slot slot = {tag, index, offset, 0, 0};
+
+     //next I think we store the slot in the vector depending on the parameters and if it's load or store
+     //need to think about it more
+   }
+
+  
 
   return 0; 
 }
