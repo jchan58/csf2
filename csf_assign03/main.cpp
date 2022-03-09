@@ -62,7 +62,13 @@ int main(int argc, char* argv[]){
 
   } CacheParams;
 
-  
+   typedef struct Stats {
+
+    //store caches simulator statistics
+    unsigned total_loads, total_stores, load_hits, load_misses, store_hits, store_misses, total_cycles;
+
+  } Stats;
+
   typedef struct Cache {
     //or are we organizing sets based on lru or fifo? read over info
     vector<Set> sets;
@@ -75,7 +81,10 @@ int main(int argc, char* argv[]){
     //use this to calculate the smaller timestamps
     unsigned global_timestamp;
 
-  }
+  } Cache;
+
+
+
 
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
@@ -178,17 +187,10 @@ int main(int argc, char* argv[]){
    char* offset = NULL;
 
    while((lineSize = getline(&trace_line, &len, stdin)) != 0){
-     //the tag bits are represented by characters 4-6 of the line
-     strncpy(tag, &trace_line[4], 3);
-
-     //the index bits are represented by characters 7-9 of the line
-     strncpy(index, &trace_line[7], 3);
-
-     //the offset bits are represented by characters 10-11 of the line
-     strncpy(offset, &trace_line[10], 2);
-
-     //create a slot with these properties ( I think the timestamps both start at 0?)
-     Slot slot = {tag, index, offset, 0, 0};
+     //strol to get int;
+     //bitwise operators
+     
+     
 
      //next I think we store the slot in the vector depending on the parameters and if it's load or store
      //need to think about it more
