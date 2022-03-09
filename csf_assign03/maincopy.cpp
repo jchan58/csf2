@@ -35,25 +35,49 @@ int main(int argc, char* argv[]){
 
   typedef struct Slot {
     //store the tag of the slot
-    char* tag;
-
-    //store the index of the slot
-    char* index; 
-
-    //store the offset of the slot
-    char* offset;
-
+    unsigned tag;
+    
+    //indicate whether the memory block is now dirty(?)
+    //indicate if the slot is valid
+    bool dirty, valid;
+    
+    
     //store the load timestamp of the slot
-    unsigned load_stamp;
-
     //store the access timestamp of the slot
-    unsigned access_stamp;
-
-
+    unsigned load_stamp, access_stamp;
+    
   } Slot;
 
+  //a set is a collection of blocks, order them based on lru or fifo (I think)
+  typedef struct Set{
+
+    vector<Slot> blocks;
+
+  } Set;
+
+  typedef struct CacheParams {
+    
+    //set fields data from command line arguments
+    unsigned block_size, num_sets, slots_per_set;
+
+  } CacheParams;
+
+  
+  typedef struct Cache {
+    //or are we organizing sets based on lru or fifo? read over info
+    vector<Set> sets;
+
+    CacheParams * params;
+
+    //where we store memory trace stats for the cache
+    Stats * stats;
+
+    //use this to calculate the smaller timestamps
+    unsigned global_timestamp;
+
+  }
+
   //order vector based off of load stamp or access stamp, depending on eviction type!
-  vector<Slot> cache;
 
   //argv[1] is number of sets in cache, pos power of 2
   //argv[2] is number of blocks in set, pos power of 2
@@ -61,34 +85,32 @@ int main(int argc, char* argv[]){
   //argv[4] is write-allocate or no-write -allocate
   //argv[5] is write-through or write-back
   //argv[6] is lru or fifo evictions
-  //think about what else could go wrong with arguments (remove above later)
+  //think about what else could go wrong with arguments (remove above later) 
 
   if(argc < 7){
      fprintf(stderr, "Must enter all six arguments.\n");
      return 1;
   }
-
   
-  /*these don't work for some reason
    //check if argv[4] valid"
-  if((strcmp(argv[4], "write-allocate") != 0) || (strcmp(argv[4], "no-write-allocate") != 0)){
+  if((strcmp(argv[4], "write-allocate") != 0) && (strcmp(argv[4], "no-write-allocate") != 0)){
      fprintf(stderr, "Cache miss paramters must be write-allocate or no-write allocate");
      return 1;
    }
-
-    //these don't work for some reason
+ 
+ 
    //check if argv[5] is "write-through" or "write-back"
-   if((strcmp(argv[5], "write-through") != 0) || (strcmp(argv[5], "write-back") != 0)){
+   if((strcmp(argv[5], "write-through") != 0) && (strcmp(argv[5], "write-back") != 0)){
      fprintf(stderr, "Write type must be write-back or write-through");
      return 1;
    }
 
    //check if argv[6] is "lru" or "fifo"
-   if((strcmp(argv[6], "lru") != 0) || (strcmp(argv[6], "fifo") != 0)){
+   if((strcmp(argv[6], "lru") != 0) && (strcmp(argv[6], "fifo") != 0)){
      fprintf(stderr, "Evictions do not match lru or fifo.\n");
      return 1;
-     }*/
-   
+   }
+  
 
 
 
@@ -135,23 +157,21 @@ int main(int argc, char* argv[]){
    
     
    
-
-
-   
-   
    //started writing read from standard in
    char* trace_line = NULL;
 
    //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
-   size_t len = 13; 
+   size_t len = 13;
 
    int lineSize;
 
-   char* tag;
 
-   char* index;
+   //these must be calculated
+   char* tag = NULL;
 
-   char* offset;
+   char* index = NULL;
+
+   char* offset = NULL;
 
    while((lineSize = getline(&trace_line, &len, stdin)) != 0){
      //the tag bits are represented by characters 4-6 of the line
@@ -164,13 +184,13 @@ int main(int argc, char* argv[]){
      strncpy(offset, &trace_line[10], 2);
 
      //create a slot with these properties ( I think the timestamps both start at 0?)
-     Slot slot = {tag, index, offset, 0, 0);
+     Slot slot = {tag, index, offset, 0, 0};
 
      //next I think we store the slot in the vector depending on the parameters and if it's load or store
      //need to think about it more
-
-
    }
+
+  
 
   return 0; 
 }
