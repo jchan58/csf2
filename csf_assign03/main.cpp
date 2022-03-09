@@ -33,6 +33,9 @@ int isPowerOfTwo(long num){
 
 int main(int argc, char* argv[]){
 
+  //create an empty vector to store slots 
+  vector<struct> slotVec; 
+
    typedef struct Slot {
     //store the tag of the slot
     char* tag;
@@ -141,14 +144,20 @@ int main(int argc, char* argv[]){
    size_t len = 13;
 
    int lineSize;
-
+   
+   char load = 'l';
+     
+   char store = 's';
+   
    char* tag = NULL;
 
    char* index = NULL;
 
    char* offset = NULL;
+ 
 
    while((lineSize = getline(&trace_line, &len, stdin)) != 0){
+ 
      //the tag bits are represented by characters 4-6 of the line
      strncpy(tag, &trace_line[4], 3);
 
@@ -159,11 +168,18 @@ int main(int argc, char* argv[]){
      strncpy(offset, &trace_line[10], 2);
 
      //create a slot with these properties ( I think the timestamps both start at 0?)
+     //we should check if the slot has been created before otherwise will have a duplicate
      Slot slot = {tag, index, offset, 0, 0};
 
      //next I think we store the slot in the vector depending on the parameters and if it's load or store
      //need to think about it more
-   }
+     if (trace_line[0] == load) {
+  
+       
+       
+     } else if (trace_line[0] == store) {
+       
+     }
 
   
 
