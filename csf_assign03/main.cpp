@@ -33,29 +33,49 @@ int isPowerOfTwo(long num){
 
 int main(int argc, char* argv[]){
 
-  //create an empty vector to store slots 
-  vector<struct> slotVec; 
-
-   typedef struct Slot {
+  typedef struct Slot {
     //store the tag of the slot
-    char* tag;
-
-    //store the index of the slot
-    char* index;
-
-    //store the offset of the slot
-    char* offset;
-
+    unsigned tag;
+    
+    //indicate whether the memory block is now dirty(?)
+    //indicate if the slot is valid
+    bool dirty, valid;
+    
+    
     //store the load timestamp of the slot
-    unsigned load_stamp;
-
     //store the access timestamp of the slot
-    unsigned access_stamp;
-
-
+    unsigned load_stamp, access_stamp;
+    
   } Slot;
 
+  //a set is a collection of blocks, order them based on lru or fifo (I think)
+  typedef struct Set{
 
+    vector<Slot> blocks;
+
+  } Set;
+
+  typedef struct CacheParams {
+    
+    //set fields data from command line arguments
+    unsigned block_size, num_sets, slots_per_set;
+
+  } CacheParams;
+
+  
+  typedef struct Cache {
+    //or are we organizing sets based on lru or fifo? read over info
+    vector<Set> sets;
+
+    CacheParams * params;
+
+    //where we store memory trace stats for the cache
+    Stats * stats;
+
+    //use this to calculate the smaller timestamps
+    unsigned global_timestamp;
+
+  }
 
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
@@ -144,20 +164,20 @@ int main(int argc, char* argv[]){
    size_t len = 13;
 
    int lineSize;
-   
+
    char load = 'l';
-     
+
    char store = 's';
-   
+
+
+   //these must be calculated
    char* tag = NULL;
 
    char* index = NULL;
 
    char* offset = NULL;
- 
 
    while((lineSize = getline(&trace_line, &len, stdin)) != 0){
- 
      //the tag bits are represented by characters 4-6 of the line
      strncpy(tag, &trace_line[4], 3);
 
@@ -168,18 +188,20 @@ int main(int argc, char* argv[]){
      strncpy(offset, &trace_line[10], 2);
 
      //create a slot with these properties ( I think the timestamps both start at 0?)
-     //we should check if the slot has been created before otherwise will have a duplicate
      Slot slot = {tag, index, offset, 0, 0};
 
      //next I think we store the slot in the vector depending on the parameters and if it's load or store
      //need to think about it more
-     if (trace_line[0] == load) {
-  
-       
-       
+
+      if (trace_line[0] == load) {
+
+
+
      } else if (trace_line[0] == store) {
-       
+
      }
+
+   }
 
   
 
