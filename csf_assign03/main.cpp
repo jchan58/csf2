@@ -198,7 +198,10 @@ int main(int argc, char* argv[]){
    //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
    size_t len = 13;
 
-   int lineSize;
+   int line_size;
+
+   //index of a new slot created ot represent the one loaded or stored
+   unsigned new_index;
 
    char load = 'l';
 
@@ -206,11 +209,25 @@ int main(int argc, char* argv[]){
 
 
    
-   while((lineSize = getline(&trace_line, &len, stdin)) != 0){
+   while((line_size = getline(&trace_line, &len, stdin)) != 0){
      //convert the address part of the line (hex) to an integer, starts at index 4
-     strtol(&(trace_line[4]), NULL, 16);
+     long address = strtol(&(trace_line[4]), NULL, 16);
 
      //next use bit shifts and number of tag, index, and offset bits
+
+     //create a new slot
+     Slot new_slot;
+
+     //a slot's tag is all the address bits not including the index and offset bits
+     new_slot.tag = address >> (num_offset_bits + num_index_bits);
+
+     //index is a combo of shifting left (tag bits off) and right (offset bits off)
+     
+     //not relevant yet? make sure there is space in the set
+     if((cache.sets)->blocks.size() < (cache.params)->num_sets){
+     
+     //to get tag bits, shift off
+
      //to get tag index and offset (store tag in it's struct and index somewhere)
 
      
