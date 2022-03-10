@@ -10,18 +10,14 @@ using std::endl;
 using std::vector;
 
 //function to check if a number is a power of 2
-int isPowerOfTwo(long num){
-
-  if(num == 1){
-    return 0;
-  }
+int is_power_of_two(long num){
   
-  int numMod;
+  int num_mod;
 
   while(num != 1){
-    numMod = num % 2;
+    num_mod = num % 2;
     
-    if(numMod != 0){
+    if(num_mod != 0){
       return 0;
     }
     
@@ -30,6 +26,17 @@ int isPowerOfTwo(long num){
   return 1;
 }
 
+//return the power of a positive power of two
+int get_power(long num){
+  int power = 0;
+  
+  while(num != 1){
+    num = num >> 1;
+    power++;
+  }
+
+  return power;
+}
 
 int main(int argc, char* argv[]){
 
@@ -84,8 +91,7 @@ int main(int argc, char* argv[]){
   } Cache;
 
 
-
-
+  
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
   //argv[1] is number of sets in cache, pos power of 2
@@ -124,9 +130,9 @@ int main(int argc, char* argv[]){
 
 
   //convert the args representing integers into integers
-  long setNum = strtol(argv[1], NULL, 10);
-  long blockNum = strtol(argv[2], NULL, 10);
-  long bytesPerBlock = strtol(argv[3], NULL, 10);
+  long set_num = strtol(argv[1], NULL, 10);
+  long block_num = strtol(argv[2], NULL, 10);
+  long bytes_per_block = strtol(argv[3], NULL, 10);
 
  
   //these params cant coexist
@@ -136,35 +142,55 @@ int main(int argc, char* argv[]){
   }
 
   //make sure integer values are with range
-  if(setNum < 0 || blockNum < 0){
+  if(set_num < 0 || block_num < 0){
     fprintf(stderr, "Set and block number must be positive.\n");
     return 1;
   }
   
 
-   if(bytesPerBlock < 4){
+   if(bytes_per_block < 4){
     fprintf(stderr, "Number of bytes per block must be at least 4.\n");
     return 1;
   }
 
    //make sure integer values are powers of 2
-   if(isPowerOfTwo(setNum) != 1){
+   if(is_power_of_two(set_num) != 1){
      fprintf(stderr, "Number of sets should be a power of two.\n");
      return 1;
    }
    
-   if(isPowerOfTwo(blockNum) != 1){
+   if(is_power_of_two(block_num) != 1){
      fprintf(stderr, "Number of blocks should be a power of two.\n");
      return 1;
    }
 
-   if(isPowerOfTwo(bytesPerBlock) != 1){
+   if(is_power_of_two(bytes_per_block) != 1){
      fprintf(stderr, "Number of bytes per block should be a power of two.\n");
      return 1;
    }
 
+   //get the total number of blocks
+   int total_blocks = set_num * block_num;
+
+   //get number of offset and index bits
+   int num_offset_bits = get_power(bytes_per_block);
+   int num_index_bits = get_power(total_blocks);
+   int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
+
+   //create a cache
+   Cache cache;
    
-    
+   //fill all the cache params
+   (cache.params)->num_sets = set_num;
+   (cache.params)->slots_per_set = block_num;
+   (cache.params)->block_size = bytes_per_block;
+
+   //set all stats counters to 0
+   (cache.stats) = {0};
+
+   //set the global timestamp to 0
+   cache.global_timestamp = 0;
+
    
    //started writing read from standard in
    char* trace_line = NULL;
@@ -179,16 +205,14 @@ int main(int argc, char* argv[]){
    char store = 's';
 
 
-   //these must be calculated
-   char* tag = NULL;
-
-   char* index = NULL;
-
-   char* offset = NULL;
-
+   
    while((lineSize = getline(&trace_line, &len, stdin)) != 0){
-     //strol to get int;
-     //bitwise operators
+     //convert the address part of the line (hex) to an integer, starts at index 4
+     strtol(&(trace_line[4]), NULL, 16);
+
+     //next use bit shifts and number of tag, index, and offset bits
+     //to get tag index and offset (store tag in it's struct and index somewhere)
+
      
      
 
