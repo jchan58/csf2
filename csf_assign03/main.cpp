@@ -209,13 +209,13 @@ int main(int argc, char* argv[]){
   //set the correct number of blocks per set
   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
     //set the size of each set
-    (*set_it_ptr).blocks.resize((cache.params).slots_per_set);
-    i++;
+    (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
       Slot empty = {i, false, true, 0, 0};
       *slot_it_ptr = empty;
     }
+    i++;
   }
 
     
