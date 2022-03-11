@@ -81,10 +81,10 @@ int main(int argc, char* argv[]){
     //or are we organizing sets based on lru or fifo? read over info
     vector<Set> sets;
 
-    CacheParams * params;
+    CacheParams params;
 
     //where we store memory trace stats for the cache
-    Stats * stats;
+    Stats stats;
 
     //use this to calculate the smaller timestamps
     unsigned global_timestamp;
@@ -182,12 +182,12 @@ int main(int argc, char* argv[]){
    Cache cache;
    
    //fill all the cache params
-   (cache.params)->num_sets = set_num;
-   (cache.params)->slots_per_set = block_num;
-   (cache.params)->block_size = bytes_per_block;
+   (cache.params).num_sets = set_num;
+   (cache.params).slots_per_set = block_num;
+   (cache.params).block_size = bytes_per_block;
 
    //set all stats counters to 0
-   (cache.stats) = {0};
+   (cache.stats) = {0, 0, 0, 0, 0, 0, 0};
 
    //set the global timestamp to 0
    cache.global_timestamp = 0;
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]){
      new_index = new_index >> (num_tag_bits + num_offset_bits);
 
      //set the correct number of empty sets
-     (cache.sets).resize((cache.params)->num_sets);
+     (cache.sets).resize((cache.params).num_sets);
 
      //find the matching set with the index of the slot you want to insert
      //new_index should be withing range
@@ -239,6 +239,7 @@ int main(int argc, char* argv[]){
 
      //we are doing one block per set for now (direct mapping)
      Slot in_cache = match.blocks.at(0);
+     
      if(in_cache.valid == true){
        hit = false;
      }else{
@@ -249,38 +250,38 @@ int main(int argc, char* argv[]){
        //shorter cycle (in cache) + access timestamp change (not for direct mapping so add later/could even be in some other part of code
        //+ stats change
        if(hit){
-	 (cache.stats)->total_loads++;
-	 (cache.stats)->load_hits++;
-	 (cache.stats)->total_cycles++;
+	 (cache.stats).total_loads++;
+	 (cache.stats).load_hits++;
+	 (cache.stats).total_cycles++;
        }else{
 	  //longer cycle (must get from memory) + stats change
-	 (cache.stats)->total_loads++;
-         (cache.stats)->load_misses++;
-         (cache.stats)->total_cycles += 100 * ((cache.params)->block_size / 4);
+	 (cache.stats).total_loads++;
+         (cache.stats).load_misses++;
+         (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
        }
      } else if (trace_line[0] == store) {
        //block in cache gets replaced, but is simple for direct; immediately replaces memory so longer cycle
        if(hit){
-      	 (cache.stats)->total_stores++;
-         (cache.stats)->store_hits++;
-         (cache.stats)->total_cycles += 1 + 100 * ((cache.params)->block_size / 4);
+      	 (cache.stats).total_stores++;
+         (cache.stats).store_hits++;
+         (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
        }else{
 	 //if miss, still have to put block in cache and memory (same cycle update)
-	 (cache.stats)->total_stores++;
-         (cache.stats)->store_misses++;
-         (cache.stats)->total_cycles += 1 + 100 * ((cache.params)->block_size / 4);
+	 (cache.stats).total_stores++;
+         (cache.stats).store_misses++;
+         (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
        }
      }
    }
 
    //when the while loop finishes, print the summary in the indicated format
-   cout << "Total loads: " << (cache.stats)->total_loads << "\n";
-   cout << "Total stores: " << (cache.stats)->total_stores << "\n";
-   cout << "Load hits: " << (cache.stats)->load_hits << "\n";
-   cout << "Load misses: " << (cache.stats)->load_misses << "\n";
-   cout << "Store hits: " << (cache.stats)->store_hits << "\n";
-   cout << "Store misses: " << (cache.stats)->store_misses << "\n";
-   cout << "Total cycles: " << (cache.stats)->total_cycles << "\n";
+   cout << "Total loads: " << (cache.stats).total_loads << "\n";
+   cout << "Total stores: " << (cache.stats).total_stores << "\n";
+   cout << "Load hits: " << (cache.stats).load_hits << "\n";
+   cout << "Load misses: " << (cache.stats).load_misses << "\n";
+   cout << "Store hits: " << (cache.stats).store_hits << "\n";
+   cout << "Store misses: " << (cache.stats).store_misses << "\n";
+   cout << "Total cycles: " << (cache.stats).total_cycles << "\n";
 
    
    
