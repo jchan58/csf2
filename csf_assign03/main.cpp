@@ -3,11 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <vector>
+#include <iterator>
 
 using std::string;
 using std::cout;
 using std::endl;
 using std::vector;
+using std::iterator;
+using std::fill;
 
 //function to check if a number is a power of 2
 int is_power_of_two(long num){
@@ -46,8 +49,8 @@ int main(int argc, char* argv[]){
     
     //indicate whether the memory block is now dirty(?)
     //indicate if the slot is valid
-    bool dirty = false;
-    bool valid = true;
+    bool dirty;
+    bool valid;
     
     
     //store the load timestamp of the slot
@@ -177,40 +180,64 @@ int main(int argc, char* argv[]){
    int num_offset_bits = get_power(bytes_per_block);
    int num_index_bits = get_power(total_blocks);
    int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
-
-   //create a cache
-   Cache cache;
+  
+  //create iterators for slots and blocks
+  vector<Slot>::iterator slot_it_ptr;
+  vector<Set>::iterator set_it_ptr;
+  
+  //create a cache
+  Cache cache;
    
-   //fill all the cache params
-   (cache.params).num_sets = set_num;
-   (cache.params).slots_per_set = block_num;
-   (cache.params).block_size = bytes_per_block;
+  //fill all the cache params
+  (cache.params).num_sets = set_num;
+  (cache.params).slots_per_set = block_num;
+  (cache.params).block_size = bytes_per_block;
 
-   //set all stats counters to 0
-   (cache.stats) = {0, 0, 0, 0, 0, 0, 0};
+  //set all stats counters to 0
+  (cache.stats) = {0, 0, 0, 0, 0, 0, 0};
 
-   //set the global timestamp to 0
-   cache.global_timestamp = 0;
-
-   
-   //started writing read from standard in
-   char* trace_line = NULL;
-
-   //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
-   size_t len = 13;
-
-   int line_size;
-
-   //index of a new slot created ot represent the one loaded or stored
-   unsigned new_index;
-
-   char load = 'l';
-
-   char store = 's';
-
-   bool hit;
+  //set the global timestamp to 0
+  cache.global_timestamp = 0;
 
    
+   
+  //initialize the empty cache
+   
+  //set the correct number of empty sets
+  (cache.sets).resize((cache.params).num_sets);
+  unsigned i = 0;
+  //set the correct number of blocks per set
+  for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+    //set the size of each set
+    (*set_it_ptr).blocks.resize((cache.params).slots_per_set);
+    i++;
+    for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+      //fill the blocks as empty
+      Slot empty = {i, false, true, 0, 0};
+      *slot_it_ptr = empty;
+    }
+  }
+
+    
+     
+     
+      //started writing read from standard in
+    char* trace_line = NULL;
+
+    //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
+     size_t len = 13;
+
+    int line_size;
+
+    //index of a new slot created ot represent the one loaded or stored
+    unsigned new_index;
+
+    char load = 'l';
+
+    char store = 's';
+
+    bool hit;
+
    while((line_size = getline(&trace_line, &len, stdin)) != 0){
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
@@ -227,9 +254,7 @@ int main(int argc, char* argv[]){
      new_index = address << num_tag_bits;
      new_index = new_index >> (num_tag_bits + num_offset_bits);
 
-     //set the correct number of empty sets
-     (cache.sets).resize((cache.params).num_sets);
-
+     
      //find the matching set with the index of the slot you want to insert
      //new_index should be withing range
 
@@ -237,7 +262,8 @@ int main(int argc, char* argv[]){
      Set match = (cache.sets).at(new_index);
      //if match tag is block...
 
-     //we are doing one block per set for now (direct mapping)
+     
+      //we are doing one block per set for now (direct mapping)
      Slot in_cache = match.blocks.at(0);
      
      if(in_cache.valid == true){
