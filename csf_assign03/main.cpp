@@ -131,9 +131,9 @@ int main(int argc, char* argv[]){
 
 
   //convert the args representing integers into integers
-  long set_num = strtol(argv[1], NULL, 10);
-  long block_num = strtol(argv[2], NULL, 10);
-  long bytes_per_block = strtol(argv[3], NULL, 10);
+   long set_num = strtol(argv[1], nullptr, 10);
+   long block_num = strtol(argv[2], nullptr, 10);
+   long bytes_per_block = strtol(argv[3], nullptr, 10);
 
  
   //these params cant coexist
@@ -274,9 +274,16 @@ int main(int argc, char* argv[]){
    }
 
    //when the while loop finishes, print the summary in the indicated format
+   cout << "Total loads: " << (cache.stats)->total_loads << "\n";
+   cout << "Total stores: " << (cache.stats)->total_stores << "\n";
+   cout << "Load hits: " << (cache.stats)->load_hits << "\n";
+   cout << "Load misses: " << (cache.stats)->load_misses << "\n";
+   cout << "Store hits: " << (cache.stats)->store_hits << "\n";
+   cout << "Store misses: " << (cache.stats)->store_misses << "\n";
+   cout << "Total cycles: " << (cache.stats)->total_cycles << "\n";
 
-  
-
+   
+   
   return 0; 
 }
 
