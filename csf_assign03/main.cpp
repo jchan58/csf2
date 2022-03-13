@@ -51,6 +51,7 @@ int main(int argc, char* argv[]){
   typedef struct Slot {
     //store the tag of the slot
     unsigned tag;
+    unsigned index; 
     
     //indicate whether the memory block is now dirty(?)
     //indicate if the slot is valid
@@ -246,74 +247,88 @@ int main(int argc, char* argv[]){
 
     char store = 's';
 
-    bool hit;
+    bool store_hit;
+
+    bool load_hit;
+
+    unsigned current_tag; 
+
+    unsigned current_index; 
 
     while(getline(&trace_line, &len, stdin) != -1){
+    load_hit = false; 
+    store_hit = false; 
     //while(!trace_line.empty()){}
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
 
-     //next use bit shifts and number of tag, index, and offset bits
+     //find the tag and index 
+     current_tag = address >> (num_offset_bits + num_index_bits);
+     current_index = address << num_tag_bits;
+     current_index = current_index >> (num_tag_bits + num_offset_bits);
 
-     //create a new slot
-     Slot new_slot;
+     for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+       for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+         if((*slot_it_ptr).tag == current_tag) {
+           if(trace_line[0] == load) {
+           load_hit = true; 
+           } else {
+             store_hit = true; 
+           }
+         }
+        }
+      }
+      if(trace_line[0] == load) {
+        if (!load_hit) {
+          //create a new slot
+          Slot new_slot;
+          //next use bit shifts and number of tag, index, and offset bits
+         //a slot's tag is all the address bits not including the index and offset bits
+         new_slot.tag = current_tag; 
+         //index is a combo of shifting left (tag bits off) and right (offset bits off and blanks space off)
+         new_slot.index = current_index;
+         //push this new slot into vector 
+         cache.sets.at(0).blocks.push_back(new_slot);
 
-     //a slot's tag is all the address bits not including the index and offset bits
-     new_slot.tag = address >> (num_offset_bits + num_index_bits);
+        //calculate the miss penalty 
+          (cache.stats).total_loads++;
+          (cache.stats).load_misses++;
+          (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+        } else if(load_hit) {
+          //this is a hit depending on load or store 
+          (cache.stats).total_loads++;
+	        (cache.stats).load_hits++;
+	        (cache.stats).total_cycles++;
+        }
+      } else {
+         if(!store_hit) {
+          //if miss, still have to put block in cache and memory (same cycle update)
+	        (cache.stats).total_stores++;
+          (cache.stats).store_misses++;
+          //this is no-write allocate behavior
+          (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+        } else if (store_hit){
+          (cache.stats).total_stores++;
+          (cache.stats).store_hits++;
+          //this is write_through behavior
+          (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+        }
+      }
+    }
 
-     //index is a combo of shifting left (tag bits off) and right (offset bits off and blanks space off)
-     new_index = address << num_tag_bits;
-     new_index = new_index >> (num_tag_bits + num_offset_bits);
-
+      
      
      //find the matching set with the index of the slot you want to insert
      //new_index should be withing range
 
      //only do this if a set is multiblock?
      //is a pointer so we can change the actual set and slot
-     Set * match = &((cache.sets).at(new_index));
+     //Set * match = &((cache.sets).at(new_index));
      //if match tag is block...
 
-     
       //we are doing one block per set for now (direct mapping)
-    Slot * in_cache = &((*match).blocks.at(0));
-     
-      if((*in_cache).valid == true){
-        hit = false;
-      }else{
-        hit = true;
-      }
-     
-     if (trace_line[0] == load) {
-       //shorter cycle (in cache) + access timestamp change (not for direct mapping so add later/could even be in some other part of code
-       //+ stats change
-       if(hit){
-	      (cache.stats).total_loads++;
-	      (cache.stats).load_hits++;
-	      (cache.stats).total_cycles++;
-       }else{
-	  //longer cycle (must get from memory) + stats change
-	      (cache.stats).total_loads++;
-        (cache.stats).load_misses++;
-        (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-       }
-     } else if (trace_line[0] == store) {
-       //block in cache gets replaced, but is simple for direct; immediately replaces memory so longer cycle
-       if(hit){
-      	(cache.stats).total_stores++;
-        (cache.stats).store_hits++;
-        //this is write_through behavior
-        (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-        (*in_cache).valid = false;
-       }else{
-	    //if miss, still have to put block in cache and memory (same cycle update)
-	      (cache.stats).total_stores++;
-        (cache.stats).store_misses++;
-        //this is no-write allocate behavior
-        (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-       }
-     }
-   }
+     //Slot * in_cache = &((*match).blocks.at(0));
+
 
    //when the while loop finishes, print the summary in the indicated format
    cout << "Total loads: " << (cache.stats).total_loads << "\n";
@@ -324,8 +339,5 @@ int main(int argc, char* argv[]){
    cout << "Store misses: " << (cache.stats).store_misses << "\n";
    cout << "Total cycles: " << (cache.stats).total_cycles << "\n";
 
-   
   return 0; 
 }
-
-
