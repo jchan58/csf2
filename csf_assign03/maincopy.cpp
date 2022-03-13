@@ -276,10 +276,10 @@ int main(int argc, char* argv[]){
 
      
       //we are doing one block per set for now (direct mapping)
-    Slot * in_cache = &((*match).blocks.at(0));
+     Slot * in_cache = &((*match).blocks.at(0));
      
-      if((*in_cache).valid == true){
-        hit = false;
+     if((*in_cache).valid == true){
+       hit = false;
       }else{
         hit = true;
       }
@@ -288,29 +288,29 @@ int main(int argc, char* argv[]){
        //shorter cycle (in cache) + access timestamp change (not for direct mapping so add later/could even be in some other part of code
        //+ stats change
        if(hit){
-	      (cache.stats).total_loads++;
-	      (cache.stats).load_hits++;
-	      (cache.stats).total_cycles++;
+	 (cache.stats).total_loads++;
+	 (cache.stats).load_hits++;
+	 (cache.stats).total_cycles++;
        }else{
 	  //longer cycle (must get from memory) + stats change
-	      (cache.stats).total_loads++;
-        (cache.stats).load_misses++;
-        (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+	 (cache.stats).total_loads++;
+         (cache.stats).load_misses++;
+         (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
        }
      } else if (trace_line[0] == store) {
        //block in cache gets replaced, but is simple for direct; immediately replaces memory so longer cycle
        if(hit){
-      	(cache.stats).total_stores++;
-        (cache.stats).store_hits++;
-        //this is write_through behavior
-        (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-        (*in_cache).valid = false;
+      	 (cache.stats).total_stores++;
+         (cache.stats).store_hits++;
+         //this is write_through behavior
+         (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+         (*in_cache).valid = false;
        }else{
 	    //if miss, still have to put block in cache and memory (same cycle update)
-	      (cache.stats).total_stores++;
-        (cache.stats).store_misses++;
-        //this is no-write allocate behavior
-        (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+	        (cache.stats).total_stores++;
+         (cache.stats).store_misses++;
+         //this is no-write allocate behavior
+         (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
        }
      }
    }
