@@ -262,15 +262,16 @@ int main(int argc, char* argv[]){
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
 
-     //find the tag and index 
+     //find the tag and index of this current address
      current_tag = address >> (num_offset_bits + num_index_bits);
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits);
-
+    
+    //use a iterator and see if the address is already in the cache - ie data is already loaded 
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-         if((*slot_it_ptr).tag == current_tag) {
-           if(trace_line[0] == load) {
+         if((*slot_it_ptr).tag == current_tag) { //if there the address exists in cache
+           if(trace_line[0] == load) { //if this is a load and there is a hit  
            load_hit = true; 
            } else {
              store_hit = true; 
@@ -278,6 +279,7 @@ int main(int argc, char* argv[]){
          }
         }
       }
+      //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
           //create a new slot
@@ -301,6 +303,7 @@ int main(int argc, char* argv[]){
 	        (cache.stats).total_cycles++;
         }
       } else {
+        //if there is not a store_hit calculate data for that 
          if(!store_hit) {
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
