@@ -11,6 +11,7 @@ using std::endl;
 using std::vector;
 using std::iterator;
 using std::fill;
+using std::cin;
 
 //function to check if a number is a power of 2
 int is_power_of_two(long num){
@@ -40,6 +41,10 @@ int get_power(long num){
 
   return power;
 }
+
+
+
+//void increment_accesses(Set * set);
 
 int main(int argc, char* argv[]){
 
@@ -89,7 +94,7 @@ int main(int argc, char* argv[]){
     //where we store memory trace stats for the cache
     Stats stats;
 
-    //use this to calculate the smaller timestamps
+    //use this to calculate the smaller timestamps (dunno why we would tho)
     unsigned global_timestamp;
 
   } Cache;
@@ -221,15 +226,20 @@ int main(int argc, char* argv[]){
     
      
      
-      //started writing read from standard in
+    //started writing read from standard in (old)
     char* trace_line = NULL;
 
     //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
-     size_t len = 13;
+    size_t len = 13;
 
-    int line_size;
+    //size_t line_size;
 
     //index of a new slot created ot represent the one loaded or stored
+    //above is old read stuff
+
+    //string trace_line;
+    //getline(std::cin, trace_line);
+
     unsigned new_index;
 
     char load = 'l';
@@ -238,7 +248,8 @@ int main(int argc, char* argv[]){
 
     bool hit;
 
-   while((line_size = getline(&trace_line, &len, stdin)) != 0){
+    while(getline(&trace_line, &len, stdin) != -1){
+    //while(!trace_line.empty()){}
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
 
@@ -259,18 +270,19 @@ int main(int argc, char* argv[]){
      //new_index should be withing range
 
      //only do this if a set is multiblock?
-     Set match = (cache.sets).at(new_index);
+     //is a pointer so we can change the actual set and slot
+     Set * match = &((cache.sets).at(new_index));
      //if match tag is block...
 
      
       //we are doing one block per set for now (direct mapping)
-     Slot in_cache = match.blocks.at(0);
+     Slot * in_cache = &((*match).blocks.at(0));
      
-     if(in_cache.valid == true){
+     if((*in_cache).valid == true){
        hit = false;
-     }else{
-       hit = true;
-     }
+      }else{
+        hit = true;
+      }
      
      if (trace_line[0] == load) {
        //shorter cycle (in cache) + access timestamp change (not for direct mapping so add later/could even be in some other part of code
@@ -290,12 +302,15 @@ int main(int argc, char* argv[]){
        if(hit){
       	 (cache.stats).total_stores++;
          (cache.stats).store_hits++;
+         //this is write_through behavior
          (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+         (*in_cache).valid = false;
        }else{
-	 //if miss, still have to put block in cache and memory (same cycle update)
-	 (cache.stats).total_stores++;
+	    //if miss, still have to put block in cache and memory (same cycle update)
+	        (cache.stats).total_stores++;
          (cache.stats).store_misses++;
-         (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+         //this is no-write allocate behavior
+         (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
        }
      }
    }
@@ -309,7 +324,6 @@ int main(int argc, char* argv[]){
    cout << "Store misses: " << (cache.stats).store_misses << "\n";
    cout << "Total cycles: " << (cache.stats).total_cycles << "\n";
 
-   
    
   return 0; 
 }
