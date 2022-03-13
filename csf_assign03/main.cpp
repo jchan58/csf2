@@ -255,10 +255,17 @@ int main(int argc, char* argv[]){
 
     unsigned current_index; 
 
+  
+    //if it is a hit, we will need to access the the slot found
+    Slot * in_cache;
+    //to check dirty and valid, we need to check valid to see if it is a hit
+    //because tag will match always for direct for example
+  
+    
     while(getline(&trace_line, &len, stdin) != -1){
     load_hit = false; 
     store_hit = false; 
-    //while(!trace_line.empty()){}
+
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
 
@@ -271,6 +278,7 @@ int main(int argc, char* argv[]){
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
          if((*slot_it_ptr).tag == current_tag) { //if there the address exists in cache
+           in_cache = &(*slot_it_ptr);
            if(trace_line[0] == load) { //if this is a load and there is a hit  
            load_hit = true; 
            } else {
@@ -289,7 +297,9 @@ int main(int argc, char* argv[]){
          new_slot.tag = current_tag; 
          //index is a combo of shifting left (tag bits off) and right (offset bits off and blanks space off)
          new_slot.index = current_index;
-         //push this new slot into vector 
+         //push this new slot into vector
+         //we do not want to change the cache
+         //just edit the cache at that block in that set
          cache.sets.at(0).blocks.push_back(new_slot);
 
         //calculate the miss penalty 
@@ -308,13 +318,25 @@ int main(int argc, char* argv[]){
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
-          //this is no-write allocate behavior
-          (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+          if(strcmp(argv[4], "no-write-allocate") == 0) {
+            //no-write-allocate: store miss, don't put in cache; do put in memory ofc
+            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+          } else {
+            //write-allocate: store miss, put in cache; change memory ofc
+            (cache.stats).total_cycles += 1 +(100 * ((cache.params).block_size / 4));
+          }
         } else if (store_hit){
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
-          //this is write_through behavior
-          (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+          if(strcmp(argv[5], "write-through") == 0) {
+            //write-through: store writes to cache and to memory
+            (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+          } else {
+            //write-back: write only to cache so block is dirty
+            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+            //if dirty is true, it must be written to memory first (add later)
+            (*in_cache).dirty = true;
+          }
         }
       }
     }
