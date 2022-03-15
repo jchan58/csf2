@@ -245,16 +245,6 @@ int main(int argc, char* argv[]){
     //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
     size_t len = 13;
 
-    //size_t line_size;
-
-    //index of a new slot created ot represent the one loaded or stored
-    //above is old read stuff
-
-    //string trace_line;
-    //getline(std::cin, trace_line);
-
-    unsigned new_index;
-
     char load = 'l';
 
     char store = 's';
@@ -281,7 +271,10 @@ int main(int argc, char* argv[]){
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
  
-    //determine the specific mapping and create tags and indexes according to it; 
+    //determine the specific mapping and create tags and indexes according to it;
+    //next use bit shifts and number of tag, index, and offset bits
+    //a slot's tag is all the address bits not including the index and offset bits
+ 
      current_tag = address >> (num_offset_bits + num_index_bits);
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
@@ -290,13 +283,11 @@ int main(int argc, char* argv[]){
       current_tag = current_tag + current_index;
       current_index = 0; 
     }
-
+      
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
            in_cache = &(*slot_it_ptr);
-           //increment the access stamp because first time accessing it 
-           (*slot_it_ptr).access_stamp = (*slot_it_ptr).access_stamp++; 
            if(trace_line[0] == load) { //if this is a load and there is a hit  
              load_hit = true; 
            } else {
@@ -305,7 +296,6 @@ int main(int argc, char* argv[]){
            //this happens if the index is equal but the slot is not 
            
         } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
-           Slot new_slot = (*slot_it_ptr); 
           //replace the slot with incoming tag
           if(trace_line[0] == load) {
           (*slot_it_ptr).tag = current_tag; 
@@ -325,23 +315,37 @@ int main(int argc, char* argv[]){
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
-          //next use bit shifts and number of tag, index, and offset bits
-         //a slot's tag is all the address bits not including the index and offset bits
-         //should we add block is dirty according to the specific parameters? 
-         //we do not want to change the cache 
-         //depending on which mapping this is 
-         //push back the slot according to the specific index of the block
-
+          
         //calculate the miss penalty 
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+
+          //set the access stamp of the found block to 0 and increment all other access stamps
+            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                (*slot_it_ptr).access_stamp++;
+                if(in_cache == &(*slot_it_ptr)) {
+                  (*slot_it_ptr).access_stamp = 0;
+                }
+              }
+            }
         } else if(load_hit) {
           //have to update the access timestamp 
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
 	        (cache.stats).load_hits++;
 	        (cache.stats).total_cycles++;
+
+          //set the access stamp of the found block to 0 and increment all other access stamps
+            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                (*slot_it_ptr).access_stamp++;
+                if(in_cache == &(*slot_it_ptr)) {
+                  (*slot_it_ptr).access_stamp = 0;
+                }
+              }
+            }
         }
       } else {
         //if there is not a store_hit calculate data for that 
@@ -356,6 +360,16 @@ int main(int argc, char* argv[]){
           } else {
             //write-allocate: store miss, put in cache; change memory ofc
             (cache.stats).total_cycles += 1 +(100 * ((cache.params).block_size / 4));
+            
+             //set the access stamp of the found block to 0 and increment all other access stamps
+            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                (*slot_it_ptr).access_stamp++;
+                if(in_cache == &(*slot_it_ptr)) {
+                  (*slot_it_ptr).access_stamp = 0;
+                }
+              }
+            }
           }
         } else if (store_hit){
           (cache.stats).total_stores++;
@@ -363,11 +377,31 @@ int main(int argc, char* argv[]){
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+          
+            //set the access stamp of the found block to 0 and increment all other access stamps
+            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                (*slot_it_ptr).access_stamp++;
+                if(in_cache == &(*slot_it_ptr)) {
+                  (*slot_it_ptr).access_stamp = 0;
+                }
+              }
+            }
           } else {
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
             //if dirty is true, it must be written to memory first (add later)
             (*in_cache).dirty = true;
+          
+            //set the access stamp of the found block to 0 and increment all other access stamps
+            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                (*slot_it_ptr).access_stamp++;
+                if(in_cache == &(*slot_it_ptr)) {
+                  (*slot_it_ptr).access_stamp = 0;
+                }
+              }
+            }
           }
         }
       }
