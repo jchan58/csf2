@@ -311,19 +311,20 @@ int main(int argc, char* argv[]){
           (*slot_it_ptr).tag = current_tag; 
           (*slot_it_ptr).index = current_index;
           (*slot_it_ptr).valid = false; 
-          (*slot_it_ptr).access_stamp = 1; 
+          (*slot_it_ptr).access_stamp = 0; 
           numLoaded++; 
-          (*slot_it_ptr).load_stamp = numLoaded;
+         // (*slot_it_ptr).load_stamp = numLoaded;
+          } else if (trace_line[0] == store) {
+
           }
         } 
-      }
+       }
      }
 
   
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
-
           //next use bit shifts and number of tag, index, and offset bits
          //a slot's tag is all the address bits not including the index and offset bits
          //should we add block is dirty according to the specific parameters? 
