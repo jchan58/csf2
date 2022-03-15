@@ -299,27 +299,24 @@ int main(int argc, char* argv[]){
            (*slot_it_ptr).access_stamp = (*slot_it_ptr).access_stamp++; 
            if(trace_line[0] == load) { //if this is a load and there is a hit  
              load_hit = true; 
-             cout << "hit"; 
            } else {
              store_hit = true; 
            }
            //this happens if the index is equal but the slot is not 
            
-        } /*
-        else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index){
-          //replace the slot with incoming tag 
+        } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
+           Slot new_slot = (*slot_it_ptr); 
+          //replace the slot with incoming tag
+          if(trace_line[0] == load) {
           (*slot_it_ptr).tag = current_tag; 
           (*slot_it_ptr).index = current_index;
           (*slot_it_ptr).valid = false; 
           (*slot_it_ptr).access_stamp = 1; 
-          if(trace_line[0] == load) {
-            load_hit = false; 
-            numLoaded++; 
-            (*slot_it_ptr).load_stamp = numLoaded;
+          numLoaded++; 
+          (*slot_it_ptr).load_stamp = numLoaded;
           }
-       }
-       */
-     }
+        } 
+      }
      }
 
   
