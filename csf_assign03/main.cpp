@@ -273,7 +273,7 @@ int main(int argc, char* argv[]){
     //to check dirty and valid, we need to check valid to see if it is a hit
     //because tag will match always for direct for example
   
-    
+    int numLoaded = 0; 
     while(getline(&trace_line, &len, stdin) != -1){
     load_hit = false; 
     store_hit = false; 
@@ -286,44 +286,47 @@ int main(int argc, char* argv[]){
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
+    if(fully) {
+      current_tag = current_tag + current_index;
+      current_index = 0; 
+    }
+
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
            in_cache = &(*slot_it_ptr);
+           //increment the access stamp because first time accessing it 
+           (*slot_it_ptr).access_stamp = access_stamp++; 
            if(trace_line[0] == load) { //if this is a load and there is a hit  
              load_hit = true; 
            } else {
              store_hit = true; 
            }
-         }
+           //this happens if the index is equal but the slot is not 
+        } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
+          //replace the slot with incoming tag 
+          (*slot_it_ptr).tag = current_tag; 
+          (*slot_it_ptr).index = current_index;
+          (*slot_it_ptr).valid = false; 
+          (*slot_it_ptr).access = 1; 
+          if(trace_line[0] == load) {
+            numLoaded++; 
+            (*slot_it_ptr).load_stamp = numLoaded;
+          }
         }
-      }
-
-      if(fully) {
-        current_tag = current_tag + current_index;
-        current_index = 0; 
       }
 
   
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
-          //create a new slot
-          Slot new_slot;
+
           //next use bit shifts and number of tag, index, and offset bits
          //a slot's tag is all the address bits not including the index and offset bits
-         new_slot.tag = current_tag; 
-         new_slot.index = current_index; 
-         new_slot.valid = false; 
-         //new_slot.load_stamp = 1; 
-        // new_slot.access_stamp = 1; 
          //should we add block is dirty according to the specific parameters? 
-         //push this new slot into vector
          //we do not want to change the cache 
-         //just edit the cache at that block in that set
          //depending on which mapping this is 
-         //push back the slot according to the specific index of the block 
-         cache.sets.at(new_slot.index).blocks.push_back(new_slot); 
+         //push back the slot according to the specific index of the block
 
         //calculate the miss penalty 
           (cache.stats).total_loads++;
