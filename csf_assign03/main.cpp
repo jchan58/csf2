@@ -100,6 +100,10 @@ int main(int argc, char* argv[]){
 
   } Cache;
 
+  bool set = false; 
+  bool fully = false; 
+  bool direct = false; 
+
 
   
   //order vector based off of load stamp or access stamp, depending on eviction type!
@@ -212,20 +216,28 @@ int main(int argc, char* argv[]){
   //set the correct number of empty sets
   (cache.sets).resize((cache.params).num_sets);
   unsigned i = 0;
+  //i indicates the set number which is the index 
   //set the correct number of blocks per set
   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
     //set the size of each set
     (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
-      Slot empty = {i, false, true, 0, 0};
+      Slot empty = {0, i, false, true, 0, 0};
       *slot_it_ptr = empty;
     }
     i++;
   }
 
     
-     
+    //check to see if what type of mapping this
+    if(set_num == 1 && block_num > 1) {
+      fully = true; 
+    } else if(set_num > 1 && block_num > 1) {
+      set = true; 
+    } else {
+      direct = true; 
+    }
      
     //started writing read from standard in (old)
     char* trace_line = NULL;
@@ -268,25 +280,31 @@ int main(int argc, char* argv[]){
 
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
-
-     //find the tag and index of this current address
+ 
+    //determine the specific mapping and create tags and indexes according to it; 
      current_tag = address >> (num_offset_bits + num_index_bits);
      current_index = address << num_tag_bits;
-     current_index = current_index >> (num_tag_bits + num_offset_bits);
-    
-    //use a iterator and see if the address is already in the cache - ie data is already loaded 
+     current_index = current_index >> (num_tag_bits + num_offset_bits); 
+
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-         if((*slot_it_ptr).tag == current_tag) { //if there the address exists in cache
+        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
            in_cache = &(*slot_it_ptr);
            if(trace_line[0] == load) { //if this is a load and there is a hit  
-           load_hit = true; 
+             load_hit = true; 
            } else {
              store_hit = true; 
            }
          }
         }
       }
+
+      if(fully) {
+        current_tag = current_tag + current_index;
+        current_index = 0; 
+      }
+
+  
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
@@ -295,18 +313,24 @@ int main(int argc, char* argv[]){
           //next use bit shifts and number of tag, index, and offset bits
          //a slot's tag is all the address bits not including the index and offset bits
          new_slot.tag = current_tag; 
-         //index is a combo of shifting left (tag bits off) and right (offset bits off and blanks space off)
-         new_slot.index = current_index;
+         new_slot.index = current_index; 
+         new_slot.valid = false; 
+         //new_slot.load_stamp = 1; 
+        // new_slot.access_stamp = 1; 
+         //should we add block is dirty according to the specific parameters? 
          //push this new slot into vector
-         //we do not want to change the cache
+         //we do not want to change the cache 
          //just edit the cache at that block in that set
-         cache.sets.at(0).blocks.push_back(new_slot);
+         //depending on which mapping this is 
+         //push back the slot according to the specific index of the block 
+         cache.sets.at(new_slot.index).blocks.push_back(new_slot); 
 
         //calculate the miss penalty 
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
         } else if(load_hit) {
+          //have to update the access timestamp 
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
 	        (cache.stats).load_hits++;
@@ -315,6 +339,7 @@ int main(int argc, char* argv[]){
       } else {
         //if there is not a store_hit calculate data for that 
          if(!store_hit) {
+           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
