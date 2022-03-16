@@ -340,8 +340,8 @@ int main(int argc, char* argv[]){
                 break; 
               }
            }
-
-
+           break_loop = false; 
+           
           //set the access stamp of the found block to 0 and increment all other access stamps
            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
@@ -421,7 +421,6 @@ int main(int argc, char* argv[]){
               if(maxSlot.dirty){
                 //adjust the cycles to account for the write back to memory
               }
-              maxSlot = *in_cache; 
             }
 
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
@@ -437,16 +436,21 @@ int main(int argc, char* argv[]){
                       if((*slot_it_ptr).access_stamp > max) {
                         max = (*slot_it_ptr).access_stamp; 
                         maxSlot = (*slot_it_ptr);
+                        break_loop = true; 
+                        break; 
                       }
                     }
                   }
                 }
+                if(break_loop){
+                break; 
+                }
               }
+              break_loop = false; 
               //if there is an eviction replace the block with new slot and adjust the cycles 
               if(maxSlot.dirty){
                 //adjust the cycles to account for the write back to memory
               }
-              maxSlot = *in_cache; 
             }
  
             //write-allocate: store miss, put in cache; change memory ofc
