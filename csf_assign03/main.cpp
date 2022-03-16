@@ -462,7 +462,7 @@ int main(int argc, char* argv[]){
              //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
+                 if(current_index == (*slot_it_ptr).index && current_tag != (*slot_it_ptr).tag) {
                   (*slot_it_ptr).access_stamp++;
                 } else if(in_cache == &(*slot_it_ptr)) {
                   (*slot_it_ptr).access_stamp = 0;
