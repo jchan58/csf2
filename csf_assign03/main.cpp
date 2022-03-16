@@ -294,14 +294,14 @@ int main(int argc, char* argv[]){
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
-           in_cache = &(*slot_it_ptr);
            if(trace_line[0] == load) { //if this is a load and there is a hit  
              load_hit = true; 
+             in_cache = &(*slot_it_ptr);
            } else {
              store_hit = true; 
+             in_cache = &(*slot_it_ptr);
            }
         } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
-          in_cache = &(*slot_it_ptr);
           //replace the slot with incoming tag
           if(trace_line[0] == load) {
           (*slot_it_ptr).tag = current_tag; 
@@ -329,7 +329,7 @@ int main(int argc, char* argv[]){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
                  if((*in_cache).index == (*slot_it_ptr).index) {
                    if((*in_cache).tag != (*slot_it_ptr).tag) {
-                     cout << (*slot_it_ptr).access_stamp; 
+                     //cout << (*slot_it_ptr).access_stamp; 
                       (*slot_it_ptr).access_stamp++;
                    } else {
                      (*slot_it_ptr).access_stamp = 0;
