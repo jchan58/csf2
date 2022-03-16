@@ -147,6 +147,10 @@ int main(int argc, char* argv[]){
    long set_num = strtol(argv[1], nullptr, 10);
    long block_num = strtol(argv[2], nullptr, 10);
    long bytes_per_block = strtol(argv[3], nullptr, 10);
+   bool lru; 
+   if(strcmp(argv[6], "lru") == 0){
+     lru = true; 
+   }
 
  
   //these params cant coexist
@@ -253,6 +257,8 @@ int main(int argc, char* argv[]){
 
     bool load_hit;
 
+    bool filled; 
+
     unsigned current_tag; 
 
     unsigned current_index; 
@@ -267,6 +273,7 @@ int main(int argc, char* argv[]){
     while(getline(&trace_line, &len, stdin) != -1){
     load_hit = false; 
     store_hit = false; 
+    filled = false; 
 
      //convert the address part of the line (hex) to an integer, starts at index 4
      long address = strtol(&(trace_line[4]), NULL, 16);
@@ -293,22 +300,18 @@ int main(int argc, char* argv[]){
            } else {
              store_hit = true; 
            }
-           //this happens if the index is equal but the slot is not 
-           
         } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
+          in_cache = &(*slot_it_ptr);
           //replace the slot with incoming tag
           if(trace_line[0] == load) {
           (*slot_it_ptr).tag = current_tag; 
           (*slot_it_ptr).index = current_index;
           (*slot_it_ptr).valid = false; 
-          (*slot_it_ptr).access_stamp = 0; 
           numLoaded++; 
-         // (*slot_it_ptr).load_stamp = numLoaded;
-          } else if (trace_line[0] == store) {
-
-          }
+          (*slot_it_ptr).load_stamp = numLoaded; 
         } 
        }
+      }
      }
 
   
@@ -322,11 +325,15 @@ int main(int argc, char* argv[]){
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
 
           //set the access stamp of the found block to 0 and increment all other access stamps
-            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                (*slot_it_ptr).access_stamp++;
-                if(in_cache == &(*slot_it_ptr)) {
-                  (*slot_it_ptr).access_stamp = 0;
+                 if((*in_cache).index == (*slot_it_ptr).index) {
+                   if((*in_cache).tag != (*slot_it_ptr).tag) {
+                     cout << (*slot_it_ptr).access_stamp; 
+                      (*slot_it_ptr).access_stamp++;
+                   } else {
+                     (*slot_it_ptr).access_stamp = 0;
+                  }
                 }
               }
             }
@@ -340,16 +347,40 @@ int main(int argc, char* argv[]){
           //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                (*slot_it_ptr).access_stamp++;
-                if(in_cache == &(*slot_it_ptr)) {
-                  (*slot_it_ptr).access_stamp = 0;
-                }
+                if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
+                  (*slot_it_ptr).access_stamp++;
+                } else if(in_cache == &(*slot_it_ptr)) {
+                 (*slot_it_ptr).access_stamp = 0;
+               }
               }
             }
         }
       } else {
+        int setSize = 0; 
+        //first check if specific set is full already 
+         for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+           for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+            if((*slot_it_ptr).index == (*in_cache).index) {
+             if((*slot_it_ptr).valid) {
+             setSize++; 
+             }
+            }
+           }
+         } 
+
+        if(setSize == block_num) {
+          filled = true; 
+        }
+
+
+
+        //if filled is true then we will need evict a block for the three params for write-through, write-back, write-allocate 
+        //just replace the block in the no-write-allocate no need to evict with the least recently used using access stamp 
+        //which block to evict depends on the greatest access_stamp 
+
         //if there is not a store_hit calculate data for that 
          if(!store_hit) {
+
            //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
@@ -358,46 +389,110 @@ int main(int argc, char* argv[]){
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           } else {
+            unsigned max; 
+            Slot maxSlot; 
+            if(filled){
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  //find the least recently used block first 
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    if((*slot_it_ptr).access_stamp > max) {
+                      max = (*slot_it_ptr).access_stamp; 
+                      maxSlot = (*slot_it_ptr);
+                    }
+                 }
+              }
+            }
+
+           //evict the old slot and replace it with the newest slot 
+            maxSlot = *in_cache; 
+
             //write-allocate: store miss, put in cache; change memory ofc
             (cache.stats).total_cycles += 1 +(100 * ((cache.params).block_size / 4));
-            
+            //if set is filled and lru is the parameter, evict the block with the highest
+
              //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                (*slot_it_ptr).access_stamp++;
-                if(in_cache == &(*slot_it_ptr)) {
+                 if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
+                  (*slot_it_ptr).access_stamp++;
+                } else if(in_cache == &(*slot_it_ptr)) {
                   (*slot_it_ptr).access_stamp = 0;
                 }
               }
             }
-          }
         } else if (store_hit){
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
+
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+
+            unsigned max; 
+            Slot maxSlot; 
+            if(filled){
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  //find the least recently used block first 
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    if((*slot_it_ptr).access_stamp > max) {
+                      max = (*slot_it_ptr).access_stamp; 
+                      maxSlot = (*slot_it_ptr);
+                    }
+                 }
+              }
+            }
+
+           //evict the old slot and replace it with the newest slot 
+            maxSlot = *in_cache; 
           
             //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                (*slot_it_ptr).access_stamp++;
-                if(in_cache == &(*slot_it_ptr)) {
+                if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
+                  (*slot_it_ptr).access_stamp++;
+                } else if(in_cache == &(*slot_it_ptr)) {
                   (*slot_it_ptr).access_stamp = 0;
                 }
               }
             }
           } else {
+            unsigned max; 
+            Slot maxSlot; 
+            if(filled){
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  //find the least recently used block first 
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    if((*slot_it_ptr).access_stamp > max) {
+                      max = (*slot_it_ptr).access_stamp; 
+                      maxSlot = (*slot_it_ptr);
+                    }
+                 }
+              }
+            }
+
+            //check if maxSlot is dirty if it is have to write-back
+            if(maxSlot.dirty) {
+              
+            }
+
+           //evict the old slot and replace it with the newest slot 
+            maxSlot = *in_cache; 
+          
+
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
             //if dirty is true, it must be written to memory first (add later)
             (*in_cache).dirty = true;
-          
+
             //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                (*slot_it_ptr).access_stamp++;
-                if(in_cache == &(*slot_it_ptr)) {
+                 if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
+                  (*slot_it_ptr).access_stamp++;
+                } else if(in_cache == &(*slot_it_ptr)) {
                   (*slot_it_ptr).access_stamp = 0;
                 }
               }
@@ -406,20 +501,6 @@ int main(int argc, char* argv[]){
         }
       }
     }
-
-      
-     
-     //find the matching set with the index of the slot you want to insert
-     //new_index should be withing range
-
-     //only do this if a set is multiblock?
-     //is a pointer so we can change the actual set and slot
-     //Set * match = &((cache.sets).at(new_index));
-     //if match tag is block...
-
-      //we are doing one block per set for now (direct mapping)
-     //Slot * in_cache = &((*match).blocks.at(0));
-
 
    //when the while loop finishes, print the summary in the indicated format
    cout << "Total loads: " << (cache.stats).total_loads << "\n";
