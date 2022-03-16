@@ -356,30 +356,30 @@ int main(int argc, char* argv[]){
             }
         }
       } else {
-        int setSize = 0; 
-        //first check if specific set is full already 
-         for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-           for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-            if((*slot_it_ptr).index == (*in_cache).index) {
-             if((*slot_it_ptr).valid) {
-             setSize++; 
-             }
-            }
-           }
-         } 
-
-        if(setSize == block_num) {
-          filled = true; 
-        }
-
-
-
         //if filled is true then we will need evict a block for the three params for write-through, write-back, write-allocate 
         //just replace the block in the no-write-allocate no need to evict with the least recently used using access stamp 
         //which block to evict depends on the greatest access_stamp 
 
         //if there is not a store_hit calculate data for that 
          if(!store_hit) {
+           //check the set size
+          int setSize = 0; 
+          //first check if specific set is full already 
+          for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+           for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+            if((*slot_it_ptr).index == (*in_cache).index) {
+              if((*slot_it_ptr).valid) {
+             setSize++; 
+            }
+           }
+         }
+       } 
+
+        if(setSize == block_num) {
+          filled = true; 
+        }
+
+
            //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
