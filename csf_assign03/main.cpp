@@ -104,12 +104,6 @@ int main(int argc, char* argv[]){
 
   } Cache;
 
-  bool set = false; 
-  bool fully = false; 
-  bool direct = false; 
-
-
-  
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
   //argv[1] is number of sets in cache, pos power of 2
@@ -238,15 +232,7 @@ int main(int argc, char* argv[]){
   }
 
     
-    //check to see if what type of mapping this
-    if(set_num == 1 && block_num > 1) {
-      fully = true; 
-    } else if(set_num > 1 && block_num > 1) {
-      set = true; 
-    } else {
-      direct = true; 
-    }
-     
+    
     //started writing read from standard in (old)
     char* trace_line = NULL;
 
@@ -254,8 +240,6 @@ int main(int argc, char* argv[]){
     size_t len = 13;
 
     char load = 'l';
-
-    char store = 's';
 
     bool store_hit;
 
@@ -292,10 +276,7 @@ int main(int argc, char* argv[]){
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
-    if(fully) {
-      current_tag = current_tag + current_index;
-      current_index = 0; 
-    }
+    
       
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
