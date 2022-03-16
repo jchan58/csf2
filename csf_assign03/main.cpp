@@ -384,9 +384,9 @@ int main(int argc, char* argv[]){
           //first check if specific set is full already 
           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
            for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-            if((*slot_it_ptr).index == (*in_cache).index) {
+            if((*slot_it_ptr).index == current_index) {
               if((*slot_it_ptr).valid) {
-             setSize++; 
+              setSize++; 
             }
            }
          }
