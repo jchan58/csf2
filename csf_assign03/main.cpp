@@ -263,6 +263,8 @@ int main(int argc, char* argv[]){
 
     unsigned current_index; 
 
+    bool break_loop = false; 
+
   
     //if it is a hit, we will need to access the the slot found
     Slot * in_cache;
@@ -323,13 +325,28 @@ int main(int argc, char* argv[]){
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+          
+
+           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                if((*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true) {
+                  (*slot_it_ptr).tag = current_tag; 
+                  (*slot_it_ptr).valid = false; 
+                  break_loop = true; 
+                  break; 
+                }
+              }
+              if(break_loop){
+                break; 
+              }
+           }
+
 
           //set the access stamp of the found block to 0 and increment all other access stamps
            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if((*in_cache).index == (*slot_it_ptr).index) {
-                   if((*in_cache).tag != (*slot_it_ptr).tag) {
-                     cout << (*slot_it_ptr).access_stamp; 
+                 if(current_index == (*slot_it_ptr).index) {
+                   if(current_tag != (*slot_it_ptr).tag) {
                       (*slot_it_ptr).access_stamp++;
                    } else {
                      (*slot_it_ptr).access_stamp = 0;
