@@ -380,33 +380,58 @@ int main(int argc, char* argv[]){
 
         //if there is not a store_hit calculate data for that 
          if(!store_hit) {
-
            //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
           if(strcmp(argv[4], "no-write-allocate") == 0) {
+
+            if(filled){
+              Slot maxSlot; 
+              unsigned max; 
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    //find any block and replace it
+                    if((*slot_it_ptr).access_stamp > max) {
+                        max = (*slot_it_ptr).access_stamp; 
+                        maxSlot = (*slot_it_ptr);
+                      }
+                  }
+                }
+              }
+              //if there is an eviction replace the block with new slot and adjust the cycles 
+              if(maxSlot.dirty){
+                //adjust the cycles to account for the write back to memory
+              }
+              maxSlot = *in_cache; 
+            }
+
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           } else {
-            unsigned max; 
             Slot maxSlot; 
+            unsigned max; 
             if(filled){
               for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
                 for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                  //find the least recently used block first 
-                  if((*in_cache).index == (*slot_it_ptr).index) {
-                    if((*slot_it_ptr).access_stamp > max) {
-                      max = (*slot_it_ptr).access_stamp; 
-                      maxSlot = (*slot_it_ptr);
+                  if(lru){
+                    if((*in_cache).index == (*slot_it_ptr).index) {
+                      if((*slot_it_ptr).access_stamp > max) {
+                        max = (*slot_it_ptr).access_stamp; 
+                        maxSlot = (*slot_it_ptr);
+                      }
                     }
-                 }
+                  }
+                }
               }
+              //if there is an eviction replace the block with new slot and adjust the cycles 
+              if(maxSlot.dirty){
+                //adjust the cycles to account for the write back to memory
+              }
+              maxSlot = *in_cache; 
             }
-
-           //evict the old slot and replace it with the newest slot 
-            maxSlot = *in_cache; 
-
+ 
             //write-allocate: store miss, put in cache; change memory ofc
             (cache.stats).total_cycles += 1 +(100 * ((cache.params).block_size / 4));
             //if set is filled and lru is the parameter, evict the block with the highest
@@ -421,6 +446,7 @@ int main(int argc, char* argv[]){
                 }
               }
             }
+          }
         } else if (store_hit){
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
@@ -428,24 +454,6 @@ int main(int argc, char* argv[]){
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-
-            unsigned max; 
-            Slot maxSlot; 
-            if(filled){
-              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                  //find the least recently used block first 
-                  if((*in_cache).index == (*slot_it_ptr).index) {
-                    if((*slot_it_ptr).access_stamp > max) {
-                      max = (*slot_it_ptr).access_stamp; 
-                      maxSlot = (*slot_it_ptr);
-                    }
-                 }
-              }
-            }
-
-           //evict the old slot and replace it with the newest slot 
-            maxSlot = *in_cache; 
           
             //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
@@ -458,30 +466,6 @@ int main(int argc, char* argv[]){
               }
             }
           } else {
-            unsigned max; 
-            Slot maxSlot; 
-            if(filled){
-              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                  //find the least recently used block first 
-                  if((*in_cache).index == (*slot_it_ptr).index) {
-                    if((*slot_it_ptr).access_stamp > max) {
-                      max = (*slot_it_ptr).access_stamp; 
-                      maxSlot = (*slot_it_ptr);
-                    }
-                 }
-              }
-            }
-
-            //check if maxSlot is dirty if it is have to write-back
-            if(maxSlot.dirty) {
-              
-            }
-
-           //evict the old slot and replace it with the newest slot 
-            maxSlot = *in_cache; 
-          
-
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
             //if dirty is true, it must be written to memory first (add later)
