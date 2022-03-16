@@ -420,8 +420,8 @@ int main(int argc, char* argv[]){
               //if there is an eviction replace the block with new slot and adjust the cycles 
               if(maxSlot.dirty){
                 //adjust the cycles to account for the write back to memory
+                (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
               }
-              maxSlot = *in_cache; 
             }
 
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
@@ -445,8 +445,8 @@ int main(int argc, char* argv[]){
               //if there is an eviction replace the block with new slot and adjust the cycles 
               if(maxSlot.dirty){
                 //adjust the cycles to account for the write back to memory
+                (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
               }
-              maxSlot = *in_cache; 
             }
  
             //write-allocate: store miss, put in cache; change memory ofc
