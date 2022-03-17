@@ -70,6 +70,7 @@ int main(int argc, char* argv[]){
   //a set is a collection of blocks, order them based on lru or fifo (I think)
   typedef struct Set{
 
+    //treat it as a "stack" with lru at the first index
     vector<Slot> blocks;
     //a map of blocks to tag keys
     //map<unsigned, Slot > blocks;
@@ -212,7 +213,8 @@ int main(int argc, char* argv[]){
   cache.global_timestamp = 0;
 
    
-   
+
+
   //initialize the empty cache
    
   //set the correct number of empty sets
@@ -227,6 +229,7 @@ int main(int argc, char* argv[]){
       //fill the blocks as empty
       Slot empty = {0, i, false, true, 0, 0};
       *slot_it_ptr = empty;
+      //all are least recently used, so just set mru to a slot (ends up being the last one)
     }
     i++;
   }
@@ -253,62 +256,55 @@ int main(int argc, char* argv[]){
 
     bool break_loop = false; 
 
+
   
     //if it is a hit, we will need to access the the slot found
     Slot * in_cache;
+
+    //hold a vector to be moved to the top of the stack (mru)
+    Slot mru;
+
     //to check dirty and valid, we need to check valid to see if it is a hit
     //because tag will match always for direct for example
   
     int numLoaded = 0; 
     while(getline(&trace_line, &len, stdin) != -1){
-    load_hit = false; 
-    store_hit = false; 
-    filled = false; 
+      load_hit = false; 
+      store_hit = false; 
+      filled = false; 
 
-     //convert the address part of the line (hex) to an integer, starts at index 4
-     long address = strtol(&(trace_line[4]), NULL, 16);
+      //convert the address part of the line (hex) to an integer, starts at index 4
+      long address = strtol(&(trace_line[4]), NULL, 16);
  
-    //determine the specific mapping and create tags and indexes according to it;
-    //next use bit shifts and number of tag, index, and offset bits
-    //a slot's tag is all the address bits not including the index and offset bits
+      //determine the specific mapping and create tags and indexes according to it;
+      //next use bit shifts and number of tag, index, and offset bits
+      //a slot's tag is all the address bits not including the index and offset bits
  
-     current_tag = address >> (num_offset_bits + num_index_bits);
-     current_index = address << num_tag_bits;
-     current_index = current_index >> (num_tag_bits + num_offset_bits); 
+      current_tag = address >> (num_offset_bits + num_index_bits);
+      current_index = address << num_tag_bits;
+      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
-<<<<<<< HEAD
-    if(fully) {
-      current_tag = current_tag + current_index;
-      current_index = 0; 
-    }
-
-
-     cout << "Index: " <<  current_index << " "; 
-     cout << "tag: " << current_tag << "\n";
-=======
     
->>>>>>> 58eceed612938220746b7cc915f977bcd3fff2e1
       
-     for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-       for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
-           in_cache = &(*slot_it_ptr);
-           if(trace_line[0] == load) { //if this is a load and there is a hit  
-             load_hit = true; 
-           } else {
-             store_hit = true; 
-           }
-        } else {
-          //in_cache = &(*slot_it_ptr);
+      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+          if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
+            in_cache = &(*slot_it_ptr);
+            if(trace_line[0] == load) { //if this is a load and there is a hit  
+              load_hit = true; 
+            } else {
+              store_hit = true; 
+            }
+          } else {
           //replace the slot with incoming tag
-          (*slot_it_ptr).tag = current_tag; 
-          (*slot_it_ptr).index = current_index;
-          (*slot_it_ptr).valid = false; 
-          numLoaded++; 
-          (*slot_it_ptr).load_stamp = numLoaded; 
-       }
+            (*slot_it_ptr).tag = current_tag; 
+            (*slot_it_ptr).index = current_index;
+            (*slot_it_ptr).valid = false; 
+            numLoaded++; 
+            (*slot_it_ptr).load_stamp = numLoaded; 
+          }
+        }
       }
-     }
 
   
       //see if this is a load in input address 
@@ -320,51 +316,37 @@ int main(int argc, char* argv[]){
           (cache.stats).load_misses++;
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           
-
-           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                if((*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true) {
-                  (*slot_it_ptr).tag = current_tag; 
-                  (*slot_it_ptr).valid = false; 
-                  break_loop = true; 
-                  break; 
-                }
-              }
-              if(break_loop){
+          
+          for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+            for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+              if((*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true) {
+                (*slot_it_ptr).tag = current_tag; 
+                (*slot_it_ptr).valid = false; 
+                break_loop = true; 
                 break; 
               }
-           }
-           break_loop = false; 
-           
-          //set the access stamp of the found block to 0 and increment all other access stamps
-           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if(current_index == (*slot_it_ptr).index) {
-                   if(current_tag != (*slot_it_ptr).tag) {
-                      (*slot_it_ptr).access_stamp++;
-                   } else {
-                     (*slot_it_ptr).access_stamp = 0;
-                  }
-                }
-              }
             }
-        } else if(load_hit) {
+            if(break_loop){
+              break; 
+            }
+          }
+
+          break_loop = false; 
+           
+          //on a load miss,leave the access stamp (gets from memory, not cache)
+            //how to make lru the new small
+        } else if (load_hit) {
           //have to update the access timestamp 
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
 	        (cache.stats).load_hits++;
 	        (cache.stats).total_cycles++;
 
-          //set the access stamp of the found block to 0 and increment all other access stamps
-            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
-                  (*slot_it_ptr).access_stamp++;
-                } else if(in_cache == &(*slot_it_ptr)) {
-                 (*slot_it_ptr).access_stamp = 0;
-               }
-              }
-            }
+          //set the access stamp of the found block to the incremented global timestamp;
+          cache.global_timestamp++;
+          in_cache->access_stamp = cache.global_timestamp;
+          //how to make lru the new small?
+          
         }
       } else {
         //if filled is true then we will need evict a block for the three params for write-through, write-back, write-allocate 
@@ -372,36 +354,38 @@ int main(int argc, char* argv[]){
         //which block to evict depends on the greatest access_stamp 
 
         //if there is not a store_hit calculate data for that 
-         if(!store_hit) {
-           //check the set size
+        if(!store_hit) {
+          //check the set size
           int setSize = 0; 
           //first check if specific set is full already 
           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-           for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-            if((*slot_it_ptr).index == current_index) {
-              if((*slot_it_ptr).valid) {
-              setSize++; 
+            for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+              if((*slot_it_ptr).index == current_index) {
+                if((*slot_it_ptr).valid) {
+                  setSize++; 
+                }
+              }
             }
-           }
-         }
-       } 
+          }
+           
 
-        if(setSize == block_num) {
-          filled = true; 
-        }
+          if(setSize == block_num) {
+            filled = true; 
+          }
 
 
-           //update access stamp for that specific block 
+          //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
           if(strcmp(argv[4], "no-write-allocate") == 0) {
 
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
+            //no change to cache means no access update
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           } else {
             //if set is filled and lru is the parameter, evict the block with the highest
-            Slot maxSlot; 
+            Slot * maxSlot; 
             unsigned max; 
             if(filled){
               for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
@@ -410,7 +394,7 @@ int main(int argc, char* argv[]){
                     if((*in_cache).index == (*slot_it_ptr).index) {
                       if((*slot_it_ptr).access_stamp > max) {
                         max = (*slot_it_ptr).access_stamp; 
-                        maxSlot = (*slot_it_ptr);
+                        maxSlot = &(*slot_it_ptr);
                         break_loop = true; 
                         break; 
                       }
@@ -418,64 +402,47 @@ int main(int argc, char* argv[]){
                   }
                 }
                 if(break_loop){
-                break; 
+                  break; 
                 }
               }
+              
               break_loop = false; 
+              
               //if there is an eviction replace the block with new slot and adjust the cycles 
-              if(maxSlot.dirty){
+              if((*maxSlot).dirty){
                 //adjust the cycles to account for the write back to memory
                 (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
               }
-            }
- 
-            
-
-             //set the access stamp of the found block to 0 and increment all other access stamps
-            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if(current_index == (*slot_it_ptr).index && current_tag != (*slot_it_ptr).tag) {
-                  (*slot_it_ptr).access_stamp++;
-                } else if(in_cache == &(*slot_it_ptr)) {
-                  (*slot_it_ptr).access_stamp = 0;
-                }
-              }
+              //set the access stamp of the added block to the incremented global timestamp
+              cache.global_timestamp++;
+              maxSlot->access_stamp = cache.global_timestamp;
+              //need to "evict" max slot and replace with new store and put in slot regardless of max anyway
+              //how to make lru the new small?
             }
           }
-        } else if (store_hit){
+ 
+        } else if (store_hit) {
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
 
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-          
-            //set the access stamp of the found block to 0 and increment all other access stamps
-            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
-                  (*slot_it_ptr).access_stamp++;
-                } else if(in_cache == &(*slot_it_ptr)) {
-                  (*slot_it_ptr).access_stamp = 0;
-                }
-              }
-            }
+
+            //set the access stamp of the added block to the incremented global timestamp
+            cache.global_timestamp++;
+            in_cache->access_stamp = cache.global_timestamp;
+            //how to make lru the new small?
           } else {
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
             //if dirty is true, it must be written to memory first (add later)
             (*in_cache).dirty = true;
 
-            //set the access stamp of the found block to 0 and increment all other access stamps
-            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-              for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
-                  (*slot_it_ptr).access_stamp++;
-                } else if(in_cache == &(*slot_it_ptr)) {
-                  (*slot_it_ptr).access_stamp = 0;
-                }
-              }
-            }
+            //set the access stamp of the added block to the incremented global timestamp
+            cache.global_timestamp++;
+            in_cache->access_stamp = cache.global_timestamp;
+            //how to make lru the new small?
           }
         }
       }
