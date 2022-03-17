@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <vector>
 #include <iterator>
-#include <map>
 
 using std::string;
 using std::cout;
@@ -13,7 +12,6 @@ using std::vector;
 using std::iterator;
 using std::fill;
 using std::cin;
-using std::map;
 
 //function to check if a number is a power of 2
 int is_power_of_two(long num){
@@ -71,8 +69,6 @@ int main(int argc, char* argv[]){
   typedef struct Set{
 
     vector<Slot> blocks;
-    //a map of blocks to tag keys
-    //map<unsigned, Slot > blocks;
 
   } Set;
 
@@ -104,6 +100,12 @@ int main(int argc, char* argv[]){
 
   } Cache;
 
+  bool set = false; 
+  bool fully = false; 
+  bool direct = false; 
+
+
+  
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
   //argv[1] is number of sets in cache, pos power of 2
@@ -190,7 +192,7 @@ int main(int argc, char* argv[]){
 
    //get number of offset and index bits
    int num_offset_bits = get_power(bytes_per_block);
-   int num_index_bits = get_power(total_blocks);
+   int num_index_bits = get_power(set_num);
    int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
   
   //create iterators for slots and blocks
@@ -222,7 +224,7 @@ int main(int argc, char* argv[]){
   //set the correct number of blocks per set
   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
     //set the size of each set
-    //(*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
+    (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
       Slot empty = {0, i, false, true, 0, 0};
@@ -232,7 +234,15 @@ int main(int argc, char* argv[]){
   }
 
     
-    
+    //check to see if what type of mapping this
+    if(set_num == 1 && block_num > 1) {
+      fully = true; 
+    } else if(set_num > 1 && block_num > 1) {
+      set = true; 
+    } else {
+      direct = true; 
+    }
+     
     //started writing read from standard in (old)
     char* trace_line = NULL;
 
@@ -240,6 +250,8 @@ int main(int argc, char* argv[]){
     size_t len = 13;
 
     char load = 'l';
+
+    char store = 's';
 
     bool store_hit;
 
@@ -276,18 +288,11 @@ int main(int argc, char* argv[]){
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
-<<<<<<< HEAD
+
     if(fully) {
       current_tag = current_tag + current_index;
       current_index = 0; 
     }
-
-
-     cout << "Index: " <<  current_index << " "; 
-     cout << "tag: " << current_tag << "\n";
-=======
-    
->>>>>>> 58eceed612938220746b7cc915f977bcd3fff2e1
       
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
@@ -298,8 +303,8 @@ int main(int argc, char* argv[]){
            } else {
              store_hit = true; 
            }
-        } else {
-          //in_cache = &(*slot_it_ptr);
+        } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
+          in_cache = &(*slot_it_ptr);
           //replace the slot with incoming tag
           (*slot_it_ptr).tag = current_tag; 
           (*slot_it_ptr).index = current_index;
@@ -334,8 +339,8 @@ int main(int argc, char* argv[]){
                 break; 
               }
            }
-           break_loop = false; 
-           
+
+
           //set the access stamp of the found block to 0 and increment all other access stamps
            for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
@@ -397,10 +402,30 @@ int main(int argc, char* argv[]){
           (cache.stats).store_misses++;
           if(strcmp(argv[4], "no-write-allocate") == 0) {
 
+            if(filled){
+              Slot maxSlot; 
+              unsigned max; 
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    //find any block and replace it
+                    if((*slot_it_ptr).access_stamp > max) {
+                        max = (*slot_it_ptr).access_stamp; 
+                        maxSlot = (*slot_it_ptr);
+                      }
+                  }
+                }
+              }
+              //if there is an eviction replace the block with new slot and adjust the cycles 
+              if(maxSlot.dirty){
+                //adjust the cycles to account for the write back to memory
+                (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+              }
+            }
+
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           } else {
-            //if set is filled and lru is the parameter, evict the block with the highest
             Slot maxSlot; 
             unsigned max; 
             if(filled){
@@ -411,17 +436,11 @@ int main(int argc, char* argv[]){
                       if((*slot_it_ptr).access_stamp > max) {
                         max = (*slot_it_ptr).access_stamp; 
                         maxSlot = (*slot_it_ptr);
-                        break_loop = true; 
-                        break; 
                       }
                     }
                   }
                 }
-                if(break_loop){
-                break; 
-                }
               }
-              break_loop = false; 
               //if there is an eviction replace the block with new slot and adjust the cycles 
               if(maxSlot.dirty){
                 //adjust the cycles to account for the write back to memory
@@ -429,12 +448,14 @@ int main(int argc, char* argv[]){
               }
             }
  
-            
+            //write-allocate: store miss, put in cache; change memory ofc
+            (cache.stats).total_cycles += 1 +(100 * ((cache.params).block_size / 4));
+            //if set is filled and lru is the parameter, evict the block with the highest
 
              //set the access stamp of the found block to 0 and increment all other access stamps
             for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
               for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                 if(current_index == (*slot_it_ptr).index && current_tag != (*slot_it_ptr).tag) {
+                 if((*in_cache).index == (*slot_it_ptr).index && (*in_cache).tag != (*slot_it_ptr).tag) {
                   (*slot_it_ptr).access_stamp++;
                 } else if(in_cache == &(*slot_it_ptr)) {
                   (*slot_it_ptr).access_stamp = 0;

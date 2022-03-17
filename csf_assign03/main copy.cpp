@@ -192,7 +192,7 @@ int main(int argc, char* argv[]){
 
    //get number of offset and index bits
    int num_offset_bits = get_power(bytes_per_block);
-   int num_index_bits = get_power(total_blocks);
+   int num_index_bits = get_power(set_num);
    int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
   
   //create iterators for slots and blocks
@@ -287,6 +287,7 @@ int main(int argc, char* argv[]){
      current_tag = address >> (num_offset_bits + num_index_bits);
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
+
 
     if(fully) {
       current_tag = current_tag + current_index;
