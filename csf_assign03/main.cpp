@@ -276,7 +276,18 @@ int main(int argc, char* argv[]){
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
+<<<<<<< HEAD
+    if(fully) {
+      current_tag = current_tag + current_index;
+      current_index = 0; 
+    }
+
+
+     cout << "Index: " <<  current_index << " "; 
+     cout << "tag: " << current_tag << "\n";
+=======
     
+>>>>>>> 58eceed612938220746b7cc915f977bcd3fff2e1
       
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
@@ -287,16 +298,14 @@ int main(int argc, char* argv[]){
            } else {
              store_hit = true; 
            }
-        } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
-          in_cache = &(*slot_it_ptr);
+        } else {
+          //in_cache = &(*slot_it_ptr);
           //replace the slot with incoming tag
-          if(trace_line[0] == load) {
           (*slot_it_ptr).tag = current_tag; 
           (*slot_it_ptr).index = current_index;
           (*slot_it_ptr).valid = false; 
           numLoaded++; 
           (*slot_it_ptr).load_stamp = numLoaded; 
-        } 
        }
       }
      }
