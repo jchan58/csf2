@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <vector>
 #include <iterator>
+#include <map>
 
 using std::string;
 using std::cout;
@@ -12,6 +13,7 @@ using std::vector;
 using std::iterator;
 using std::fill;
 using std::cin;
+using std::map;
 
 //function to check if a number is a power of 2
 int is_power_of_two(long num){
@@ -69,6 +71,8 @@ int main(int argc, char* argv[]){
   typedef struct Set{
 
     vector<Slot> blocks;
+    //a map of blocks to tag keys
+    //map<unsigned, Slot > blocks;
 
   } Set;
 
@@ -100,12 +104,6 @@ int main(int argc, char* argv[]){
 
   } Cache;
 
-  bool set = false; 
-  bool fully = false; 
-  bool direct = false; 
-
-
-  
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
   //argv[1] is number of sets in cache, pos power of 2
@@ -224,7 +222,7 @@ int main(int argc, char* argv[]){
   //set the correct number of blocks per set
   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
     //set the size of each set
-    (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
+    //(*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
       Slot empty = {0, i, false, true, 0, 0};
@@ -234,15 +232,7 @@ int main(int argc, char* argv[]){
   }
 
     
-    //check to see if what type of mapping this
-    if(set_num == 1 && block_num > 1) {
-      fully = true; 
-    } else if(set_num > 1 && block_num > 1) {
-      set = true; 
-    } else {
-      direct = true; 
-    }
-     
+    
     //started writing read from standard in (old)
     char* trace_line = NULL;
 
@@ -250,8 +240,6 @@ int main(int argc, char* argv[]){
     size_t len = 13;
 
     char load = 'l';
-
-    char store = 's';
 
     bool store_hit;
 
@@ -288,6 +276,7 @@ int main(int argc, char* argv[]){
      current_index = address << num_tag_bits;
      current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
+<<<<<<< HEAD
     if(fully) {
       current_tag = current_tag + current_index;
       current_index = 0; 
@@ -296,6 +285,9 @@ int main(int argc, char* argv[]){
 
      cout << "Index: " <<  current_index << " "; 
      cout << "tag: " << current_tag << "\n";
+=======
+    
+>>>>>>> 58eceed612938220746b7cc915f977bcd3fff2e1
       
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
