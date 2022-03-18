@@ -279,6 +279,8 @@ int main(int argc, char* argv[]){
     //because tag will match always for direct for example
   
     int numLoaded = 0; 
+
+
     while(getline(&trace_line, &len, stdin) != -1){
       load_hit = false; 
       store_hit = false; 
@@ -286,6 +288,7 @@ int main(int argc, char* argv[]){
 
       //convert the address part of the line (hex) to an integer, starts at index 4
       long address = strtol(&(trace_line[4]), NULL, 16);
+  //      cout << " current_address " << address << "\n"; 
  
       //determine the specific mapping and create tags and indexes according to it;
       //next use bit shifts and number of tag, index, and offset bits
@@ -295,15 +298,39 @@ int main(int argc, char* argv[]){
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
+  //    cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
+
 
     if(fully) {
       current_tag = current_tag + current_index;
       current_index = 0; 
     }
+
+    bool wellHit = false; 
+    Slot empty_slot; 
+    int setSize; 
+
+    //first check if specific set is full already 
+        for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+          for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+            if((*slot_it_ptr).index == current_index) {
+              if((*slot_it_ptr).valid) {
+                 setSize++; 
+               } else {
+                 setSize = 0; 
+               }
+            }
+          }
+        }
+
+        if(setSize == 0) {
+          filled = true;
+        }
+
       
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index) {
+        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
            in_cache = &(*slot_it_ptr);
            //this is a hit so make it mru in advance
            //hold a copy of the slot
@@ -317,28 +344,86 @@ int main(int argc, char* argv[]){
            } else {
              store_hit = true; 
            }
-        } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
-          in_cache = &(*slot_it_ptr);
-          //replace the slot with incoming tag
-            (*slot_it_ptr).tag = current_tag; 
-            (*slot_it_ptr).index = current_index;
-            (*slot_it_ptr).valid = false; 
-            numLoaded++; 
-            (*slot_it_ptr).load_stamp = numLoaded; 
+         } else if((*slot_it_ptr).tag != current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == true){
+        //  in_cache = &(*slot_it_ptr);
+          if(strcmp(argv[4], "no-write-allocate") == 0 && trace_line[0] == store) {
+            wellHit = false; 
+          } else if (strcmp(argv[4], "no-write-allocate") == 0 && trace_line[0] == load) {
+           wellHit == true; 
+           empty_slot = (*slot_it_ptr);
+          } else if (strcmp(argv[4], "write-allocate") == 0) {
+            //replace the slot with incoming tag
+           wellHit == true; 
+           empty_slot = (*slot_it_ptr);
+          }
           }
         }
       }
+
+    if(wellHit) {
+      numLoaded++;
+      Slot new_slot = {current_tag, current_index, false, false, numLoaded};
+      if(!filled){
+        cache.sets.at(current_index).blocks.push_back(new_slot); 
+      } 
+    }
+    wellHit = false; 
 
   
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         if (!load_hit) {
+          int setSize = 0; 
           
         //calculate the miss penalty 
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;
           (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+
+            if(filled){
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  if((*in_cache).index == (*slot_it_ptr).index) {
+                    //if set is filled and lru is the parameter, evict the first block in a set vector
+                    //lru gets replaced (tag change)
+                    (*slot_it_ptr).tag = current_tag;
+                     //if the evicted slot is dirty, adjust the cycles 
+                    if((*slot_it_ptr).dirty){
+                      //adjust the cycles to account for the write back to memory
+                      (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+                    }
+                    break_loop = true; 
+                    break; 
+                  }
+                if(break_loop){
+                  break;
+                 }
+                }             
+              }
+              break_loop = false; 
+
+            } else {
+              //if not full, put in first valid space in that set
+              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+                  if((*slot_it_ptr).index == current_index) {
+                    if((*slot_it_ptr).valid) {
+                      (*slot_it_ptr).tag = current_tag; 
+                      (*slot_it_ptr).index = current_index;
+                      (*slot_it_ptr).valid = false; 
+                      break_loop = true; 
+                      break; 
+                    }
+                  }
+                }
+                if(break_loop){
+                  break;
+                }
+              }
+            }
+            break_loop = false; 
           
+          /*
           //loads it into the cache
           for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
             for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
@@ -348,9 +433,9 @@ int main(int argc, char* argv[]){
                 //hold a copy of the slot
                 mru = (*slot_it_ptr);
                 //remove the actual slot so we can reinsert it at the top of the stack vector
-                (*set_it_ptr).blocks.erase(slot_it_ptr);
+               (*set_it_ptr).blocks.erase(slot_it_ptr);
                 //put the most recently used element at the top of the stack
-                (*set_it_ptr).blocks.push_back(mru);
+               (*set_it_ptr).blocks.push_back(mru);
                 break_loop = true; 
                 break; 
               }
@@ -361,6 +446,7 @@ int main(int argc, char* argv[]){
           }
 
           break_loop = false; 
+          */
            
           //on a load miss,leave the access stamp (gets from memory, not cache)
             //how to make lru the new small
@@ -373,7 +459,7 @@ int main(int argc, char* argv[]){
           //mru was already moved to the top
           
         }
-      } else {
+      } else if(trace_line[0] == store) {
         //if there is not a store_hit calculate data for that 
         if(!store_hit) {
           //check the set size
@@ -388,10 +474,9 @@ int main(int argc, char* argv[]){
               }
             }
           }
-           
 
-          if(setSize == block_num) {
-            filled = true; 
+          if(setSize == 0) {
+            filled = true;
           }
 
 
@@ -421,12 +506,13 @@ int main(int argc, char* argv[]){
                     break_loop = true; 
                     break; 
                   }
-                }
                 if(break_loop){
                   break;
-                }
+                 }
+                }             
               }
               break_loop = false; 
+
             } else {
               //if not full, put in first valid space in that set
               for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
@@ -477,6 +563,16 @@ int main(int argc, char* argv[]){
    cout << "Store hits: " << (cache.stats).store_hits << "\n";
    cout << "Store misses: " << (cache.stats).store_misses << "\n";
    cout << "Total cycles: " << (cache.stats).total_cycles << "\n";
+
+  /*
+   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
+     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
+         cout << "index: " << (*slot_it_ptr).index << " tag: " << (*slot_it_ptr).tag <<  "valid: " << (*slot_it_ptr).valid << "\n"; 
+      }
+   }
+*/
+
+
 
   return 0; 
 }
