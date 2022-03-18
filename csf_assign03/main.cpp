@@ -431,5 +431,7 @@ int main(int argc, char* argv[]){
    cout << "Store misses: " << (cache.stats).store_misses << "\n";
    cout << "Total cycles: " << (cache.stats).total_cycles << "\n";
 
+   cout << current_index; 
+
   return 0; 
 }
