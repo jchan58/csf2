@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
 
     bool break_loop = false; 
 
- 
+    Slot * in_cache;
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
@@ -296,8 +296,6 @@ int main(int argc, char* argv[]){
     }
 
   
-
-
     //first check if specific set is full already; it is not full if there is a valid slot 
     for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
       if((*slot_it_ptr).valid) {
@@ -312,6 +310,7 @@ int main(int argc, char* argv[]){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
           //this is a hit so make it mru in advance
           //hold a copy of the slot
+          in_cache = &(*slot_it_ptr);
           mru = (*slot_it_ptr);
           //remove the actual slot so we can reinsert it at the top of the stack vector
           cache.sets.at(current_index).blocks.erase(slot_it_ptr);
@@ -391,7 +390,7 @@ int main(int argc, char* argv[]){
                 (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
               }
               cache.sets.at(current_index).blocks.at(0) = new_slot; 
-              //plus one because storing to cache
+
         
             } else {
               //if not full, put in first valid space in that set  
@@ -415,10 +414,21 @@ int main(int argc, char* argv[]){
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
             //lru is done at top on hit
+            Slot new_slot = {current_tag, current_index, false, false, 0};
+            //replaced the lru (at 0 of set) with the slot you are looking for
+
+            //if it is dirty, must add 100 cycles before eviction (put in memory)
+            if(cache.sets.at(current_index).blocks.at(0).dirty) {
+              (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+            }
+            cache.sets.at(current_index).blocks.at(0) = new_slot; 
           } else {
             //write-back: write only to cache so block is dirty
+            Slot new_slot = {current_tag, current_index, false, false, 0};
+            cache.sets.at(current_index).blocks.at(0) = new_slot; 
             (cache.stats).total_cycles += 1;
             //lru is done at top on hit
+            in_cache->dirty = true;
           }
         }
       }
