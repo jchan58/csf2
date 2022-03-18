@@ -13,7 +13,7 @@ using std::vector;
 using std::iterator;
 using std::fill;
 using std::cin;
-using std::replace;
+using std::find;
 
 //function to check if a number is a power of 2
 int is_power_of_two(long num){
@@ -260,10 +260,12 @@ int main(int argc, char* argv[]){
 
     bool break_loop = false; 
 
+    vector<Slot>::iterator found_tag;
+
 
   
     //if it is a hit, we will need to access the the slot found
-    Slot * in_cache;
+    //Slot * in_cache;
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
@@ -317,7 +319,8 @@ int main(int argc, char* argv[]){
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
-           in_cache = &(*slot_it_ptr);
+           //in_cache = &(*slot_it_ptr);
+           found_tag = find(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.end(), *slot_it_ptr);
            //this is a hit so make it mru in advance
            //hold a copy of the slot
             mru = (*slot_it_ptr);
