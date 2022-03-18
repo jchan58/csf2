@@ -363,7 +363,7 @@ int main(int argc, char* argv[]){
 	        (cache.stats).load_hits++;
 	        (cache.stats).total_cycles++;
 
-          //mru was already moved to the top
+          //mru was already  moved to the top
         }
           
       } else if(trace_line[0] == store) {
