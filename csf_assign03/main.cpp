@@ -305,7 +305,7 @@ int main(int argc, char* argv[]){
 
       //checking for a load or store hit
       for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
-        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).valid == false) {
+        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
           //this is a hit so make it mru in advance
           //hold a copy of the slot
           mru = (*slot_it_ptr);
