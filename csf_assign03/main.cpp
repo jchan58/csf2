@@ -320,15 +320,11 @@ int main(int argc, char* argv[]){
           }
         }       
       }
-      
-
   
       //see if this is a load in input address 
       if(trace_line[0] == load) {
         //load miss
-        if (!load_hit) {
-          int setSize = 0; 
-          
+        if (!load_hit) {   
         //calculate the miss penalty and stats
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;  
@@ -369,13 +365,14 @@ int main(int argc, char* argv[]){
       } else if(trace_line[0] == store) {
         //if there is not a store_hit calculate data for that 
         if(!store_hit) {
+          //adding
     
           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
           if(strcmp(argv[4], "no-write-allocate") == 0) {
-
+            //adding new address
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             //no change to cache means no access update
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
@@ -385,13 +382,14 @@ int main(int argc, char* argv[]){
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
+              /*
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
                 (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-              }
+              }*/
               cache.sets.at(current_index).blocks.at(0) = new_slot; 
               //plus one because storing to cache
-              (cache.stats).total_cycles += 1;
+
                    
             } else {
               //if not full, put in first valid space in that set  
@@ -403,6 +401,7 @@ int main(int argc, char* argv[]){
                     break; 
                   }
               }
+              (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
    
             }
           }
