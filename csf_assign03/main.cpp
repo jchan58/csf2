@@ -260,12 +260,7 @@ int main(int argc, char* argv[]){
 
     bool break_loop = false; 
 
-    vector<Slot>::iterator found_tag;
-
-
-  
-    //if it is a hit, we will need to access the the slot found
-    //Slot * in_cache;
+ 
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
@@ -300,43 +295,35 @@ int main(int argc, char* argv[]){
 
 
     //first check if specific set is full already; it is not full if there is a valid slot 
-        for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-          for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-            if((*slot_it_ptr).index == current_index) {
-              if((*slot_it_ptr).valid) {
-                 filled = false; 
-                 break_loop = true;
-                 break;
-               }
-            }
-          }
-          if(break_loop){
+    for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+      if((*slot_it_ptr).index == current_index) {
+        if((*slot_it_ptr).valid) {
+            filled = false; 
             break;
-          }
-        }
-
-      //checking for a load or store hit
-     for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-       for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
-           //in_cache = &(*slot_it_ptr);
-           found_tag = find(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.end(), *slot_it_ptr);
-           //this is a hit so make it mru in advance
-           //hold a copy of the slot
-            mru = (*slot_it_ptr);
-            //remove the actual slot so we can reinsert it at the top of the stack vector
-            (*set_it_ptr).blocks.erase(slot_it_ptr);
-            (*set_it_ptr).blocks.push_back(mru);
-            //might want to break out once we hit, could be a function?
-           if(trace_line[0] == load) { //if this is a load and there is a hit  
-             load_hit = true; 
-           } else {
-             store_hit = true; 
-           }
-         }       
- 
         }
       }
+    }
+       
+
+      //checking for a load or store hit
+
+      for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+        if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
+          //this is a hit so make it mru in advance
+          //hold a copy of the slot
+          mru = (*slot_it_ptr);
+          //remove the actual slot so we can reinsert it at the top of the stack vector
+          (*set_it_ptr).blocks.erase(slot_it_ptr);
+          (*set_it_ptr).blocks.push_back(mru);
+          //might want to break out once we hit, could be a function?
+          if(trace_line[0] == load) { //if this is a load and there is a hit  
+            load_hit = true; 
+          } else {
+            store_hit = true; 
+          }
+        }       
+      }
+      
 
   
       //see if this is a load in input address 
@@ -362,24 +349,18 @@ int main(int argc, char* argv[]){
               
             } else {
               //if not full, put in first valid space in that set
-              for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
-                for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
-                  if((*slot_it_ptr).index == current_index) {
-                    if((*slot_it_ptr).valid) {
-                      (*slot_it_ptr).tag = current_tag; 
-                      (*slot_it_ptr).index = current_index;
-                      (*slot_it_ptr).valid = false; 
-                      break_loop = true; 
-                      break; 
-                    }
+                for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+                  if((*slot_it_ptr).valid) {
+                    (*slot_it_ptr).tag = current_tag; 
+                    (*slot_it_ptr).index = current_index;
+                    (*slot_it_ptr).valid = false; 
+                    break; 
                   }
                 }
-                if(break_loop){
-                  break;
-                }
               }
+                         
             }
-            break_loop = false; 
+
            
         } else if (load_hit) {
           //this is a hit depending on load or store 
@@ -389,7 +370,6 @@ int main(int argc, char* argv[]){
 
           //mru was already moved to the top
           
-        }
       } else if(trace_line[0] == store) {
         //if there is not a store_hit calculate data for that 
         if(!store_hit) {
@@ -445,16 +425,10 @@ int main(int argc, char* argv[]){
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-            Slot new_slot = {current_tag, current_index, false, false, 0};
-            cache.sets.at(current_index).blocks.at(current_tag) = new_slot; 
             //lru is done at top on hit
           } else {
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 1;
-            Slot new_slot = {current_tag, current_index, true, false, 0};
-            //if dirty is true, it must be written to memory first if evicted
-            cache.sets.at(current_index).blocks.at(current_tag) = new_slot; 
-
             //lru is done at top on hit
           }
         }
