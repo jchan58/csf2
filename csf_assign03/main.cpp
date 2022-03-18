@@ -280,10 +280,12 @@ int main(int argc, char* argv[]){
       //determine the specific mapping and create tags and indexes according to it;
       //next use bit shifts and number of tag, index, and offset bits
       //a slot's tag is all the address bits not including the index and offset bits
- 
-      current_tag = address >> (num_offset_bits + num_index_bits);
-      current_index = address << num_tag_bits;
-      current_index = current_index >> (num_tag_bits + num_offset_bits); 
+
+
+      //is it offset address or bits?
+      current_tag = ((1 << num_tag_bits) - 1) & (address >> (num_offset_bits * num_index_bits));
+      current_index = ((1 << num_index_bits) - 1) & (address >> (num_offset_bits));
+
 
     //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
@@ -292,6 +294,8 @@ int main(int argc, char* argv[]){
       current_tag = current_tag + current_index;
       current_index = 0; 
     }
+
+  
 
 
     //first check if specific set is full already; it is not full if there is a valid slot 
@@ -382,7 +386,6 @@ int main(int argc, char* argv[]){
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
-              
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
                 (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
