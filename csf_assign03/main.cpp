@@ -442,13 +442,15 @@ int main(int argc, char* argv[]){
           if(strcmp(argv[5], "write-through") == 0) {
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-
+            Slot new_slot = {current_tag, current_index, false, false, 0};
+            cache.sets.at(current_index).blocks.at(current_tag) = new_slot; 
             //lru is done at top on hit
           } else {
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 1;
-            //if dirty is true, it must be written to memory first (add later)
-            (*in_cache).dirty = true;
+            Slot new_slot = {current_tag, current_index, true, false, 0};
+            //if dirty is true, it must be written to memory first if evicted
+            cache.sets.at(current_index).blocks.at(current_tag) = new_slot; 
 
             //lru is done at top on hit
           }
