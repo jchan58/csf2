@@ -382,15 +382,14 @@ int main(int argc, char* argv[]){
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
-              /*
+              
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
-                (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-              }*/
+                (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+              }
               cache.sets.at(current_index).blocks.at(0) = new_slot; 
               //plus one because storing to cache
-
-                   
+        
             } else {
               //if not full, put in first valid space in that set  
               for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
