@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
     
     //store the load timestamp of the slot
     //store the access timestamp of the slot
-    unsigned load_stamp, access_stamp;
+    unsigned load_stamp;
     
   } Slot;
 
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]){
     (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
-      Slot empty = {0, i, false, true, 0, 0};
+      Slot empty = {0, i, false, true, 0};
       *slot_it_ptr = empty;
       //all are least recently used, so just set mru to a slot (ends up being the last one)
     }
@@ -365,7 +365,6 @@ int main(int argc, char* argv[]){
           //on a load miss,leave the access stamp (gets from memory, not cache)
             //how to make lru the new small
         } else if (load_hit) {
-          //have to update the access timestamp 
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
 	        (cache.stats).load_hits++;
@@ -457,20 +456,14 @@ int main(int argc, char* argv[]){
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
 
-            //set the access stamp of the added block to the incremented global timestamp
-            cache.global_timestamp++;
-            in_cache->access_stamp = cache.global_timestamp;
-            //how to make lru the new small?
+            //lru is done at top on hit
           } else {
             //write-back: write only to cache so block is dirty
             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
             //if dirty is true, it must be written to memory first (add later)
             (*in_cache).dirty = true;
 
-            //set the access stamp of the added block to the incremented global timestamp
-            cache.global_timestamp++;
-            in_cache->access_stamp = cache.global_timestamp;
-            //how to make lru the new small?
+            //lru is done at top on hit
           }
         }
       }

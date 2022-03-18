@@ -43,9 +43,6 @@ int get_power(long num){
 }
 
 
-
-//void increment_accesses(Set * set);
-
 int main(int argc, char* argv[]){
 
   typedef struct Slot {
@@ -60,7 +57,6 @@ int main(int argc, char* argv[]){
     
     
     //store the load timestamp of the slot
-    //store the access timestamp of the slot
     unsigned load_stamp;
     
   } Slot;
@@ -109,9 +105,7 @@ int main(int argc, char* argv[]){
   
   //order vector based off of load stamp or access stamp, depending on eviction type!
 
-  //argv[1] is number of sets in cache, pos power of 2
-  //argv[2] is number of blocks in set, pos power of 2
-  //argv[3] number of bytes in each block, min 4
+ 
   //argv[4] is write-allocate or no-write -allocate
   //argv[5] is write-through or write-back
   //argv[6] is lru or fifo evictions
@@ -142,12 +136,16 @@ int main(int argc, char* argv[]){
    }
   
 
+  //argv[1] is number of sets in cache, pos power of 2
+  //argv[2] is number of blocks in set, pos power of 2
+  //argv[3] number of bytes in each block, min 4
 
   //convert the args representing integers into integers
    long set_num = strtol(argv[1], nullptr, 10);
    long block_num = strtol(argv[2], nullptr, 10);
    long bytes_per_block = strtol(argv[3], nullptr, 10);
    bool lru; 
+
    if(strcmp(argv[6], "lru") == 0){
      lru = true; 
    }
@@ -210,12 +208,6 @@ int main(int argc, char* argv[]){
   //set all stats counters to 0
   (cache.stats) = {0, 0, 0, 0, 0, 0, 0};
 
-  //set the global timestamp to 0
-  cache.global_timestamp = 0;
-
-   
-
-
   //initialize the empty cache
    
   //set the correct number of empty sets
@@ -230,20 +222,21 @@ int main(int argc, char* argv[]){
       //fill the blocks as empty
       Slot empty = {0, i, false, true, 0};
       *slot_it_ptr = empty;
-      //all are least recently used, so just set mru to a slot (ends up being the last one)
     }
     i++;
   }
 
     
     //check to see if what type of mapping this
-    if(set_num == 1 && block_num > 1) {
-      fully = true; 
-    } else if(set_num > 1 && block_num > 1) {
-      set = true; 
-    } else {
-      direct = true; 
+    if(set_num > 1 && block_num == 1) {
+      direct = true;
+    } else if (set_num > 1 && block_num > 1) {
+      set = true;
+    } else if (set_num == 1 && block_num > 1) {
+      fully = true;
     }
+
+    
      
     //started writing read from standard in (old)
     char* trace_line = NULL;
@@ -274,9 +267,6 @@ int main(int argc, char* argv[]){
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
-
-    //to check dirty and valid, we need to check valid to see if it is a hit
-    //because tag will match always for direct for example
   
     int numLoaded = 0; 
 
@@ -284,11 +274,11 @@ int main(int argc, char* argv[]){
     while(getline(&trace_line, &len, stdin) != -1){
       load_hit = false; 
       store_hit = false; 
-      filled = false; 
+      filled = true; 
 
       //convert the address part of the line (hex) to an integer, starts at index 4
       long address = strtol(&(trace_line[4]), NULL, 16);
-  //      cout << " current_address " << address << "\n"; 
+      //cout << " current_address " << address << "\n"; 
  
       //determine the specific mapping and create tags and indexes according to it;
       //next use bit shifts and number of tag, index, and offset bits
@@ -298,7 +288,7 @@ int main(int argc, char* argv[]){
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
-  //    cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
+    //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
 
     if(fully) {
@@ -310,24 +300,22 @@ int main(int argc, char* argv[]){
     Slot empty_slot; 
     int setSize; 
 
-    //first check if specific set is full already 
+    //first check if specific set is full already; it is not full if there is a valid slot 
         for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
           for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
             if((*slot_it_ptr).index == current_index) {
               if((*slot_it_ptr).valid) {
-                 setSize++; 
-               } else {
-                 setSize = 0; 
+                 filled = false; 
+                 break_loop = true;
+                 break;
                }
             }
           }
+          if(break_loop){
+            break;
+          }
         }
 
-        if(setSize == 0) {
-          filled = true;
-        }
-
-      
      for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
        for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
