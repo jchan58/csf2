@@ -383,17 +383,27 @@ int main(int argc, char* argv[]){
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             //no change to cache means no access update
             (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+
+          
           } else {
             //if full, must evict and replace
             if(filled){
-              Slot new_slot = {current_tag, current_index, false, false, 0};
+              (cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
+
+              if (strcmp(argv[5], "write-through") == 0) {
+                (cache.stats).total_cycles += 100;
+              } else {
+                          //if it is dirty, must add 100 cycles before eviction (put in memory)
+                if(cache.sets.at(current_index).blocks.at(0).dirty) {
+                  (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+                }
+              }
+
+              Slot new_slot = {current_tag, current_index, true, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
+            
               
-              //if it is dirty, must add 100 cycles before eviction (put in memory)
-              if(cache.sets.at(current_index).blocks.at(0).dirty) {
-                (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
-              }
               cache.sets.at(current_index).blocks.at(0) = new_slot; 
             (cache.stats).total_cycles += 1;
           
@@ -408,6 +418,16 @@ int main(int argc, char* argv[]){
                   }
               }
               (cache.stats).total_cycles += 1;
+
+              //!!! new
+              //* for some reason
+              (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+              if (strcmp(argv[5], "write-through") == 0) {
+                (cache.stats).total_cycles += 100;
+              } else {
+                in_cache->dirty = true;
+              }
+              //!!!
             }
           }
           
