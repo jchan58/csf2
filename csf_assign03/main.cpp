@@ -337,12 +337,14 @@ int main(int argc, char* argv[]){
         //calculate the miss penalty and stats
           (cache.stats).total_loads++;
           (cache.stats).load_misses++;  
-             (cache.stats).total_cycles += 1 + 100;   // * ((cache.params).block_size / 4);
+          (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
             if(filled){
           
-              if(cache.sets.at(current_index).blocks.at(0).dirty && strcmp(argv[5],"write-back") == 0) {
-                //if the slot being evicted is dirty, have ot store to memory
-                (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+              if(strcmp(argv[5],"write-back") == 0) {
+                if(cache.sets.at(current_index).blocks.at(0).dirty) {
+                  //if the slot being evicted is dirty, have ot store to memory
+                  (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+                }
               }
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
@@ -357,8 +359,7 @@ int main(int argc, char* argv[]){
                     break; 
                   }
                 }
-  
-              }               
+            }               
 
            
         } else if (load_hit) {
