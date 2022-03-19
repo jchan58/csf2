@@ -374,21 +374,58 @@ int main(int argc, char* argv[]){
       } else if(trace_line[0] == store) {
         //if there is not a store_hit calculate data for that 
         if(!store_hit) {
-          //adding
-    
+
           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
-          if(strcmp(argv[4], "no-write-allocate") == 0) {
+
+          if(filled){
+            if(strcmp(argv[4], "write-allocate") == 0){
+              (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+               if(strcmp(argv[5], "write-through") == 0){
+                 (cache.stats).total_cycles += 100;
+               } else if(strcmp(argv[5], "write-back") == 0){
+                 if(cache.sets.at(current_index).blocks.at(0).dirty) {
+                  (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+                 }
+                Slot new_slot = {current_tag, current_index, true, false, 0};
+                cache.sets.at(current_index).blocks.at(0) = new_slot; 
+               }
+            } else if(strcmp(argv[4], "no-write-allocate") == 0) {
+               (cache.stats).total_cycles += 100;
+            }
+          } else {
+            if(strcmp(argv[4], "write-allocate") == 0){
+             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+              if(strcmp(argv[5], "write-through") == 0){
+                 (cache.stats).total_cycles += 100;
+              } else if(strcmp(argv[5], "write-back") == 0){
+                for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+                  if((*slot_it_ptr).valid) {
+                    (*slot_it_ptr).tag = current_tag; 
+                    (*slot_it_ptr).index = current_index;
+                    (*slot_it_ptr).valid = false; 
+                     (*slot_it_ptr).dirty = true; 
+                    break; 
+                  }
+                }
+              }
+            } else if(strcmp(argv[4], "no-write-allocate") == 0) {
+              (cache.stats).total_cycles += 100;
+            }
+          }
+
+      
+      //    if(strcmp(argv[4], "no-write-allocate") == 0) {
             //adding new address
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             //no change to cache means no access update
-            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-          } else {
+       //     (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+       //   } else {
             //if full, must evict and replace
-            if(filled){
-              Slot new_slot = {current_tag, current_index, false, false, 0};
+       //     if(filled){
+       //       Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
               /*
@@ -396,11 +433,10 @@ int main(int argc, char* argv[]){
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
                 (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               }*/
-              cache.sets.at(current_index).blocks.at(0) = new_slot; 
+     //         cache.sets.at(current_index).blocks.at(0) = new_slot; 
               //plus one because storing to cache
-
-                   
-            } else {
+          
+         /*   } else {
               //if not full, put in first valid space in that set  
               for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
                   if((*slot_it_ptr).valid) {
@@ -414,6 +450,7 @@ int main(int argc, char* argv[]){
    
             }
           }
+          */
         } else if (store_hit) {
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
