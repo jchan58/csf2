@@ -264,7 +264,7 @@ int main(int argc, char* argv[]){
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
-    Slot * in_cache;
+  
     int numLoaded = 0; 
 
 
@@ -284,11 +284,6 @@ int main(int argc, char* argv[]){
       current_tag = address >> (num_offset_bits + num_index_bits);
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
-
-      /*correct way?
-      current_tag = ((1 << num_tag_bits) - 1) & (address >> (num_offset_bits * num_index_bits));
-      current_index = ((1 << num_index_bits) - 1) & (address >> (num_offset_bits));
-      */
 
     //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
@@ -314,7 +309,6 @@ int main(int argc, char* argv[]){
       //checking for a load or store hit
       for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
-          in_cache = &(*slot_it_ptr);
           //this is a hit so make it mru in advance
           //hold a copy of the slot
           mru = (*slot_it_ptr);
@@ -336,18 +330,22 @@ int main(int argc, char* argv[]){
         if (!load_hit) {   
         //calculate the miss penalty and stats
           (cache.stats).total_loads++;
-          (cache.stats).load_misses++;  
-             (cache.stats).total_cycles += 1 + 100;   // * ((cache.params).block_size / 4);
+          (cache.stats).load_misses++; 
+
             if(filled){
-          
-              if(cache.sets.at(current_index).blocks.at(0).dirty && strcmp(argv[5],"write-back") == 0) {
+              (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+               (cache.stats).total_cycles += 1;
+              if(cache.sets.at(current_index).blocks.at(0).dirty && argv[5] == "write-back") {
                 //if the slot being evicted is dirty, have ot store to memory
-                (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+                (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               }
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
               cache.sets.at(current_index).blocks.at(0) = new_slot; 
-            } else {
+              //if it is dirty, must add 100 cycles before eviction (put in memory)
+              
+            } else if (!filled){
+               (cache.stats).total_cycles += 1;
               //if not full, put in first valid space in that set
                 for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
                   if((*slot_it_ptr).valid) {
@@ -357,7 +355,7 @@ int main(int argc, char* argv[]){
                     break; 
                   }
                 }
-  
+                (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
               }               
 
            
@@ -367,8 +365,9 @@ int main(int argc, char* argv[]){
 	        (cache.stats).load_hits++;
 	        (cache.stats).total_cycles++;
 
-          //mru was already done at the top
+          //mru was already  moved to the top
         }
+          
       } else if(trace_line[0] == store) {
         //if there is not a store_hit calculate data for that 
         if(!store_hit) {
@@ -378,24 +377,63 @@ int main(int argc, char* argv[]){
 	        (cache.stats).total_stores++;
           (cache.stats).store_misses++;
 
-          if(strcmp(argv[4], "no-write-allocate") == 0) {
+          if(filled){
+            if(strcmp(argv[4], "write-allocate") == 0){
+               (cache.stats).total_cycles += 1;
+              (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+               if(strcmp(argv[5], "write-through") == 0){
+                 (cache.stats).total_cycles += 100;
+               } else if(strcmp(argv[5], "write-back") == 0){
+                 if(cache.sets.at(current_index).blocks.at(0).dirty) {
+                  (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+                 }
+                  Slot new_slot = {current_tag, current_index, true, false, 0};
+                  cache.sets.at(current_index).blocks.at(0) = new_slot; 
+               }
+            } else if(strcmp(argv[4], "no-write-allocate") == 0) {
+               (cache.stats).total_cycles += 100;
+            }
+          } else if (!filled){
+            if(strcmp(argv[4], "write-allocate") == 0){
+             (cache.stats).total_cycles += 1;
+             (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+              if(strcmp(argv[5], "write-through") == 0){
+                 (cache.stats).total_cycles += 100;
+              } else if(strcmp(argv[5], "write-back") == 0){
+                for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+                  if((*slot_it_ptr).valid) {
+                    (*slot_it_ptr).tag = current_tag; 
+                    (*slot_it_ptr).index = current_index;
+                    (*slot_it_ptr).valid = false; 
+                    (*slot_it_ptr).dirty = true; 
+                    break; 
+                  }
+                }
+              }
+            } else if(strcmp(argv[4], "no-write-allocate") == 0) {
+              (cache.stats).total_cycles += 100;
+            }
+          }
+    
+      /*
+         if(strcmp(argv[4], "no-write-allocate") == 0) {
             //adding new address
             //no-write-allocate: store miss, don't put in cache; do put in memory ofc
             //no change to cache means no access update
-            (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
           } else {
             //if full, must evict and replace
             if(filled){
               Slot new_slot = {current_tag, current_index, false, false, 0};
               //replaced the lru (at 0 of set) with the slot you are looking for
 
-              
+        
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
-                (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
+                (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               }
-              cache.sets.at(current_index).blocks.at(0) = new_slot; 
-            (cache.stats).total_cycles += 1;
+             cache.sets.at(current_index).blocks.at(0) = new_slot; 
+              //plus one because storing to cache
           
             } else {
               //if not full, put in first valid space in that set  
@@ -407,24 +445,26 @@ int main(int argc, char* argv[]){
                     break; 
                   }
               }
-              (cache.stats).total_cycles += 1;
+              (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+   
             }
           }
-          
+          */
+        
         } else if (store_hit) {
           (cache.stats).total_stores++;
           (cache.stats).store_hits++;
-          //(cache.stats).total_cycles += 1;
+          (cache.stats).total_cycles += 1;
 
           if(strcmp(argv[5], "write-through") == 0) {
+            (cache.stats).total_cycles += 100;
             //write-through: store writes to cache and to memory
-            (cache.stats).total_cycles += 1 + 100;// * //((cache.params).block_size / 4);
+          //  (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
             //lru is done at top on hit
-          } else {
+          } else if (strcmp(argv[5], "write-back") == 0){
             //write-back: write only to cache so block is dirty
-            (cache.stats).total_cycles += 1;
-            in_cache->dirty = true;
-         
+             mru.dirty = true; 
+            //lru is done at top on hit
           }
         }
       }
