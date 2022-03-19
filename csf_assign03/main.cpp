@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
 
     bool break_loop = false; 
 
-    Slot * in_cache;
+ 
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
@@ -284,6 +284,11 @@ int main(int argc, char* argv[]){
       current_tag = address >> (num_offset_bits + num_index_bits);
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
+
+      /*correct way?
+      current_tag = ((1 << num_tag_bits) - 1) & (address >> (num_offset_bits * num_index_bits));
+      current_index = ((1 << num_index_bits) - 1) & (address >> (num_offset_bits));
+      */
 
     //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
@@ -311,7 +316,6 @@ int main(int argc, char* argv[]){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
           //this is a hit so make it mru in advance
           //hold a copy of the slot
-          in_cache = &(*slot_it_ptr);
           mru = (*slot_it_ptr);
           //remove the actual slot so we can reinsert it at the top of the stack vector
           cache.sets.at(current_index).blocks.erase(slot_it_ptr);
@@ -335,7 +339,7 @@ int main(int argc, char* argv[]){
 
             if(filled){
               (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-              if(cache.sets.at(current_index).blocks.at(0).dirty && argv[5] == "write-back") {
+              if(cache.sets.at(current_index).blocks.at(0).dirty && strcmp(argv[5],"write-back") == 0) {
                 //if the slot being evicted is dirty, have ot store to memory
                 (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               }
@@ -364,7 +368,7 @@ int main(int argc, char* argv[]){
 	        (cache.stats).load_hits++;
 	        (cache.stats).total_cycles++;
 
-          //mru was already  moved to the top
+          //mru was already done at the top
         }
           
       } else if(trace_line[0] == store) {
@@ -418,21 +422,10 @@ int main(int argc, char* argv[]){
             //write-through: store writes to cache and to memory
             (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
             //lru is done at top on hit
-            Slot new_slot = {current_tag, current_index, false, false, 0};
-            //replaced the lru (at 0 of set) with the slot you are looking for
-
-            //if it is dirty, must add 100 cycles before eviction (put in memory)
-            if(cache.sets.at(current_index).blocks.at(0).dirty) {
-              (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
-            }
-            cache.sets.at(current_index).blocks.at(0) = new_slot; 
           } else {
             //write-back: write only to cache so block is dirty
-            Slot new_slot = {current_tag, current_index, false, false, 0};
-            cache.sets.at(current_index).blocks.at(0) = new_slot; 
             (cache.stats).total_cycles += 1;
             //lru is done at top on hit
-            in_cache->dirty = true;
           }
         }
       }
