@@ -133,9 +133,6 @@ int main(int argc, char* argv[]){
      return 1;
    } 
 
-   if(strcmp(argv[6], "fifo") == 0) {
-     fifo = true; 
-   }
 
   
   
@@ -149,9 +146,14 @@ int main(int argc, char* argv[]){
    long block_num = strtol(argv[2], nullptr, 10);
    long bytes_per_block = strtol(argv[3], nullptr, 10);
    bool lru; 
+   bool fifo; 
 
    if(strcmp(argv[6], "lru") == 0){
      lru = true; 
+     fifo = false; 
+   } else {
+     fifo = true; 
+     lru = false; 
    }
   
   //argv[4] is write-allocate or no-write -allocate
