@@ -102,7 +102,6 @@ int main(int argc, char* argv[]){
   bool set = false; 
   bool fully = false; 
   bool direct = false; 
-  bool fifo = false; 
 
 
   
@@ -131,10 +130,7 @@ int main(int argc, char* argv[]){
    if((strcmp(argv[6], "lru") != 0) && (strcmp(argv[6], "fifo") != 0)){
      fprintf(stderr, "Evictions do not match lru or fifo.\n");
      return 1;
-   } 
-
-
-  
+   }
   
 
   //argv[1] is number of sets in cache, pos power of 2
@@ -146,14 +142,9 @@ int main(int argc, char* argv[]){
    long block_num = strtol(argv[2], nullptr, 10);
    long bytes_per_block = strtol(argv[3], nullptr, 10);
    bool lru; 
-   bool fifo; 
 
    if(strcmp(argv[6], "lru") == 0){
      lru = true; 
-     fifo = false; 
-   } else {
-     fifo = true; 
-     lru = false; 
    }
   
   //argv[4] is write-allocate or no-write -allocate
@@ -318,20 +309,8 @@ int main(int argc, char* argv[]){
           break;
       }
     }
-    /*
-    if(std::find(cache.sets.at(current_index).blocks.begin(),cache.sets.at(current_index).blocks.end(), current_tag) != cache.sets.at(current_index).blocks.end()){
-        in_cache = &(*slot_it_ptr);
-        mru = (*slot_it_ptr);
-        cache.sets.at(current_index).blocks.erase(slot_it_ptr);
-        cache.sets.at(current_index).blocks.push_back(mru);
-        if(trace_line[0] == load) { //if this is a load and there is a hit  
-            load_hit = true; 
-          } else {
-            store_hit = true; 
-          }
-     }
-    */
-    
+       
+
       //checking for a load or store hit
       for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
@@ -344,15 +323,12 @@ int main(int argc, char* argv[]){
           cache.sets.at(current_index).blocks.push_back(mru);
           //might want to break out once we hit, could be a function?
           if(trace_line[0] == load) { //if this is a load and there is a hit  
-            load_hit = true;
-            break; 
+            load_hit = true; 
           } else {
             store_hit = true; 
-            break;
           }
         }       
       }
-      
   
       //see if this is a load in input address 
       if(trace_line[0] == load) {
