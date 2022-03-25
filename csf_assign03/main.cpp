@@ -323,9 +323,11 @@ int main(int argc, char* argv[]){
           cache.sets.at(current_index).blocks.push_back(mru);
           //might want to break out once we hit, could be a function?
           if(trace_line[0] == load) { //if this is a load and there is a hit  
-            load_hit = true; 
+            load_hit = true;
+            break; 
           } else {
             store_hit = true; 
+            break;
           }
         }       
       }
