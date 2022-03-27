@@ -56,11 +56,7 @@ int main(int argc, char* argv[]){
     //indicate if the slot is valid
     bool dirty;
     bool valid;
-    
-    
-    //store the load timestamp of the slot
-    unsigned load_stamp;
-    
+        
   } Slot;
 
   //a set is a collection of blocks, order them based on lru or fifo (I think)
@@ -93,9 +89,6 @@ int main(int argc, char* argv[]){
 
     //where we store memory trace stats for the cache
     Stats stats;
-
-    //use this to calculate the smaller timestamps (dunno why we would tho)
-    unsigned global_timestamp;
 
   } Cache;
 
@@ -225,7 +218,7 @@ int main(int argc, char* argv[]){
     (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
-      Slot empty = {0, i, false, true, 0};
+      Slot empty = {0, i, false, true};
       *slot_it_ptr = empty;
     }
     i++;
@@ -263,14 +256,11 @@ int main(int argc, char* argv[]){
 
     unsigned current_index; 
 
-    bool break_loop = false; 
-
  
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
     Slot * in_cache;
-    int numLoaded = 0; 
 
 
     while(getline(&trace_line, &len, stdin) != -1){
@@ -298,7 +288,7 @@ int main(int argc, char* argv[]){
     //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
       //we may end up inserting a new slot
-      Slot new_slot = {current_tag, current_index, false, false, 0};
+      Slot new_slot = {current_tag, current_index, false, false};
 
     if(fully) {
       current_tag = current_tag + current_index;
@@ -316,31 +306,21 @@ int main(int argc, char* argv[]){
           break;
       }
     }
-    /*
-    if(std::find(cache.sets.at(current_index).blocks.begin(),cache.sets.at(current_index).blocks.end(), current_tag) != cache.sets.at(current_index).blocks.end()){
-        in_cache = &(*slot_it_ptr);
-        mru = (*slot_it_ptr);
-        cache.sets.at(current_index).blocks.erase(slot_it_ptr);
-        cache.sets.at(current_index).blocks.push_back(mru);
-        if(trace_line[0] == load) { //if this is a load and there is a hit  
-            load_hit = true; 
-          } else {
-            store_hit = true; 
-          }
-     }
-    */
     
       //checking for a load or store hit
       for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
         if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
           in_cache = &(*slot_it_ptr);
-          //this is a hit so make it mru in advance
-          //hold a copy of the slot
-          mru = (*slot_it_ptr);
-          //remove the actual slot so we can reinsert it at the top of the stack vector
-          cache.sets.at(current_index).blocks.erase(slot_it_ptr);
-          cache.sets.at(current_index).blocks.push_back(mru);
-          //might want to break out once we hit, could be a function?
+
+	  if(lru){
+	    //this is a hit so make it mru in advance
+	    //hold a copy of the slot
+	    mru = (*slot_it_ptr);
+	    //remove the actual slot so we can reinsert it at the top of the stack vector
+	    cache.sets.at(current_index).blocks.erase(slot_it_ptr);
+	    cache.sets.at(current_index).blocks.push_back(mru);
+	    in_cache = &mru;
+	  }
           if(trace_line[0] == load) { //if this is a load and there is a hit  
             load_hit = true; 
           } else {
@@ -405,8 +385,8 @@ int main(int argc, char* argv[]){
         } else if (load_hit) {
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
-	        (cache.stats).load_hits++;
-	        (cache.stats).total_cycles++;
+	  (cache.stats).load_hits++;
+	  (cache.stats).total_cycles++;
 
           //mru was already done at the top
         }
@@ -416,7 +396,7 @@ int main(int argc, char* argv[]){
 
           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
-	        (cache.stats).total_stores++;
+	  (cache.stats).total_stores++;
           (cache.stats).store_misses++;
 
           if(strcmp(argv[4], "no-write-allocate") == 0) {
@@ -440,9 +420,7 @@ int main(int argc, char* argv[]){
                 }
               }
 
-        
               //replaced the lru (at 0 of set) with the slot you are looking for
-
             
 	      if(lru) {  
 		cache.sets.at(current_index).blocks.at(0) = new_slot; 
