@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-std=c++11 -Wall -Wextra -pedantic -O2
+CFLAGS=-std=c++11 -Wall -Wextra -pedantic 
 
 csim: main.o
 	$(CC) -o csim main.o

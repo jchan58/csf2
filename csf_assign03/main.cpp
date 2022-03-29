@@ -48,7 +48,7 @@ int get_power(long num){
 int main(int argc, char* argv[]){
 
   typedef struct Slot {
-    //store the tag of the slot
+    //store the tag of the slot; a - tag means empty
     unsigned tag;
     unsigned index; 
     
@@ -124,9 +124,6 @@ int main(int argc, char* argv[]){
      return 1;
    } 
 
-
-  
-  
 
   //argv[1] is number of sets in cache, pos power of 2
   //argv[2] is number of blocks in set, pos power of 2
@@ -323,9 +320,11 @@ int main(int argc, char* argv[]){
 	  }
           if(trace_line[0] == load) { //if this is a load and there is a hit  
             load_hit = true; 
-          } else {
+	    break;
+	  } else {
             store_hit = true; 
-          }
+	    break;
+	  }
         }       
       }
       
@@ -446,7 +445,8 @@ int main(int argc, char* argv[]){
               }
               (cache.stats).total_cycles += 1;
 
-              //!!! new
+	      /*
+              //!!! new segfaults
               //* for some reason
               (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               if (strcmp(argv[5], "write-through") == 0) {
@@ -454,7 +454,7 @@ int main(int argc, char* argv[]){
               } else {
                 in_cache->dirty = true;
               }
-              //!!!
+              */
             }
           }
           
