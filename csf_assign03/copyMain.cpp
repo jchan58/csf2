@@ -48,7 +48,7 @@ int get_power(long num){
 int main(int argc, char* argv[]){
 
   typedef struct Slot {
-    //store the tag of the slot
+    //store the tag of the slot; a - tag means empty
     unsigned tag;
     unsigned index; 
     
@@ -124,9 +124,6 @@ int main(int argc, char* argv[]){
      return 1;
    } 
 
-
-  
-  
 
   //argv[1] is number of sets in cache, pos power of 2
   //argv[2] is number of blocks in set, pos power of 2
@@ -323,9 +320,11 @@ int main(int argc, char* argv[]){
 	  }
           if(trace_line[0] == load) { //if this is a load and there is a hit  
             load_hit = true; 
-          } else {
+	    break;
+	  } else {
             store_hit = true; 
-          }
+	    break;
+	  }
         }       
       }
       
@@ -385,8 +384,8 @@ int main(int argc, char* argv[]){
         } else if (load_hit) {
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
-	        (cache.stats).load_hits++;
-	        (cache.stats).total_cycles++;
+	  (cache.stats).load_hits++;
+	  (cache.stats).total_cycles++;
 
           //mru was already done at the top
         }
@@ -396,7 +395,7 @@ int main(int argc, char* argv[]){
 
           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
-	        (cache.stats).total_stores++;
+	  (cache.stats).total_stores++;
           (cache.stats).store_misses++;
 
           if(strcmp(argv[4], "no-write-allocate") == 0) {
@@ -420,9 +419,7 @@ int main(int argc, char* argv[]){
                 }
               }
 
-        
               //replaced the lru (at 0 of set) with the slot you are looking for
-
             
 	      if(lru) {  
 		cache.sets.at(current_index).blocks.at(0) = new_slot; 
@@ -443,14 +440,13 @@ int main(int argc, char* argv[]){
                     (*slot_it_ptr).tag = current_tag; 
                     (*slot_it_ptr).index = current_index;
                     (*slot_it_ptr).valid = false; 
-                    mru = (*slot_it_ptr);
-                    in_cache = &mru; 
                     break; 
                   }
               }
               (cache.stats).total_cycles += 1;
 
-              //!!! new
+	      /*
+              //!!! new segfaults
               //* for some reason
               (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               if (strcmp(argv[5], "write-through") == 0) {
@@ -458,7 +454,7 @@ int main(int argc, char* argv[]){
               } else {
                 in_cache->dirty = true;
               }
-              //!!!
+              */
             }
           }
           
