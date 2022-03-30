@@ -448,17 +448,17 @@ int main(int argc, char* argv[]){
             //if not full, put in first valid space in that set  
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
                 if((*slot_it_ptr).valid) {
-                    (*slot_it_ptr).tag = current_tag; 
-                    (*slot_it_ptr).index = current_index;
-                    (*slot_it_ptr).valid = false; 
+                  (*slot_it_ptr).tag = current_tag; 
+                  (*slot_it_ptr).index = current_index;
+                  (*slot_it_ptr).valid = false; 
                     
-                    //new block should become mru/end for lru/fifo
-		                //hold a copy of the slot
-		                mru = (*slot_it_ptr);
-		                //remove the actual slot so we can reinsert it at the top of the stack vector
-		                cache.sets.at(current_index).blocks.erase(slot_it_ptr);
-		                cache.sets.at(current_index).blocks.push_back(mru);      
-                    break; 
+                  //new block should become mru/end for lru/fifo
+		              //hold a copy of the slot
+		              mru = (*slot_it_ptr);
+		              //remove the actual slot so we can reinsert it at the top of the stack vector
+		              cache.sets.at(current_index).blocks.erase(slot_it_ptr);
+		              cache.sets.at(current_index).blocks.push_back(mru);      
+                  break; 
                 }
             }
             (cache.stats).total_cycles += 1;
