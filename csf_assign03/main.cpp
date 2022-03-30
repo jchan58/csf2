@@ -188,7 +188,9 @@ int main(int argc, char* argv[]){
 
    //get number of offset and index bits
    int num_offset_bits = get_power(bytes_per_block);
+
    int num_index_bits = get_power(set_num);
+
    int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
   
   //create iterators for slots and blocks
@@ -224,7 +226,7 @@ int main(int argc, char* argv[]){
     i++;
   }
 
-    
+  
     //check to see if what type of mapping this
     if(set_num > 1 && block_num == 1) {
       direct = true;
@@ -348,11 +350,19 @@ int main(int argc, char* argv[]){
 		  }
 		  //replaced the lru (at 0 of set) with the slot you are looking for
 		  cache.sets.at(current_index).blocks.at(0) = new_slot;
-		  //!!!(note)was not else before, so write-back was double replacing
+		  
 		}else{
 		  //replaced the lru (at 0 of set) with the slot you are looking for
 		  cache.sets.at(current_index).blocks.at(0) = new_slot; 
 		}
+
+		//replaced block should become mru
+		//hold a copy of the slot
+		mru = cache.sets.at(current_index).blocks.at(0);
+		//remove the actual slot so we can reinsert it at the top of the stack vector
+		cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
+		cache.sets.at(current_index).blocks.push_back(mru);
+
 	      }else{
 		//do same but with fifo
 		if(strcmp(argv[5],"write-back") == 0) {
@@ -396,7 +406,7 @@ int main(int argc, char* argv[]){
 
           //update access stamp for that specific block 
           //if miss, still have to put block in cache and memory (same cycle update)
-	        (cache.stats).total_stores++;
+	  (cache.stats).total_stores++;
           (cache.stats).store_misses++;
 
           if(strcmp(argv[4], "no-write-allocate") == 0) {
@@ -410,22 +420,25 @@ int main(int argc, char* argv[]){
             //if full, must evict and replace
             if(filled){
               (cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
-
               if (strcmp(argv[5], "write-through") == 0) {
                 (cache.stats).total_cycles += 100;
               } else {
-                          //if it is dirty, must add 100 cycles before eviction (put in memory)
+                //if it is dirty, must add 100 cycles before eviction (put in memory)
                 if(cache.sets.at(current_index).blocks.at(0).dirty) {
                   (cache.stats).total_cycles += 100; // * ((cache.params).block_size / 4);
                 }
               }
-
-        
               //replaced the lru (at 0 of set) with the slot you are looking for
-
-            
 	      if(lru) {  
-		cache.sets.at(current_index).blocks.at(0) = new_slot; 
+		cache.sets.at(current_index).blocks.at(0) = new_slot;
+
+		//replaced block should become mru?
+                //hold a copy of the slot
+                mru = cache.sets.at(current_index).blocks.at(0);
+                //remove the actual slot so we can reinsert it at the top of the stack vector
+                cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).block\
+s.begin() + 1);
+                cache.sets.at(current_index).blocks.push_back(mru);
 	      }else{
 		//fifo
 		cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks \
@@ -449,16 +462,6 @@ int main(int argc, char* argv[]){
                   }
               }
               (cache.stats).total_cycles += 1;
-
-              //!!! new
-              //* for some reason
-              (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-              if (strcmp(argv[5], "write-through") == 0) {
-                (cache.stats).total_cycles += 100;
-              } else {
-                in_cache->dirty = true;
-              }
-              //!!!
             }
           }
           
