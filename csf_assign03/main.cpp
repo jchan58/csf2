@@ -97,9 +97,6 @@ int main(int argc, char* argv[]){
   bool direct = false; 
   
   
-  //order vector based off of load stamp or access stamp, depending on eviction type!
-
-  
   if(argc < 7){
      fprintf(stderr, "Must enter all six arguments.\n");
      return 1;
@@ -183,8 +180,6 @@ int main(int argc, char* argv[]){
      return 1;
    }
 
-   //get the total number of blocks
-   int total_blocks = set_num * block_num;
 
    //get number of offset and index bits
    int num_offset_bits = get_power(bytes_per_block);
@@ -266,6 +261,11 @@ int main(int argc, char* argv[]){
 
 
     while(getline(&trace_line, &len, stdin) != -1){
+
+      //narrow scope
+      vector<Slot>::iterator slot_it_ptr;
+      vector<Set>::iterator set_it_ptr;
+      
       load_hit = false; 
       store_hit = false; 
       filled = true; 
@@ -282,10 +282,6 @@ int main(int argc, char* argv[]){
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
-      /*correct way?
-      current_tag = ((1 << num_tag_bits) - 1) & (address >> (num_offset_bits * num_index_bits));
-      current_index = ((1 << num_index_bits) - 1) & (address >> (num_offset_bits));
-      */
 
     //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
@@ -342,56 +338,62 @@ int main(int argc, char* argv[]){
           (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
             if(filled){
 
-	      if(lru){
-		if(strcmp(argv[5],"write-back") == 0) {
-		  if(cache.sets.at(current_index).blocks.at(0).dirty) {
-		    //if the slot being evicted is dirty, have ot store to memory
-		    (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
-		  }
-		  //replaced the lru (at 0 of set) with the slot you are looking for
-		  cache.sets.at(current_index).blocks.at(0) = new_slot;
+	            if(lru){
+		            if(strcmp(argv[5],"write-back") == 0) {
+		              if(cache.sets.at(current_index).blocks.at(0).dirty) {
+		              //if the slot being evicted is dirty, have ot store to memory
+		              (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+		              }
+		            //replaced the lru (at 0 of set) with the slot you are looking for
+		          cache.sets.at(current_index).blocks.at(0) = new_slot;
 		  
-		}else{
-		  //replaced the lru (at 0 of set) with the slot you are looking for
-		  cache.sets.at(current_index).blocks.at(0) = new_slot; 
-		}
+		          }else{
+		          //replaced the lru (at 0 of set) with the slot you are looking for
+		          cache.sets.at(current_index).blocks.at(0) = new_slot; 
+		          }
 
-		//replaced block should become mru
-		//hold a copy of the slot
-		mru = cache.sets.at(current_index).blocks.at(0);
-		//remove the actual slot so we can reinsert it at the top of the stack vector
-		cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
-		cache.sets.at(current_index).blocks.push_back(mru);
+	  	        //replaced block should become mru
+		          //hold a copy of the slot
+		          mru = cache.sets.at(current_index).blocks.at(0);
+		          //remove the actual slot so we can reinsert it at the top of the stack vector
+		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
+		          cache.sets.at(current_index).blocks.push_back(mru);
 
-	      }else{
-		//do same but with fifo
-		if(strcmp(argv[5],"write-back") == 0) {
+	            }else{
+		            //do same but with fifo
+		            if(strcmp(argv[5],"write-back") == 0) {
                   if(cache.sets.at(current_index).blocks.at(0).dirty) {
                     //if the slot being evicted is dirty, have ot store to memory
                     (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
                   }
                   //fifo, slot vector is stack; pop front and push back
-		  cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
-		  cache.sets.at(current_index).blocks.push_back(new_slot);
+		              cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
+		              cache.sets.at(current_index).blocks.push_back(new_slot);
                 }else{
-		   cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.\
-     begin()+1);
+		              cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.\
+                  begin()+1);
                   cache.sets.at(current_index).blocks.push_back(new_slot);
                 }
-	      }
-	    } else {
+	            }
+	          } else {
               //if not full, put in first valid space in that set
-                for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
-                  if((*slot_it_ptr).valid) {
-                    (*slot_it_ptr).tag = current_tag; 
-                    (*slot_it_ptr).index = current_index;
-                    (*slot_it_ptr).valid = false; 
-                    break; 
-                  }
-                }
-            }               
+              for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+                if((*slot_it_ptr).valid) {
+                  (*slot_it_ptr).tag = current_tag; 
+                  (*slot_it_ptr).index = current_index;
+                  (*slot_it_ptr).valid = false; 
 
-           
+                  //new block should become mru
+		              //hold a copy of the slot
+		              mru = (*slot_it_ptr);
+		              //remove the actual slot so we can reinsert it at the top of the stack vector
+		              cache.sets.at(current_index).blocks.erase(slot_it_ptr);
+		              cache.sets.at(current_index).blocks.push_back(mru);
+                  break; 
+                }
+              }
+            }               
+      
         } else if (load_hit) {
           //this is a hit depending on load or store 
           (cache.stats).total_loads++;
@@ -429,26 +431,23 @@ int main(int argc, char* argv[]){
                 }
               }
               //replaced the lru (at 0 of set) with the slot you are looking for
-	      if(lru) {  
-		cache.sets.at(current_index).blocks.at(0) = new_slot;
+	            if(lru) {  
+		          cache.sets.at(current_index).blocks.at(0) = new_slot;
 
-		//replaced block should become mru?
-                //hold a copy of the slot
-                mru = cache.sets.at(current_index).blocks.at(0);
-                //remove the actual slot so we can reinsert it at the top of the stack vector
-                cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).block\
+		          //replaced block should become mru?
+              //hold a copy of the slot
+              mru = cache.sets.at(current_index).blocks.at(0);
+              //remove the actual slot so we can reinsert it at the top of the stack vector
+              cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).block\
 s.begin() + 1);
-                cache.sets.at(current_index).blocks.push_back(mru);
-	      }else{
-		//fifo
-		cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks \
-     .\
-       begin()+1);
-		cache.sets.at(current_index).blocks.push_back(new_slot);
+              cache.sets.at(current_index).blocks.push_back(mru);
+	            }else{
+		            //fifo
+		            cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
+		            cache.sets.at(current_index).blocks.push_back(new_slot);
 
-	      }
-	     (cache.stats).total_cycles += 1;
-          
+	            }
+	            (cache.stats).total_cycles += 1;
             } else {
               //if not full, put in first valid space in that set  
               for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
@@ -456,8 +455,14 @@ s.begin() + 1);
                     (*slot_it_ptr).tag = current_tag; 
                     (*slot_it_ptr).index = current_index;
                     (*slot_it_ptr).valid = false; 
-                    mru = (*slot_it_ptr);
-                    in_cache = &mru; 
+                    
+            
+                    //new block should become mru
+		                //hold a copy of the slot
+		                mru = (*slot_it_ptr);
+		                //remove the actual slot so we can reinsert it at the top of the stack vector
+		                cache.sets.at(current_index).blocks.erase(slot_it_ptr);
+		                cache.sets.at(current_index).blocks.push_back(mru);
                     break; 
                   }
               }
