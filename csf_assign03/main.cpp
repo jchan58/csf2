@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
   //a set is a collection of blocks, order them based on lru or fifo (I think)
   typedef struct Set{
 
-    //treat it as a "stack" with lru at the first index
+    //treat it as a "stack" with lru at the first index, or a "queue" for fifo
     vector<Slot> blocks;
 
   } Set;
@@ -381,7 +381,7 @@ int main(int argc, char* argv[]){
                 (*slot_it_ptr).index = current_index;
                 (*slot_it_ptr).valid = false; 
 
-                //new block should become mru
+                //new block should become mru/end for lru/fifo
 		            //hold a copy of the slot
 		            mru = (*slot_it_ptr);
 		            //remove the actual slot so we can reinsert it at the top of the stack vector
@@ -452,12 +452,12 @@ int main(int argc, char* argv[]){
                     (*slot_it_ptr).index = current_index;
                     (*slot_it_ptr).valid = false; 
                     
-                    //new block should become mru
+                    //new block should become mru/end for lru/fifo
 		                //hold a copy of the slot
 		                mru = (*slot_it_ptr);
 		                //remove the actual slot so we can reinsert it at the top of the stack vector
 		                cache.sets.at(current_index).blocks.erase(slot_it_ptr);
-		                cache.sets.at(current_index).blocks.push_back(mru);
+		                cache.sets.at(current_index).blocks.push_back(mru);      
                     break; 
                 }
             }
