@@ -299,14 +299,14 @@ int main(int argc, char* argv[]){
         //calculate the miss penalty and stats
         (cache.stats).total_loads++;
         (cache.stats).load_misses++;  
-        (cache.stats).total_cycles += 1 + 100 * ((cache.params).block_size / 4);
+        (cache.stats).total_cycles += cache.params.block_size * 25; //1 + 100 * ((cache.params).block_size / 4);
         if(filled){
 
 	        if(lru){
 		        if(strcmp(argv[5],"write-back") == 0) {
 		          if(cache.sets.at(current_index).blocks.at(0).dirty) {
 		            //if the slot being evicted is dirty, have ot store to memory
-		            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+		            (cache.stats).total_cycles += cache.params.block_size * 25; //100 * ((cache.params).block_size / 4);
 		          }
 		          		  
 		        }
@@ -320,7 +320,7 @@ int main(int argc, char* argv[]){
 		        if(strcmp(argv[5],"write-back") == 0) {
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
                   //if the slot being evicted is dirty, have ot store to memory
-                  (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
+                  (cache.stats).total_cycles += cache.params.block_size * 25; //100 * ((cache.params).block_size / 4);
               }
               
             }
@@ -374,13 +374,17 @@ int main(int argc, char* argv[]){
         } else {
           //if full, must evict and replace
           if(filled){
-            (cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
+            //(cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
             if (strcmp(argv[5], "write-through") == 0) {
-              (cache.stats).total_cycles += 100;
+              //!!!new + bs * 25
+              (cache.stats).total_cycles += 100 + cache.params.block_size * 25;
             } else {
+              //!!!new + bs * 25 
+              (cache.stats).total_cycles += cache.params.block_size * 25;
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
-                (cache.stats).total_cycles += 100; 
+                //!!!new bs * 25 instead
+                (cache.stats).total_cycles += cache.params.block_size * 25; 
               }
             }
             //replaced the lru (at 0 of set) with the slot you are looking for
@@ -393,7 +397,7 @@ int main(int argc, char* argv[]){
 		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
 		          cache.sets.at(current_index).blocks.push_back(new_slot);
 	          }
-	            (cache.stats).total_cycles += 1;
+	            //!!!(cache.stats).total_cycles += 1;
           } else {
             //if not full, put in first valid space in that set  
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
@@ -410,7 +414,7 @@ int main(int argc, char* argv[]){
                   break; 
                 }
             }
-            (cache.stats).total_cycles += 1;
+            //!!!(cache.stats).total_cycles += 1;
           }
         }
           
@@ -419,13 +423,12 @@ int main(int argc, char* argv[]){
         (cache.stats).store_hits++;
         if(strcmp(argv[5], "write-through") == 0) {
           //write-through: store writes to cache and to memory
-          (cache.stats).total_cycles += 1 + 100;
+          (cache.stats).total_cycles += 100; // +1;
           //lru is done at top on hit
         } else {
           //write-back: write only to cache so block is dirty
           (cache.stats).total_cycles += 1;
           in_cache->dirty = true;
-         
         }
       }
     }
