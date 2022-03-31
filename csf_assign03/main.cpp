@@ -257,8 +257,6 @@ int main(int argc, char* argv[]){
 
       //we may end up inserting a new slot
       Slot new_slot = {current_tag, current_index, false, false};
-
-      
     
       if(num_index_bits == 0){
         current_index = 0; 
