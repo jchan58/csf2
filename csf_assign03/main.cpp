@@ -210,10 +210,7 @@ int main(int argc, char* argv[]){
     i++;
   }
   
-    //check to see if what type of mapping this
-    if (set_num == 1 && block_num > 1) {
-      fully = true;
-    }
+    
 
     
  
