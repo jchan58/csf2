@@ -50,7 +50,6 @@ int main(int argc, char* argv[]){
   typedef struct Slot {
     //store the tag of the slot
     unsigned tag;
-    unsigned index; 
     
     //indicate whether the memory block is now dirty(?)
     //indicate if the slot is valid
@@ -204,7 +203,7 @@ int main(int argc, char* argv[]){
 
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
-      Slot empty = {0, i, false, true};
+      Slot empty = {0, false, true};
       *slot_it_ptr = empty;
     }
     i++;
@@ -256,7 +255,7 @@ int main(int argc, char* argv[]){
       //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
       //we may end up inserting a new slot
-      Slot new_slot = {current_tag, current_index, false, false};
+      Slot new_slot = {current_tag, false, false};
     
       if(num_index_bits == 0){
         current_index = 0; 
@@ -272,7 +271,7 @@ int main(int argc, char* argv[]){
     
       //checking for a load or store hit
     for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
-      if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).index == current_index && (*slot_it_ptr).valid == false) {
+      if((*slot_it_ptr).tag == current_tag && (*slot_it_ptr).valid == false) {
         in_cache = &(*slot_it_ptr);
 
 	      if(lru){
@@ -335,7 +334,6 @@ int main(int argc, char* argv[]){
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
               if((*slot_it_ptr).valid) {
                 (*slot_it_ptr).tag = current_tag; 
-                (*slot_it_ptr).index = current_index;
                 (*slot_it_ptr).valid = false; 
 
                 //new block should become mru/end for lru/fifo
@@ -401,7 +399,6 @@ int main(int argc, char* argv[]){
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
                 if((*slot_it_ptr).valid) {
                   (*slot_it_ptr).tag = current_tag; 
-                  (*slot_it_ptr).index = current_index;
                   (*slot_it_ptr).valid = false; 
                     
                   //new block should become mru/end for lru/fifo
