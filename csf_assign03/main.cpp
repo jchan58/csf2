@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
   typedef struct CacheParams {
     
     //set fields data from command line arguments
-    unsigned block_size, num_sets, slots_per_set;
+    long block_size, num_sets, slots_per_set;
 
   } CacheParams;
 
@@ -92,9 +92,7 @@ int main(int argc, char* argv[]){
 
   } Cache;
 
-  bool set = false; 
-  bool fully = false; 
-  bool direct = false; 
+  bool lru; 
   
   
   if(argc < 7){
@@ -124,17 +122,12 @@ int main(int argc, char* argv[]){
 
   
   
-
   //argv[1] is number of sets in cache, pos power of 2
   //argv[2] is number of blocks in set, pos power of 2
   //argv[3] number of bytes in each block, min 4
 
   //convert the args representing integers into integers
-   long set_num = strtol(argv[1], nullptr, 10);
-   long block_num = strtol(argv[2], nullptr, 10);
-   long bytes_per_block = strtol(argv[3], nullptr, 10);
-   bool lru; 
- 
+   long set_num = strtol(argv[1], nullptr, 10), block_num = strtol(argv[2], nullptr, 10), bytes_per_block = strtol(argv[3], nullptr, 10);
 
    if(strcmp(argv[6], "lru") == 0){
      lru = true;  
@@ -182,11 +175,7 @@ int main(int argc, char* argv[]){
 
 
    //get number of offset and index bits
-   int num_offset_bits = get_power(bytes_per_block);
-
-   int num_index_bits = get_power(set_num);
-
-   int num_tag_bits = 32 - (num_offset_bits + num_index_bits);
+   int num_offset_bits = get_power(bytes_per_block), num_index_bits = get_power(set_num), num_tag_bits = 32 - (num_offset_bits + num_index_bits);
   
   //create iterators for slots and blocks
   vector<Slot>::iterator slot_it_ptr;
@@ -196,9 +185,8 @@ int main(int argc, char* argv[]){
   Cache cache;
    
   //fill all the cache params
-  (cache.params).num_sets = set_num;
-  (cache.params).slots_per_set = block_num;
-  (cache.params).block_size = bytes_per_block;
+
+  cache.params = {bytes_per_block, set_num, block_num};
 
   //set all stats counters to 0
   (cache.stats) = {0, 0, 0, 0, 0, 0, 0};
@@ -213,6 +201,7 @@ int main(int argc, char* argv[]){
   for(set_it_ptr = (cache.sets).begin(); set_it_ptr < (cache.sets).end(); set_it_ptr++){
     //set the size of each set
     (*set_it_ptr).blocks.resize((cache.params).slots_per_set); 
+
     for(slot_it_ptr = (*set_it_ptr).blocks.begin(); slot_it_ptr < (*set_it_ptr).blocks.end(); slot_it_ptr++){
       //fill the blocks as empty
       Slot empty = {0, i, false, true};
@@ -220,43 +209,29 @@ int main(int argc, char* argv[]){
     }
     i++;
   }
-
   
     //check to see if what type of mapping this
-    if(set_num > 1 && block_num == 1) {
-      direct = true;
-    } else if (set_num > 1 && block_num > 1) {
-      set = true;
-    } else if (set_num == 1 && block_num > 1) {
+    if (set_num == 1 && block_num > 1) {
       fully = true;
     }
 
     
-     
+ 
     //started writing read from standard in (old)
     char* trace_line = NULL;
 
     //one line of the memory trace is 13 characters, not counting the irrelvant characters and the end
     size_t len = 13;
 
-    char load = 'l';
+    char load = 'l', store = 's';
 
-    char store = 's';
+    bool store_hit, load_hit, filled; 
 
-    bool store_hit;
-
-    bool load_hit;
-
-    bool filled; 
-
-    unsigned current_tag; 
-
-    unsigned current_index; 
+    unsigned current_tag, current_index; 
 
     //hold a vector to be moved to the top of the stack (mru)
     Slot mru;
     Slot * in_cache;
-
 
     while(getline(&trace_line, &len, stdin) != -1){
 
@@ -281,27 +256,24 @@ int main(int argc, char* argv[]){
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
 
 
-    //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
+      //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
       //we may end up inserting a new slot
-    Slot new_slot = {current_tag, current_index, false, false};
+      Slot new_slot = {current_tag, current_index, false, false};
 
-    if(fully) {
-      current_tag = current_tag + current_index;
-      current_index = 0; 
-    }
+      
     
-    if(num_index_bits == 0){
-      current_index = 0; 
-    }
+      if(num_index_bits == 0){
+        current_index = 0; 
+      }
 
-    //first check if specific set is full already; it is not full if there is a valid slot 
-    for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
-      if((*slot_it_ptr).valid) {
+      //first check if specific set is full already; it is not full if there is a valid slot 
+      for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
+        if((*slot_it_ptr).valid) {
           filled = false; 
           break;
+        }
       }
-    }
     
       //checking for a load or store hit
     for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
@@ -342,20 +314,12 @@ int main(int argc, char* argv[]){
 		            //if the slot being evicted is dirty, have ot store to memory
 		            (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
 		          }
-		          //replaced the lru (at 0 of set) with the slot you are looking for
-		          cache.sets.at(current_index).blocks.at(0) = new_slot;
-		  
-		        }else{
-		          //replaced the lru (at 0 of set) with the slot you are looking for
-		          cache.sets.at(current_index).blocks.at(0) = new_slot; 
+		          		  
 		        }
-
-	  	      //replaced block should become mru
-		        //hold a copy of the slot
-		        mru = cache.sets.at(current_index).blocks.at(0);
-		        //remove the actual slot so we can reinsert it at the top of the stack vector
+		        //remove the old slot and reinsert the new one it at the top of the stack vector (put it at 0 and move it to end, mru)
 		        cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
-		        cache.sets.at(current_index).blocks.push_back(mru);
+            //was mru
+		        cache.sets.at(current_index).blocks.push_back(new_slot);
 
 	        }else{
 		        //do same but with fifo
@@ -364,14 +328,12 @@ int main(int argc, char* argv[]){
                   //if the slot being evicted is dirty, have ot store to memory
                   (cache.stats).total_cycles += 100 * ((cache.params).block_size / 4);
               }
-              //fifo, slot vector is stack; pop front and push back
-		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
-		          cache.sets.at(current_index).blocks.push_back(new_slot);
-            }else{
-		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.\
-              begin()+1);
-              cache.sets.at(current_index).blocks.push_back(new_slot);
+              
             }
+            //same for write-through and write-back
+            //fifo, slot vector is stack; pop front and push back
+		        cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
+		        cache.sets.at(current_index).blocks.push_back(new_slot);
 	        }
 	      } else {
           //if not full, put in first valid space in that set
@@ -430,14 +392,9 @@ int main(int argc, char* argv[]){
             }
             //replaced the lru (at 0 of set) with the slot you are looking for
 	          if(lru) {  
-		          cache.sets.at(current_index).blocks.at(0) = new_slot;
-
-		          //replaced block should become mru?
-              //hold a copy of the slot
-              mru = cache.sets.at(current_index).blocks.at(0);
-              //remove the actual slot so we can reinsert it at the top of the stack vector
+		          //remove the old slot and reinsert the new one it at the top of the stack vector (put it at 0 and move it to end, mru)
               cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
-              cache.sets.at(current_index).blocks.push_back(mru);
+              cache.sets.at(current_index).blocks.push_back(new_slot);
 	          }else{
 		          //fifo
 		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
