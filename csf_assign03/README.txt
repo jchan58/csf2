@@ -37,12 +37,12 @@ the block is evicted from the cache.
 This result matched the reasoning in our hypothesis.
     After we had those pieces of information, we experiemented with having larger versus smaller block sizes. We found that bigger block size usually results in more hits
 but has two to four times more cycles, so takes significantly longer. This is expected because having less memory to transfer is faster. 
-    So,  that write-allocate, write-back, lru, and a smaller block size result in less cycles and therefore better speed. Next, we looked
+    So, that write-allocate, write-back, lru, and a smaller block size result in less cycles and therefore better speed. Next, we looked
 at if a set, direct, or fully associative configuration would result in less cycles. We found that set has way faster total cycles, and more hits overall.
 This follows the reasoning in our hypothesis.
     Lastly, we experiemented with having more total blocks. We found having more blocks halves the cycle count, so is significantly faster, which makes sense because
-    it also results in more hits. This is expected because having a bigger cache means less instances of having to access memory, which takes more cycles
-    In conclusion, the fastest, and therefore best configuration is one that is write-allocate, write-back, lru, set associative with a large number of blocks and a 
+it also results in more hits. This is expected because having a bigger cache means less instances of having to access memory, which takes more cycles
+ In conclusion, the fastest, and therefore best configuration is one that is write-allocate, write-back, lru, set associative with a large number of blocks and a 
 small block size. We have included the exact statistics from our experiement in a Google doc link below.
 
 -Link
