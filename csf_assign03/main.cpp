@@ -374,7 +374,7 @@ int main(int argc, char* argv[]){
         } else {
           //if full, must evict and replace
           if(filled){
-            //(cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
+            (cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
             if (strcmp(argv[5], "write-through") == 0) {
               //!!!new + bs * 25
               (cache.stats).total_cycles += 100 + cache.params.block_size * 25;
@@ -397,6 +397,7 @@ int main(int argc, char* argv[]){
 		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
 		          cache.sets.at(current_index).blocks.push_back(new_slot);
 	          }
+	            (cache.stats).total_cycles += 1;
           } else {
             //if not full, put in first valid space in that set  
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
@@ -413,13 +414,14 @@ int main(int argc, char* argv[]){
                   break; 
                 }
             }
+            (cache.stats).total_cycles += 1;
           }
         }
           
       } else if (store_hit) {
         (cache.stats).total_stores++;
         (cache.stats).store_hits++;
-        if(strcmp(argv[5], "write-through") == 0){
+        if(strcmp(argv[5], "write-through") == 0) {
           //write-through: store writes to cache and to memory
           (cache.stats).total_cycles += 100; // +1;
           //lru is done at top on hit
