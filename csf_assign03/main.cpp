@@ -397,7 +397,6 @@ int main(int argc, char* argv[]){
 		          cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin()+1);
 		          cache.sets.at(current_index).blocks.push_back(new_slot);
 	          }
-	            //!!!(cache.stats).total_cycles += 1;
           } else {
             //if not full, put in first valid space in that set  
             for(slot_it_ptr = cache.sets.at(current_index).blocks.begin(); slot_it_ptr < cache.sets.at(current_index).blocks.end(); slot_it_ptr++){
@@ -414,7 +413,6 @@ int main(int argc, char* argv[]){
                   break; 
                 }
             }
-            //!!!(cache.stats).total_cycles += 1;
           }
         }
           
