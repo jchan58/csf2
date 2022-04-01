@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
+#include <cerrno>
+#include <cstdint>
 #include <elf.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -15,6 +15,4 @@
 
 int main(int argc, char **argv) {
   // TODO: implement
-
-  return 0;
 }
