@@ -241,7 +241,6 @@ int main(int argc, char* argv[]){
 
       //convert the address part of the line (hex) to an integer, starts at index 4
       long address = strtol(&(trace_line[4]), NULL, 16);
-      //cout << " current_address " << address << "\n"; 
  
       //determine the specific mapping and create tags and indexes according to it;
       //next use bit shifts and number of tag, index, and offset bits
@@ -250,9 +249,6 @@ int main(int argc, char* argv[]){
       current_tag = address >> (num_offset_bits + num_index_bits);
       current_index = address << num_tag_bits;
       current_index = current_index >> (num_tag_bits + num_offset_bits); 
-
-
-      //cout << "current_index: " << current_index << " current_tag " << current_tag << "\n"; 
 
       //we may end up inserting a new slot
       Slot new_slot = {current_tag, false, false};
@@ -299,14 +295,14 @@ int main(int argc, char* argv[]){
         //calculate the miss penalty and stats
         (cache.stats).total_loads++;
         (cache.stats).load_misses++;  
-        (cache.stats).total_cycles += cache.params.block_size * 25; //1 + 100 * ((cache.params).block_size / 4);
+        (cache.stats).total_cycles += cache.params.block_size * 25; 
         if(filled){
 
 	        if(lru){
 		        if(strcmp(argv[5],"write-back") == 0) {
 		          if(cache.sets.at(current_index).blocks.at(0).dirty) {
-		            //if the slot being evicted is dirty, have ot store to memory
-		            (cache.stats).total_cycles += cache.params.block_size * 25; //100 * ((cache.params).block_size / 4);
+		            //if the slot being evicted is dirty, have to store to memory
+		            (cache.stats).total_cycles += cache.params.block_size * 25;
 		          }
 		          		  
 		        }
@@ -320,7 +316,7 @@ int main(int argc, char* argv[]){
 		        if(strcmp(argv[5],"write-back") == 0) {
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
                   //if the slot being evicted is dirty, have ot store to memory
-                  (cache.stats).total_cycles += cache.params.block_size * 25; //100 * ((cache.params).block_size / 4);
+                  (cache.stats).total_cycles += cache.params.block_size * 25; 
               }
               
             }
@@ -376,18 +372,14 @@ int main(int argc, char* argv[]){
           if(filled){
             (cache.stats).total_cycles += 100  * ((cache.params).block_size / 4);
             if (strcmp(argv[5], "write-through") == 0) {
-              //!!!new + bs * 25
               (cache.stats).total_cycles += 100 + cache.params.block_size * 25;
             } else {
-              //!!!new + bs * 25 
               (cache.stats).total_cycles += cache.params.block_size * 25;
               //if it is dirty, must add 100 cycles before eviction (put in memory)
               if(cache.sets.at(current_index).blocks.at(0).dirty) {
-                //!!!new bs * 25 instead
                 (cache.stats).total_cycles += cache.params.block_size * 25; 
               }
             }
-            //replaced the lru (at 0 of set) with the slot you are looking for
 	          if(lru) {  
 		          //remove the old slot and reinsert the new one it at the top of the stack vector (put it at 0 and move it to end, mru)
               cache.sets.at(current_index).blocks.erase(cache.sets.at(current_index).blocks.begin(), cache.sets.at(current_index).blocks.begin() + 1);
@@ -423,7 +415,7 @@ int main(int argc, char* argv[]){
         (cache.stats).store_hits++;
         if(strcmp(argv[5], "write-through") == 0) {
           //write-through: store writes to cache and to memory
-          (cache.stats).total_cycles += 100; // +1;
+          (cache.stats).total_cycles += 100; 
           //lru is done at top on hit
         } else {
           //write-back: write only to cache so block is dirty

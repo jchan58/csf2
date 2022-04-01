@@ -1,9 +1,5 @@
---Sola Oladosu
-Everything
-
-
---Ji Chan
-Everything
+---Work Divison Summary: Sola Oladosu and Ji Chan
+We both worked on everything together. We worked on seperate sections at different times to avoid merge conflicts though.
 
 ---Best Cache
     The way we began this experiment was to start with thinking about 
