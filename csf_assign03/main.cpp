@@ -419,7 +419,7 @@ int main(int argc, char* argv[]){
       } else if (store_hit) {
         (cache.stats).total_stores++;
         (cache.stats).store_hits++;
-        if(strcmp(argv[5], "write-through") == 0) {
+        if(strcmp(argv[5], "write-through") == 0){
           //write-through: store writes to cache and to memory
           (cache.stats).total_cycles += 100; // +1;
           //lru is done at top on hit
