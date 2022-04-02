@@ -13,6 +13,34 @@
 
 #include "elf_names.h"
 
+//ours
+#include <iostream>
+
+using std::cerr;
+
 int main(int argc, char **argv) {
-  // TODO: implement
+  size_t file_size;
+  //open file
+  int fd = open(argv[1], O_RDONLY);
+  if(fd < 0) {
+    cerr << "Cannot open file";
+    return 1;
+  }
+
+  //get file byte size
+  struct stat statbuf;
+  int rc = fstat(fd, &statbuf);
+  if (rc != 0) {
+    cerr << "Cannot open file";
+    return 2;
+  } else {
+    file_size = statbuf.st_size;
+  }
+
+  //map the file contents to a region of memory
+  void *data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if(data == ((void *)-1)) {
+    cerr << "File cannot be mapped to memory";
+    return 3;
+  }
 }
