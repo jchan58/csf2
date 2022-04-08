@@ -10,16 +10,21 @@
 #include <sys/stat.h>
 #include <sys/unistd.h>
 #include <fcntl.h>
-
+#include <string>
 #include "elf_names.h"
 
 //ours
 #include <iostream>
 
 using std::cerr;
+using std::string;
+using std::cout; 
 
 int main(int argc, char **argv) {
   size_t file_size;
+  string file = argv[1];
+  int length = file.length(); 
+  bool executable = false; 
   //open file
   int fd = open(argv[1], O_RDONLY);
   if(fd < 0) {
@@ -53,7 +58,32 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-
+  if(file[length - 1] == 'o' && file[length - 2] == '.') {
+    executable = false; 
+  } else {
+    executable = true; 
+  }
   
+  if(!executable) {
+    cout << "Object file type: " << "ET_REL" << "\n";
+  } else {
+    cout << "Object file type: " << "ET_EXEC" << "\n";
+  }
+  cout << "Instruction Set: " << "\n";
+  cout << "Endianness: " << "\n";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
 }
