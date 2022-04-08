@@ -11,6 +11,7 @@
 #include <sys/unistd.h>
 #include <fcntl.h>
 
+
 #include "elf_names.h"
 
 //ours
@@ -20,7 +21,7 @@ using std::cerr;
 
 int main(int argc, char **argv) {
   size_t file_size;
-  //open file
+  //open file; open? creat?
   int fd = open(argv[1], O_RDONLY);
   if(fd < 0) {
     cerr << "Cannot open file \n";
