@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-<<<<<<< HEAD
   unsigned char * char_data = (unsigned char *) data;
 
  
@@ -53,9 +52,5 @@ int main(int argc, char **argv) {
     cerr << "Not an ELF file";
     return 3;
   }
-=======
-
   
-
->>>>>>> 6dbcfc19d493ad6ba52b093a9b7aaedad3060644
 }
