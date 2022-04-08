@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   //open file
   int fd = open(argv[1], O_RDONLY);
   if(fd < 0) {
-    cerr << "Cannot open file";
+    cerr << "Cannot open file \n";
     return 1;
   }
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
-    cerr << "Cannot open file \n";
+    cerr << "Error getting file size \n";
     return 2;
   } else {
     file_size = statbuf.st_size;
