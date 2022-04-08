@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
-    cerr << "Cannot open file ";
+    cerr << "Cannot open file \n";
     return 2;
   } else {
     file_size = statbuf.st_size;
@@ -40,22 +40,16 @@ int main(int argc, char **argv) {
   //map the file contents to a region of memory
   void *data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
   if(data == ((void *)-1)) {
-    cerr << "File cannot be mapped to memory";
+    cerr << "File cannot be mapped to memory \n";
     return 3;
   }
 
-<<<<<<< HEAD
   unsigned char * char_data = (unsigned char *) data;
 
  
   //check if it is an elf file
   if(char_data[0] != 0x7f || char_data[1] != 'E' || char_data[2] != 'L' || char_data[3] != 'F' ){
-    cerr << "Not an ELF file";
+    cerr << "Not an ELF file \n";
     return 3;
   }
-=======
-
-  
-
->>>>>>> 6dbcfc19d493ad6ba52b093a9b7aaedad3060644
 }
