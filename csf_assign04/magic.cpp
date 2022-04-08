@@ -43,4 +43,13 @@ int main(int argc, char **argv) {
     cerr << "File cannot be mapped to memory";
     return 3;
   }
+
+  unsigned char * char_data = (unsigned char *) data;
+
+ 
+  //check if it is an elf file
+  if(char_data[0] != 0x7f || char_data[1] != 'E' || char_data[2] != 'L' || char_data[3] != 'F' ){
+    cerr << "Not an ELF file";
+    return 3;
+  }
 }
