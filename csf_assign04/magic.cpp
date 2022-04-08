@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
-    cerr << "Cannot open file";
+    cerr << "Cannot open file ";
     return 2;
   } else {
     file_size = statbuf.st_size;
@@ -43,4 +43,8 @@ int main(int argc, char **argv) {
     cerr << "File cannot be mapped to memory";
     return 3;
   }
+
+
+  
+
 }
