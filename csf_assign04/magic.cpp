@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <string>
 #include "elf_names.h"
+#include <stdint.h>
 
 //ours
 #include <iostream>
@@ -20,11 +21,22 @@ using std::cerr;
 using std::string;
 using std::cout; 
 
+void printEndian(int endian) {
+  int executable = false; 
+
+  if(endian == 2) {
+    cout << "Endianness: " << "Big endian" << "\n";
+  } else {
+    cout << "Endianness: " << "Little endian" << "\n";
+  }
+
+}
+
+
+
 int main(int argc, char **argv) {
   size_t file_size;
-  string file = argv[1];
-  int length = file.length(); 
-  bool executable = false; 
+
   //open file
   int fd = open(argv[1], O_RDONLY);
   if(fd < 0) {
@@ -58,28 +70,16 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-  if(file[length - 1] == 'o' && file[length - 2] == '.') {
-    executable = false; 
-  } else {
-    executable = true; 
-  }
+  Elf64_Ehdr *elf_header = (Elf64_Ehdr *) data;
+  int endian = elf_header->e_ident[EI_DATA];
   
-  if(!executable) {
-    cout << "Object file type: " << "ET_REL" << "\n";
-  } else {
-    cout << "Object file type: " << "ET_EXEC" << "\n";
-  }
-  cout << "Instruction Set: " << "\n";
-  cout << "Endianness: " << "\n";
+  string type = get_type_name(elf_header->e_type);
+  string machine = get_machine_name(elf_header->e_machine);
+  uint16_t totalSection = elf_header->e_shnum;
 
-
-
-
-
-
-
-
-
+  cout << "Object file type: " << type << "\n";
+  cout << "Instruction Set: " << machine << "\n";
+  printEndian(endian);
 
 
 
