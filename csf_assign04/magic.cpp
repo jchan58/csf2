@@ -75,11 +75,39 @@ int main(int argc, char **argv) {
   
   string type = get_type_name(elf_header->e_type);
   string machine = get_machine_name(elf_header->e_machine);
-  uint16_t totalSection = elf_header->e_shnum;
+  
+  
+  uint16_t numSectionHeaders = elf_header->e_shnum;
+  //is this a pointer?
+  Elf64_Ehdr *section_table = elf_header.e_shstrndx;
+
+  //scan throught the section headers, idk what data type it is...
+  for(size_t i = 0; i < section_table.length; i++) {
+    //store how many bytes of the section header you have looked at 
+    char looked = 0;
+    //store an array of section info, is there more we need?
+    char * section_name_arr;
+    //is this even how you make an int array
+    int * section_size_arr;
+
+    //how do we get the section type? and size?
+
+    int k = 0;
+    //while there is space left to look at in the header, store the section 
+    //names in an array
+    while(looked < section_table[i].length) {
+      section_name_arr[k] = section_table[i] + looked;
+      //increment the number of bytes looked at by the space between 
+      //the section names
+      looked += section_table[i] + section_table->sh_name;
+    }
+    
+  }
 
   cout << "Object file type: " << type << "\n";
   cout << "Instruction Set: " << machine << "\n";
-  printEndian(endian);
+  cout << "Endianness: " << printEndian(endian) << "\n";
+  
 
 
 
