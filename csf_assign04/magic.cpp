@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   size_t file_size;
   Elf64_Ehdr * elf; 
   Elf64_Shdr * shdr; 
+
   unsigned char * shrtab; 
 
   //open file
@@ -81,39 +82,32 @@ int main(int argc, char **argv) {
   for(int i = 0; i < numSectionHeaders; i++) {
     elf = (Elf64_Ehdr *) data;
     //the section header that contains the section entries 
-    shdr = (Elf64_Shdr *) (data + elf->e_shoff);
+    shdr = (Elf64_Shdr *) (char_data + elf->e_shoff);
     //used to access each specific section accessed by indexing 
-    shrtab = (unsigned char *)(data + shdr[elf->e_shstrndx].sh_offset);  
+    shrtab = (unsigned char *)(char_data + shdr[elf->e_shstrndx].sh_offset);  
     unsigned char * section_name = &shrtab[shdr[i].sh_name];
     cout << "Section header " << i << ": " <<  "name=" << section_name << ", ";
-    printf("type= %lx, offset= %lx, size= %lx \n",shdr[i].sh_type, shdr[i].sh_offset, shdr[i].sh_size);
-  }
-  
+    //converted sh.type to a long val
+    printf("type= %lx, offset= %lx, size= %lx \n", (long unsigned int) shdr[i].sh_type, shdr[i].sh_offset, shdr[i].sh_size);
 
-  /*
-  //scan throught the section headers, idk what data type it is...
-  for(size_t i = 0; i < section_table.length; i++) {
-    //store how many bytes of the section header you have looked at 
-    char looked = 0;
-    //store an array of section info, is there more we need?
-    char * section_name_arr;
-    //is this even how you make an int array
-    int * section_size_arr;
+    
+    
+    //0x2 is the value that means symbol table
+    if(shdr[i].sh_type == 0x2) {
+      //print the information for the symbol table in the specific section
 
-    //how do we get the section type? and size?
+      //number of symbols in a section is the size of the section/size of each entry in that section
+      int numSymbols = shdr[i].sh_size/shdr[i].sh_entsize;
 
-    int k = 0;
-    //while there is space left to look at in the header, store the section 
-    //names in an array
-    while(looked < section_table[i].length) {
-      section_name_arr[k] = section_table[i] + looked;
-      //increment the number of bytes looked at by the space between 
-      //the section names
-      looked += section_table[i] + section_table->sh_name;
+      //how to properly get symbol table data from symbol table???
+      for(int i = 0; i < numSymbols; i++) {
+        cout << "Symbol " << i << ": name = " << elf[shdr[i].sh_offset].st_name << ", ";
+        printf("size= %lx, info= %lx, other= %lx \n", shdr[i].st_size, shdr[i].st_info, shdr[i].st_other);
+      }
     }
     
   }
-  */
+  
   
 }
 
