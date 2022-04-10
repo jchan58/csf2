@@ -21,21 +21,11 @@ using std::cerr;
 using std::string;
 using std::cout; 
 
-void printEndian(int endian) {
-  int executable = false; 
-
-  if(endian == 2) {
-    cout << "Endianness: " << "Big endian" << "\n";
-  } else {
-    cout << "Endianness: " << "Little endian" << "\n";
-  }
-
-}
-
-
-
 int main(int argc, char **argv) {
   size_t file_size;
+  Elf64_Ehdr * elf; 
+  Elf64_Shdr * shdr; 
+  unsigned char * shrtab; 
 
   //open file
   int fd = open(argv[1], O_RDONLY);
@@ -70,17 +60,40 @@ int main(int argc, char **argv) {
     return 3;
   }
 
+  //pointer to the header of the elf file 
   Elf64_Ehdr *elf_header = (Elf64_Ehdr *) data;
   int endian = elf_header->e_ident[EI_DATA];
   
+  //to help get access to the specific type and machine name of file
   string type = get_type_name(elf_header->e_type);
   string machine = get_machine_name(elf_header->e_machine);
-  
+
+  cout << "Object file type: " << type << "\n";
+  cout << "Instruction Set: " << machine << "\n";
+  if(endian == 2) {
+    cout << "Endianness: " << "Big endian" << "\n";
+  } else {
+    cout << "Endianness: " << "Little endian" << "\n";
+  }
   
   uint16_t numSectionHeaders = elf_header->e_shnum;
-  //is this a pointer?
-  Elf64_Ehdr *section_table = elf_header.e_shstrndx;
+  uint16_t sectionTable = elf_header->e_shstrndx;
+  //print out all the sections in the elf file 
+  for(int i = 0; i < elf_header->e_shnum; i++) {
+    elf = (Elf64_Ehdr *) data;
+    //the section header that contains the section entries 
+    shdr = (Elf64_Shdr *) (data + elf->e_shoff);
+    //used to access each specific section accessed by indexing 
+    shrtab = (unsigned char *)(data + shdr[elf->e_shstrndx].sh_offset);  
+    unsigned char * section_name = &shrtab[shdr[i].sh_name];
+    Elf64_Word section_type = shdr[i].sh_type;
+    Elf64_Xword sh_size = shdr[i].sh_size;
+    cout << "Section header " << i << ": " <<  "name=" << section_name << ", "<< "type=" << section_type << ", ";
+    printf("offset= %lx, size= %lx \n", shdr[i].sh_offset, shdr[i].sh_size);
+  }
+  
 
+  /*
   //scan throught the section headers, idk what data type it is...
   for(size_t i = 0; i < section_table.length; i++) {
     //store how many bytes of the section header you have looked at 
@@ -103,15 +116,8 @@ int main(int argc, char **argv) {
     }
     
   }
-
-  cout << "Object file type: " << type << "\n";
-  cout << "Instruction Set: " << machine << "\n";
-  cout << "Endianness: " << printEndian(endian) << "\n";
-  
-
-
-
-
-
+  */
   
 }
+
+
