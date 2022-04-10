@@ -1,1 +1,2 @@
-TODO: describe the contributions of each team member
+Joey Chan - Jchan58
+- Worked on finding Objectfile, instruction set, Endianness, finding section information, and printing section information. 
