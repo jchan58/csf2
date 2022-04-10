@@ -77,9 +77,8 @@ int main(int argc, char **argv) {
   }
   
   uint16_t numSectionHeaders = elf_header->e_shnum;
-  uint16_t sectionTable = elf_header->e_shstrndx;
   //print out all the sections in the elf file 
-  for(int i = 0; i < elf_header->e_shnum; i++) {
+  for(int i = 0; i < numSectionHeaders; i++) {
     elf = (Elf64_Ehdr *) data;
     //the section header that contains the section entries 
     shdr = (Elf64_Shdr *) (data + elf->e_shoff);
