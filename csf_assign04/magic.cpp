@@ -85,10 +85,8 @@ int main(int argc, char **argv) {
     //used to access each specific section accessed by indexing 
     shrtab = (unsigned char *)(data + shdr[elf->e_shstrndx].sh_offset);  
     unsigned char * section_name = &shrtab[shdr[i].sh_name];
-    Elf64_Word section_type = shdr[i].sh_type;
-    Elf64_Xword sh_size = shdr[i].sh_size;
-    cout << "Section header " << i << ": " <<  "name=" << section_name << ", "<< "type=" << section_type << ", ";
-    printf("offset= %lx, size= %lx \n", shdr[i].sh_offset, shdr[i].sh_size);
+    cout << "Section header " << i << ": " <<  "name=" << section_name << ", ";
+    printf("type= %lx, offset= %lx, size= %lx \n",shdr[i].sh_type, shdr[i].sh_offset, shdr[i].sh_size);
   }
   
 

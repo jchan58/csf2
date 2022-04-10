@@ -2,7 +2,7 @@ Object file type: ET_DYN
 Instruction set: AMD x86-64
 Endianness: Little endian
 Section header 0: name=, type=0, offset=0, size=0
-Section header 1: name=.interp, type=1, offset=318, size=1c
+Section header 1: name=.interpgi, type=1, offset=318, size=1c
 Section header 2: name=.note.gnu.property, type=7, offset=338, size=20
 Section header 3: name=.note.gnu.build-id, type=7, offset=358, size=24
 Section header 4: name=.note.ABI-tag, type=7, offset=37c, size=20
