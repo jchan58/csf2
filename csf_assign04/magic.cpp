@@ -94,15 +94,18 @@ int main(int argc, char **argv) {
     
     //0x2 is the value that means symbol table
     if(shdr[i].sh_type == 0x2) {
-      //print the information for the symbol table in the specific section
+      //print the information for the symbol table 
+
+      //sh offset gives you the location the symbol table
+      Elf64_Sym * symtab = (Elf64_Sym * ) &elf[shdr[i].sh_offset];
 
       //number of symbols in a section is the size of the section/size of each entry in that section
       int numSymbols = shdr[i].sh_size/shdr[i].sh_entsize;
 
       //how to properly get symbol table data from symbol table???
       for(int i = 0; i < numSymbols; i++) {
-        cout << "Symbol " << i << ": name = " << elf[shdr[i].sh_offset].st_name << ", ";
-        printf("size= %lx, info= %lx, other= %lx \n", shdr[i].st_size, shdr[i].st_info, shdr[i].st_other);
+        cout << "Symbol " << i << ": name = " << symtab[i].st_name << ", ";
+        printf("size= %lx, info= %lx, other= %lx \n", symtab[i].st_size, symtab[i].st_info, symtab[i].st_other);
       }
     }
     
