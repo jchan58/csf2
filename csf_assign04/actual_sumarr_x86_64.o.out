@@ -1,5 +1,9 @@
 Object file type: ET_REL
+<<<<<<< HEAD
 Instruction Set: AMD x86-64
+=======
+Instruction set: AMD x86-64
+>>>>>>> 7a76ecdc2ee56d6bf701230edb4fde286abd2d8b
 Endianness: Little endian
 Section header 0: name=, type=0, offset=0, size=0 
 Section header 1: name=.text, type=1, offset=40, size=162 
