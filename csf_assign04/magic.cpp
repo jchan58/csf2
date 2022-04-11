@@ -88,30 +88,29 @@ int main(int argc, char **argv) {
     unsigned char * section_name = &shrtab[shdr[i].sh_name];
     cout << "Section header " << i << ": " <<  "name=" << section_name << ", ";
     //converted sh.type to a long val
-    printf("type= %lx, offset= %lx, size= %lx \n", (long unsigned int) shdr[i].sh_type, shdr[i].sh_offset, shdr[i].sh_size);
-
-    
-    
-    //0x2 is the value that means symbol table
-    if(shdr[i].sh_type == 0x2) {
-      //print the information for the symbol table 
-
-      //sh offset gives you the location the symbol table
-      Elf64_Sym * symtab = (Elf64_Sym * ) &elf[shdr[i].sh_offset];
-
-      //number of symbols in a section is the size of the section/size of each entry in that section
-      int numSymbols = shdr[i].sh_size/shdr[i].sh_entsize;
-
-      //how to properly get symbol table data from symbol table???
-      for(int i = 0; i < numSymbols; i++) {
-        cout << "Symbol " << i << ": name = " << symtab[i].st_name << ", ";
-        printf("size= %lx, info= %lx, other= %lx \n", symtab[i].st_size, symtab[i].st_info, symtab[i].st_other);
-      }
-    }
-    
+    printf("type=%lx, offset=%lx, size=%lx \n", (long unsigned int) shdr[i].sh_type, shdr[i].sh_offset, shdr[i].sh_size);
   }
+
   
-  
+
+  //printing out all the symbols in the elf header
+ for (int i = 0; i < numSectionHeaders; i++) {
+    elf = (Elf64_Ehdr *) data;
+    //the section header that contains the section entries 
+    shdr = (Elf64_Shdr *) (char_data + elf->e_shoff);
+    //check if reached the symbol table
+  if (shdr[i].sh_type == SHT_SYMTAB) { 
+    Elf64_Sym * symtab = (Elf64_Sym *)((unsigned char *)char_data + shdr[i].sh_offset);
+    //get total entries ie total number of symbols in symbol table
+    int count = shdr[i].sh_size / shdr[i].sh_entsize;
+    char *symbol_names = (char *)(char_data + shdr[shdr[i].sh_link].sh_offset);
+    //print out all the symbols in the symbol table 
+    for(int k = 0; k < count; k++) { 
+      cout << "Symbol " << k << ": " << "name=" << symbol_names + symtab[k].st_name << ", ";
+       printf("size=%lx, info=%lx, other=%lx \n", (long unsigned int) symtab[k].st_size, symtab[k].st_info, symtab[k].st_other);
+    }
+    break; 
+  }
+ }
+
 }
-
-
