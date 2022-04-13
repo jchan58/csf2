@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
     unsigned char * section_name = &shrtab[shdr[i].sh_name];
     cout << "Section header " << i << ": " <<  "name=" << section_name << ", ";
     //converted sh.type to a long val
-    printf("type=%lx, offset=%lx, size=%lx \n", (long unsigned int) shdr[i].sh_type, (long unsigned int) shdr[i].sh_offset, (long unsigned int) shdr[i].sh_size);
+    printf("type=%lx, offset=%lx, size=%lx\n", (long unsigned int) shdr[i].sh_type, (long unsigned int) shdr[i].sh_offset, (long unsigned int) shdr[i].sh_size);
   }
 
   
@@ -107,10 +107,9 @@ int main(int argc, char **argv) {
     //print out all the symbols in the symbol table 
     for(int k = 0; k < count; k++) { 
       cout << "Symbol " << k << ": " << "name=" << symbol_names + symtab[k].st_name << ", ";
-       printf("size=%lx, info=%lx, other=%lx \n", (long unsigned int) symtab[k].st_size, (long unsigned int) symtab[k].st_info, (long unsigned int) symtab[k].st_other);
+       printf("size=%lx, info=%lx, other=%lx\n", (long unsigned int) symtab[k].st_size, (long unsigned int) symtab[k].st_info, (long unsigned int) symtab[k].st_other);
     }
     break; 
   }
  }
-
 }
