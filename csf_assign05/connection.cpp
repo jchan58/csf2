@@ -11,18 +11,24 @@ Connection::Connection()
 }
 
 Connection::Connection(int fd)
+  rio_t rio;
   : m_fd(fd)
   , m_last_result(SUCCESS) {
-  // TODO: call rio_readinitb to initialize the rio_t object
+  //call rio_readinitb to initialize the rio_t object
+  rio_readinitb(&rio, fd);
 }
 
 void Connection::connect(const std::string &hostname, int port) {
-  // TODO: call open_clientfd to connect to the server
-  // TODO: call rio_readinitb to initialize the rio_t object
+  rio_t rio;
+  //open_clientfd to connect to the server
+  int ready_fd = open_clientfd(hostname, (char *) &port);
+  //call rio_readinitb to initialize the rio_t object
+  rio_readinitb(&rio, ready_fd);
 }
 
 Connection::~Connection() {
   // TODO: close the socket if it is open
+  //how to get socket fd?
 }
 
 bool Connection::is_open() const {
