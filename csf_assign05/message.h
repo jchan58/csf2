@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 struct Message {
   // An encoded message may have at most this many characters,
@@ -25,8 +26,23 @@ struct Message {
     std::vector<std::string> result;
     // TODO: split the message data into fields separated by ':', add them
     //       to result vector
+
+ //is the string not already split then we need to split the strings ourselves.
+
+  std::replace(data.begin(), data.end(), ' ', ':');
+
+  std::stringstream ss(data);
+  const char split = ':';
+  std::string s; 
+
+  //push back all strings that are followed by :
+  while(std::getline(ss, s, split)) {
+    result.push_back(s);
+  }
     return result;
   }
+
+
 };
 
 // standard message tags (note that you don't need to worry about
