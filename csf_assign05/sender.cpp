@@ -16,14 +16,17 @@ int main(int argc, char **argv) {
   std::string server_hostname;
   int server_port;
   std::string username;
+  char * host = argv[1];
+  char * port = argv[2]; 
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
   username = argv[3];
 
-  // TODO: connect to server
+  int clientfd = open_clientfd(host, port);
 
   // TODO: send slogin message
+  
 
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
