@@ -63,6 +63,12 @@ Server::~Server() {
 bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
+  int listenfd = open_listenfd((char *) m_port);
+  if(listenfd == - 1) {
+    return false; 
+  } else {
+    return true; 
+  }
 }
 
 void Server::handle_client_requests() {
