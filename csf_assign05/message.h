@@ -29,8 +29,6 @@ struct Message {
 
  //is the string not already split then we need to split the strings ourselves.
 
-  std::replace(data.begin(), data.end(), ' ', ':');
-
   std::stringstream ss(data);
   const char split = ':';
   std::string s; 
