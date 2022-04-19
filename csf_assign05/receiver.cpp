@@ -41,18 +41,19 @@ int main(int argc, char **argv) {
 
   //join resulted in error
   if(conn.send(join) == false) {
-    //check bytes got
+    //server error will check bytes back to determine error
     std::cerr << join.data;
     return 3;
   }
 
   
 
-  // TODO: loop waiting for messages from server
+  // loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
   std::string input;
   cin >> input;
   while(true) {
+    //check tag?
     conn.receive();
   }
 
