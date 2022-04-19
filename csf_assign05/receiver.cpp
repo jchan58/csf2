@@ -46,8 +46,6 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-  
-
   // loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
   std::string input;

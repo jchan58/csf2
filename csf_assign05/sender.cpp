@@ -21,9 +21,7 @@ int main(int argc, char **argv) {
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
-
-  int clientfd = open_clientfd(argv[1], argv[2]);
-
+  
   Connection conn;
 
   // connect to server
