@@ -52,16 +52,17 @@ bool Connection::send(const Message &msg) {
   // TODO: send a message
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  
+    
   //send to server fd, message
+  //make sure that m_last_result is correct
   ssize_t result = rio_writen(m_fd, &msg, strlen(msg.data.c_str()) + strlen(msg.tag.c_str()));
   if(result < 0){
-    //should be a bad depending on if message format is invalid
-    m_last_result = SUCCESS;
+    //EOF or other err
+    m_last_result = EOF_OR_ERROR;
     return false;
   } else {
+        m_last_result = SUCCESS;
     return true;
-    m_last_result = SUCCESS;
   }
 
   //TODO: make sure that m_last_result is correct
@@ -74,14 +75,15 @@ bool Connection::receive(Message &msg) {
   // make sure that m_last_result is set appropriately
 
   //read into message from the server fd
+  //make sure that m_last_result is correct
   ssize_t result = rio_readlineb(&m_fdbuf, &m_fdbuf, sizeof(m_fdbuf));
   if(result < 0){
-    m_last_result = SUCCESS;
+    m_last_result = EOF_OR_ERROR;
     return false;
   } else {
     m_last_result = SUCCESS;
     return true;
   }
 
-  //TODO: make sure that m_last_result is correct
+  
 }
