@@ -7,6 +7,9 @@
 #include "connection.h"
 #include "client_util.h"
 
+using std::cin; 
+using std::string;
+
 int main(int argc, char **argv) {
   if (argc != 4) {
     std::cerr << "Usage: ./sender [server_address] [port] [username]\n";
@@ -21,7 +24,7 @@ int main(int argc, char **argv) {
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
-  
+
   Connection conn;
 
   // connect to server
@@ -36,9 +39,23 @@ int main(int argc, char **argv) {
     return 2;
   }
 
+ //   Message join = Message("join", room_name);
+
+ //   Message leave = Message("leave");
+
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
-  while()
+  string input = "";
+  while(cin >> input) {
+    if(input == "/leave") {
+      
+    }
+  }
+
+  //wait for server response 
+ // if(!conn.receive()){
+
+ // } 
 
   return 0;
 }
