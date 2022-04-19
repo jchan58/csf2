@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
   std::string input;
   cin >> input;
   while(true) {
-    //check tag?, what parameter???
-    conn.receive();
+    Message empty = Message();
+    conn.receive(empty);
   }
 
 
