@@ -5,6 +5,9 @@
 #include "message.h"
 #include "connection.h"
 
+#include <unistd.h>
+#include <sstream>
+
 Connection::Connection()
   : m_fd(-1)
   , m_last_result(SUCCESS) {
@@ -18,15 +21,18 @@ Connection::Connection(int fd)
 }
 
 void Connection::connect(const std::string &hostname, int port) {
+  std::stringstream ss;
+  ss << port;
+  std::string str_port = ss.str();
   //open_clientfd to connect to the server
-  int ready_fd = open_clientfd(hostname, &((char) port));
+  int ready_fd = open_clientfd(hostname.c_str(), str_port.c_str());
   //call rio_readinitb to initialize the rio_t object
   rio_readinitb(&m_fdbuf, ready_fd);
 }
 
 Connection::~Connection() {
   //close the socket if it is open
-  close(m_fd);
+  Close(m_fd);
 }
 
 bool Connection::is_open() const {
@@ -38,7 +44,7 @@ void Connection::close() {
   // TODO: close the connection if it is open
   if(m_fd >= 0) {
     //how is this different than closing the socket?
-    close(m_fd);
+    Close(m_fd);
   }
 }
 
@@ -48,14 +54,15 @@ bool Connection::send(const Message &msg) {
   // make sure that m_last_result is set appropriately
   
   //send to server fd, message
-  ssize_t result = rio_writen(m_fd, msg, strlen(*msg));
-  m_last_result = result;
+  ssize_t result = rio_writen(m_fd, &msg, strlen(msg.data.c_str()) + strlen(msg.tag.c_str()));
   if(result < 0){
     //success
     return false;
   } else {
     return true;
   }
+
+  //TODO: make sure that m_last_result
   
 }
 
@@ -65,12 +72,13 @@ bool Connection::receive(Message &msg) {
   // make sure that m_last_result is set appropriately
 
   //read into message from the server fd
-  ssize_t result = rio_readlineb(msg, msg->MAX_LEN, sizeof(buf));
-  m_last_result = result;
+  ssize_t result = rio_readlineb(&m_fdbuf, &m_fdbuf, sizeof(m_fdbuf));
   if(result < 0){
     //success
     return false;
   } else {
     return true;
   }
+
+  //TODO: make sure that m_last_result
 }
