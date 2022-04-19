@@ -87,16 +87,12 @@ bool Connection::receive(Message &msg) {
     m_last_result = SUCCESS;
     return true;
   }
-
-  int colon;
-  for(int i = 0; i < (int) sizeof(buf); i++) {
-    if(buf[i] == ':') {
-      colon = i;
-      break;
-    }
-  }
-
-  char * message = buf.substr(colon, sizeof(buf));
-  std::cout << message << std::endl;
-
+  
+  msg.tag = "delivery";
+  
+  //put buf in msg
+  std::string buf_cpp = buf;
+  //the message starts after the delivery tag + a colon (index 9)
+  std::string payload = buf_cpp.substr(9, sizeof(buf));
+  msg.data = payload;
 }
