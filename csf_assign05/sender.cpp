@@ -7,6 +7,7 @@
 #include "connection.h"
 #include "client_util.h"
 
+
 using std::cin; 
 using std::string;
 
@@ -47,15 +48,28 @@ int main(int argc, char **argv) {
   //       server as appropriate
   string room; 
   string input = "";
+  bool joined = false; 
+
+
   while(true) {
-    cin >> input; 
+    std::getline (std::cin, input);
+    //checks if the input has the join line 
     if(input.find("/join")) {
-      cin >> room; 
-      Message join = Message("join", room);
+      Message join = Message("join", input);
       conn.send(join);
-      if(conn.receive()){
-        
+      //check if message format was formatted correctly and if the recieve worked 
+      if(conn.send(join) == false && conn.receive()){
+         std::cerr << "connection error from server";
+         joined = false; 
+         //if the connection was not estabilished then break out of the loop 
+         break;
+      } else {
+        joined = true;
       }
+      //if the input is leave then we estabilish the room. 
+    } else if(input == "/leave"){
+      Message leave = Message("leave", "need to leave");
+      
     }
   }
 
