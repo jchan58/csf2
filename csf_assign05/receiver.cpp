@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   // connect to server
   conn.connect(server_hostname, server_port);
   
-  // send (is recieve?) rlogin and join messages (expect a response from
+  // send (is receive?) rlogin and join messages (expect a response from
   //       the server for each one)
   Message rlogin = Message("rlogin", username);
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   //check if server accepted send
   Message fromServer = Message();
   
-  conn.recieve(fromServer);
+  conn.receive(fromServer);
 
   if (conn.send(rlogin) == false || strcmp(fromServer.tag, "err") == 0) {
     //so print the server payload
@@ -56,8 +56,7 @@ int main(int argc, char **argv) {
 
   // loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
-  std::string input;
-  cin >> input;
+  
   while(true) {
     //is empty at first
     Message received = Message();
@@ -67,8 +66,8 @@ int main(int argc, char **argv) {
     int colon_two = 0;
 
     //get the index of the second colon
-    for(int i = 5; i < sizeof(msg.data); i++) {
-      if(msg.data[i] == ':') {
+    for(int i = 5; i < sizeof(received.data); i++) {
+      if(received.data[i] == ':') {
         colon_two = i;
         break;
       }
@@ -77,7 +76,7 @@ int main(int argc, char **argv) {
     std::string username = received.data.substr(5, colon_two);
     std:: string message = received.data.substr(colon_two + 1, sizeof(received.data));
 
-    std::cout << username ": " message;
+    std::cout << username ": " << message;
 
   }
 
