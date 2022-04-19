@@ -67,7 +67,7 @@ bool Server::listen() {
 
  std::stringstream ss;
  ss << m_port;
-std::string str_port = ss.str();
+ std::string str_port = ss.str();
 
   int listenfd = open_listenfd(str_port.c_str());
   if(listenfd == - 1) {

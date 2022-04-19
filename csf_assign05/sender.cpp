@@ -45,10 +45,17 @@ int main(int argc, char **argv) {
 
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
+  string room; 
   string input = "";
-  while(cin >> input) {
-    if(input == "/leave") {
-      
+  while(true) {
+    cin >> input; 
+    if(input.find("/join")) {
+      cin >> room; 
+      Message join = Message("join", room);
+      conn.send(join);
+      if(conn.receive()){
+        
+      }
     }
   }
 
