@@ -56,13 +56,14 @@ bool Connection::send(const Message &msg) {
   //send to server fd, message
   ssize_t result = rio_writen(m_fd, &msg, strlen(msg.data.c_str()) + strlen(msg.tag.c_str()));
   if(result < 0){
-    //success
+    m_last_result = SUCCESS;
     return false;
   } else {
     return true;
+    m_last_result = SUCCESS;
   }
 
-  //TODO: make sure that m_last_result
+  //TODO: make sure that m_last_result is correct
   
 }
 
@@ -74,11 +75,12 @@ bool Connection::receive(Message &msg) {
   //read into message from the server fd
   ssize_t result = rio_readlineb(&m_fdbuf, &m_fdbuf, sizeof(m_fdbuf));
   if(result < 0){
-    //success
+    m_last_result = SUCCESS;
     return false;
   } else {
+    m_last_result = SUCCESS;
     return true;
   }
 
-  //TODO: make sure that m_last_result
+  //TODO: make sure that m_last_result is correct
 }
