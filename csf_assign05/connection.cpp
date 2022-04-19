@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include <sstream>
+#include <iostream>
 
 Connection::Connection()
   : m_fd(-1)
@@ -76,7 +77,9 @@ bool Connection::receive(Message &msg) {
 
   //read into message from the server fd
   //make sure that m_last_result is correct
-  ssize_t result = rio_readlineb(&m_fdbuf, &m_fdbuf, sizeof(m_fdbuf));
+  char buf[msg.MAX_LEN];
+
+  ssize_t result = rio_readlineb(&m_fdbuf, buf, sizeof(m_fdbuf));
   if(result < 0){
     m_last_result = EOF_OR_ERROR;
     return false;
@@ -85,5 +88,15 @@ bool Connection::receive(Message &msg) {
     return true;
   }
 
-  
+  int colon;
+  for(int i = 0; i < (int) sizeof(buf); i++) {
+    if(buf[i] == ':') {
+      colon = i;
+      break;
+    }
+  }
+
+  char * message = buf.substr(colon, sizeof(buf));
+  std::cout << message << std::endl;
+
 }
