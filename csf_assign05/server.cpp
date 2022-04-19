@@ -13,6 +13,7 @@
 #include "guard.h"
 #include "server.h"
 
+
 ////////////////////////////////////////////////////////////////////////
 // Server implementation data types
 ////////////////////////////////////////////////////////////////////////
@@ -63,11 +64,16 @@ Server::~Server() {
 bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
-  int listenfd = open_listenfd((char *) m_port);
+
+ std::stringstream ss;
+ ss << m_port;
+std::string str_port = ss.str();
+
+  int listenfd = open_listenfd(str_port.c_str());
   if(listenfd == - 1) {
-    return false; 
+   return false; 
   } else {
-    return true; 
+   return true; 
   }
 }
 
