@@ -56,6 +56,7 @@ bool Connection::send(const Message &msg) {
   //send to server fd, message
   ssize_t result = rio_writen(m_fd, &msg, strlen(msg.data.c_str()) + strlen(msg.tag.c_str()));
   if(result < 0){
+    //should be a bad depending on if message format is invalid
     m_last_result = SUCCESS;
     return false;
   } else {
