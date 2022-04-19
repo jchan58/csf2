@@ -20,13 +20,39 @@ int main(int argc, char **argv) {
 
   Connection conn;
 
-  // TODO: connect to server
+  // connect to server
   conn.connect(server_hostname, server_port);
-  // TODO: send rlogin and join messages (expect a response from
+  
+  // send (is recieve?) rlogin and join messages (expect a response from
   //       the server for each one)
+  Message rlogin = new Message("rlogin", username);
+
+  //response was error (is this how?)
+  if (conn.send(rlogin) == false) {
+    //so print the payload
+    std::cerr << rlogin.data;
+    //exit non-zero
+    return 2;
+  }
+
+  Message join = new Message("join", room_name);
+
+  //join resulted in error
+  if(conn.send(join) == false) {
+    //check bytes got
+    std::cerr << join.data;
+    return 3;
+  }
+
+  
 
   // TODO: loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
+  std::string input;
+  cin >> input;
+  while(true) {
+    conn.receive();
+  }
 
 
   return 0;
