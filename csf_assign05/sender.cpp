@@ -21,15 +21,26 @@ int main(int argc, char **argv) {
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
-  username = argv[3];
 
-  int clientfd = open_clientfd(host, port);
+  int clientfd = open_clientfd(argv[1], argv[2]);
 
-  // TODO: send slogin message
-  
+  Connection conn;
+
+  // connect to server
+  conn.connect(server_hostname, server_port);
+
+  Message slogin =  Message("slogin", username);
+
+   if (conn.send(slogin) == false) {
+    //so print the payload
+    std::cerr << slogin.data;
+    //exit non-zero
+    return 2;
+  }
 
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
+  while()
 
   return 0;
 }

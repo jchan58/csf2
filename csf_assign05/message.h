@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <sstream>
 
 struct Message {
   // An encoded message may have at most this many characters,

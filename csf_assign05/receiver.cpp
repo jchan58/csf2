@@ -7,6 +7,8 @@
 #include "connection.h"
 #include "client_util.h"
 
+using std::cin; 
+
 int main(int argc, char **argv) {
   if (argc != 5) {
     std::cerr << "Usage: ./receiver [server_address] [port] [username] [room]\n";
@@ -25,7 +27,7 @@ int main(int argc, char **argv) {
   
   // send (is recieve?) rlogin and join messages (expect a response from
   //       the server for each one)
-  Message rlogin = new Message("rlogin", username);
+  Message rlogin = Message("rlogin", username);
 
   //response was error (is this how?)
   if (conn.send(rlogin) == false) {
@@ -35,7 +37,7 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Message join = new Message("join", room_name);
+  Message join = Message("join", room_name);
 
   //join resulted in error
   if(conn.send(join) == false) {
