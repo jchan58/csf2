@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     //checks if the input has the join line 
     if(input.at(0) == '/') {
       if(input.find("/join")) {
-      Message join = Message("join", input);
+      Message join = Message("join", input.substr(6, input.length() - 1));
       bool sentMessage = conn.send(join);
       Message received = Message();
       conn.receive(received);
