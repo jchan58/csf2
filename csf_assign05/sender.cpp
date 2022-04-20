@@ -10,6 +10,7 @@
 
 using std::cin; 
 using std::string;
+using std::cout; 
 
 int main(int argc, char **argv) {
   if (argc != 4) {
@@ -41,7 +42,9 @@ int main(int argc, char **argv) {
     std::cerr << slogin.data;
     //exit non-zero
     return 2;
-  };
+  } else if(strcmp(received.tag.c_str(), "ok") == 0){
+    cout << "this works"; 
+  }
 
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
@@ -50,11 +53,11 @@ int main(int argc, char **argv) {
   bool joined = false; 
 
   while(true) {
-    std::getline (std::cin, input);
+    std::getline (cin, input);
     //checks if the input has the join line 
     if(input.at(0) == '/') {
-      if(input.find("/join")) {
-      Message join = Message("join", input);
+      if(input.substr(0, 4).compare("/join") == 0) {
+      Message join = Message("join", input.substr(6, input.length()));
       bool sentMessage = conn.send(join);
       Message received = Message();
       conn.receive(received);
@@ -96,7 +99,7 @@ int main(int argc, char **argv) {
      }
     } else {
       //sends a message to all the rooms 
-      Message send_all = Message("sendall", input);
+      Message send_all = Message("sendall", input.substr(8, input.length()));
       bool sentMessage = conn.send(send_all); 
       Message received = Message();
       conn.receive(received);
