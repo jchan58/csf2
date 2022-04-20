@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   
   conn.receive(fromServer);
 
-  if (conn.send(rlogin) == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
+  if (login == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
     //so print the server payload
     std::cerr << fromServer.data;
     //exit non-zero
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   
 
   //join resulted in error
-  if(conn.send(join) == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
+  if(joined == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
     std::cerr << fromServer.data;
     return 3;
   }
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     int colon_two = 0;
 
     //get the index of the second colon
-    for(int i = 5; i < sizeof(received.data); i++) {
+    for(int i = 5; i < (int) sizeof(received.data); i++) {
       if(received.data[i] == ':') {
         colon_two = i;
         break;
