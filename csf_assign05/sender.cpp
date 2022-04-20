@@ -41,11 +41,7 @@ int main(int argc, char **argv) {
     std::cerr << slogin.data;
     //exit non-zero
     return 2;
-  }
-
- //   Message join = Message("join", room_name);
-
- //   Message leave = Message("leave");
+  };
 
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
@@ -53,11 +49,11 @@ int main(int argc, char **argv) {
   string input = "";
   bool joined = false; 
 
-
   while(true) {
     std::getline (std::cin, input);
     //checks if the input has the join line 
-    if(input.find("/join")) {
+    if(input.at(0) == '/') {
+      if(input.find("/join")) {
       Message join = Message("join", input);
       bool sentMessage = conn.send(join);
       Message received = Message();
@@ -65,34 +61,52 @@ int main(int argc, char **argv) {
       //check if message format was formatted correctly and if the recieve worked 
 
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         std::cerr << "connection error from server";
-         joined = false; 
-         //if the connection was not estabilished then break out of the loop 
-         break;
+         joined = false;
+         std::cerr << received.data;
+         continue; 
       } else {
         joined = true;
       }
       //if the input is leave then we leave the room
     } else if(input == "/leave" && joined == true){
-      Message leave = Message("leave", "need to leave room");
+      Message leave = Message("leave", "");
       bool sentMessage = conn.send(leave); 
       Message received = Message();
       conn.receive(received);
        if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         std::cerr << "connection error from server";
-         joined = true; 
-         //if the connection was not estabilished then break out of the loop 
-         break;
-      } else if(strcmp(received.tag.c_str(), "ok") == 0) {
-        joined = false; // meaning they can join another room 
+         std::cerr << received.data;
+         continue; 
+      } 
+    } else if (input.compare("/quit") == 0) {
+      Message quit = Message("quit", "");
+      bool sentMessage = conn.send(quit); 
+      Message received = Message();
+      conn.receive(received);
+      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
+         std::cerr << received.data;
+         continue; 
+      } else if(strcmp(received.tag.c_str(), "ok") == 0){
+        //exits 
+        return 0; 
       }
-    } else if 
+     } else {
+       //prints out error for not a correct command 
+       std::cerr << "not a correct command";
+       continue; 
+     }
+    } else {
+      //sends a message to all the rooms 
+      Message send_all = Message("sendall", input);
+      bool sentMessage = conn.send(send_all); 
+      Message received = Message();
+      conn.receive(received);
+      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
+         std::cerr << received.data;
+         continue; 
+      }
+    }
   }
 
-  //wait for server response 
- // if(!conn.receive()){
-
- // } 
 
   return 0;
 }
