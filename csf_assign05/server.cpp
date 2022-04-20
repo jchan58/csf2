@@ -69,11 +69,10 @@ bool Server::listen() {
  ss << m_port;
  std::string str_port = ss.str();
 
-  int listenfd = open_listenfd(str_port.c_str());
-  if(listenfd == - 1) {
-   return false; 
-  } else {
+  if(open_listenfd(str_port.c_str())) {
    return true; 
+  } else {
+   return false; 
   }
 }
 

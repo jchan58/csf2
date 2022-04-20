@@ -32,8 +32,11 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
 
   Message slogin =  Message("slogin", username);
+  Message received = Message(); 
+  bool sloginSent = conn.send(slogin); 
+  conn.receive(received); 
 
-   if (conn.send(slogin) == false) {
+   if (sloginSent == false || strcmp(received.tag.c_str(), "err") == 0) {
     //so print the payload
     std::cerr << slogin.data;
     //exit non-zero
@@ -56,9 +59,12 @@ int main(int argc, char **argv) {
     //checks if the input has the join line 
     if(input.find("/join")) {
       Message join = Message("join", input);
-      conn.send(join);
+      bool sentMessage = conn.send(join);
+      Message received = Message();
+      conn.receive(received);
       //check if message format was formatted correctly and if the recieve worked 
-      if(conn.send(join) == false && conn.receive()){
+
+      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
          std::cerr << "connection error from server";
          joined = false; 
          //if the connection was not estabilished then break out of the loop 
@@ -66,11 +72,21 @@ int main(int argc, char **argv) {
       } else {
         joined = true;
       }
-      //if the input is leave then we estabilish the room. 
-    } else if(input == "/leave"){
-      Message leave = Message("leave", "need to leave");
-      
-    }
+      //if the input is leave then we leave the room
+    } else if(input == "/leave" && joined == true){
+      Message leave = Message("leave", "need to leave room");
+      bool sentMessage = conn.send(leave); 
+      Message received = Message();
+      conn.receive(received);
+       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
+         std::cerr << "connection error from server";
+         joined = true; 
+         //if the connection was not estabilished then break out of the loop 
+         break;
+      } else if(strcmp(received.tag.c_str(), "ok") == 0) {
+        joined = false; // meaning they can join another room 
+      }
+    } else if 
   }
 
   //wait for server response 

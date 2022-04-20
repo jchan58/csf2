@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   
   conn.receive(fromServer);
 
-  if (conn.send(rlogin) == false || strcmp(fromServer.tag, "err") == 0) {
+  if (conn.send(rlogin) == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
     //so print the server payload
     std::cerr << fromServer.data;
     //exit non-zero
@@ -44,12 +44,12 @@ int main(int argc, char **argv) {
   }
 
   Message join = Message("join", room_name);
-  bool join = conn.send(join);
-  conn.receive(fromServer)
+  bool joined = conn.send(join);
+  conn.receive(fromServer);
   
 
   //join resulted in error
-  if(conn.send(join) == false || strcmp(fromServer.tag, "err") == 0) {
+  if(conn.send(join) == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
     std::cerr << fromServer.data;
     return 3;
   }
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     std::string username = received.data.substr(5, colon_two);
     std:: string message = received.data.substr(colon_two + 1, sizeof(received.data));
 
-    std::cout << username ": " << message;
+    std::cout << username << ": " << message;
 
   }
 
