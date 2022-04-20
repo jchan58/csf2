@@ -26,9 +26,9 @@ void Connection::connect(const std::string &hostname, int port) {
   ss << port;
   std::string str_port = ss.str();
   //open_clientfd to connect to the server
-  int ready_fd = open_clientfd(hostname.c_str(), str_port.c_str());
+  m_fd = Open_clientfd(hostname.c_str(), str_port.c_str());
   //call rio_readinitb to initialize the rio_t object
-  rio_readinitb(&m_fdbuf, ready_fd);
+  rio_readinitb(&m_fdbuf, m_fd);
 }
 
 Connection::~Connection() {
@@ -79,7 +79,7 @@ bool Connection::receive(Message &msg) {
   //make sure that m_last_result is correct
   char buf[msg.MAX_LEN];
 
-  ssize_t result = rio_readlineb(&m_fdbuf, buf, sizeof(m_fdbuf));
+  ssize_t result = rio_readlineb(&m_fdbuf, buf, msg.MAX_LEN);
   if(result < 0){
     m_last_result = EOF_OR_ERROR;
     return false;
