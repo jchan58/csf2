@@ -53,10 +53,10 @@ int main(int argc, char **argv) {
   bool joined = false; 
 
   while(true) {
-    std::getline (std::cin, input);
+    std::getline (cin, input);
     //checks if the input has the join line 
     if(input.at(0) == '/') {
-      if(input.find("/join")) {
+      if(input.substr(0, 4).compare("/join") == 0) {
       Message join = Message("join", input.substr(6, input.length()));
       bool sentMessage = conn.send(join);
       Message received = Message();
