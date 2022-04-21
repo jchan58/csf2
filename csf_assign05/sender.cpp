@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
   std::string server_hostname;
   int server_port;
-  std::string username;
+  std::string username = argv[3]; 
   char * host = argv[1];
   char * port = argv[2]; 
 
@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
 
   Message slogin =  Message("slogin", username);
-  Message received = Message(); 
   bool sloginSent = conn.send(slogin); 
+  Message received = Message(); 
   conn.receive(received); 
 
    if (sloginSent == false || strcmp(received.tag.c_str(), "err") == 0) {
@@ -42,8 +42,6 @@ int main(int argc, char **argv) {
     std::cerr << slogin.data;
     //exit non-zero
     return 2;
-  } else if(strcmp(received.tag.c_str(), "ok") == 0){
-    cout << "this works"; 
   }
 
   // TODO: loop reading commands from user, sending messages to
@@ -51,12 +49,13 @@ int main(int argc, char **argv) {
   string room; 
   string input = "";
   bool joined = false; 
+  char command = '/';
 
   while(true) {
-    std::getline (cin, input);
+    std::getline(cin, input); 
     //checks if the input has the join line 
-    if(input.at(0) == '/') {
-      if(input.substr(0, 4).compare("/join") == 0) {
+    if(command == input.at(0)) {
+      if(input.at(1) == 'j'){
       Message join = Message("join", input.substr(6, input.length()));
       bool sentMessage = conn.send(join);
       Message received = Message();
@@ -71,7 +70,7 @@ int main(int argc, char **argv) {
         joined = true;
       }
       //if the input is leave then we leave the room
-    } else if(input == "/leave" && joined == true){
+    } else if(input == "/leave"){
       Message leave = Message("leave", "");
       bool sentMessage = conn.send(leave); 
       Message received = Message();
@@ -85,21 +84,16 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(quit); 
       Message received = Message();
       conn.receive(received);
-      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
+      if(sentMessage == false || received.tag.c_str() == "err"){
          std::cerr << received.data;
          continue; 
-      } else if(strcmp(received.tag.c_str(), "ok") == 0){
-        //exits 
+      } else if(received.tag.c_str() == "ok"){
         return 0; 
       }
-     } else {
-       //prints out error for not a correct command 
-       std::cerr << "not a correct command";
-       continue; 
      }
-    } else {
+    } else if(command != input.at(0)) {
       //sends a message to all the rooms 
-      Message send_all = Message("sendall", input.substr(8, input.length()));
+      Message send_all = Message("sendall", input);
       bool sentMessage = conn.send(send_all); 
       Message received = Message();
       conn.receive(received);
