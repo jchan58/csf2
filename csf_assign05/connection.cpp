@@ -56,8 +56,10 @@ bool Connection::send(const Message &msg) {
     
   //send to server fd, message
   //make sure that m_last_result is correct
-  ssize_t result = rio_writen(m_fd, &msg, strlen(msg.data.c_str()) + strlen(msg.tag.c_str()));
-  if(result < 0, should = .length){
+  std::string message = msg.tag + ":" + msg.data + "\n";
+
+  ssize_t result = rio_writen(m_fd, (message).c_str(), message.length());
+  if(result != message.length()){
     //EOF or other err
     m_last_result = EOF_OR_ERROR;
     return false;
@@ -78,6 +80,7 @@ bool Connection::receive(Message &msg) {
   //read into message from the server fd
   //make sure that m_last_result is correct
   char buf[msg.MAX_LEN];
+
 
   ssize_t result = rio_readlineb(&m_fdbuf, buf, msg.MAX_LEN);
   if(result < 0){
