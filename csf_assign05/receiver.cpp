@@ -7,6 +7,8 @@
 #include "connection.h"
 #include "client_util.h"
 
+#include <sstream>
+
 using std::cin; 
 
 int main(int argc, char **argv) {
@@ -62,21 +64,19 @@ int main(int argc, char **argv) {
     Message received = Message();
     conn.receive(received);
 
-    //print username: message
-    int colon_two = 0;
+    //sender is 1st word and message is second
+    std::stringstream ss;
+    ss << received.data;
+    //std::getline(ss, word, ':');
 
-    //get the index of the second colon
-    for(int i = 5; i < (int) sizeof(received.data); i++) {
-      if(received.data[i] == ':') {
-        colon_two = i;
-        break;
-      }
+
+    std::vector<std::string> split_msg;
+    std::string word;
+    while(std::getline(ss, word, ':')){
+      split_msg.push_back(word);
     }
-
-    std::string username = received.data.substr(5, colon_two);
-    std:: string message = received.data.substr(colon_two + 1, sizeof(received.data));
-
-    std::cout << username << ": " << message << std::endl;
+    
+    std::cout << split_msg[1] << ": " << split_msg[2] << std::endl;
 
   }
 

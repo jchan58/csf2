@@ -89,14 +89,27 @@ bool Connection::receive(Message &msg) {
     return false;
   } else {
     m_last_result = SUCCESS;
-    return true;
   }
   
-  msg.tag = "delivery";
+  //msg.tag = "delivery";
   
   //put buf in msg
   std::string buf_cpp = buf;
-  //the message starts after the delivery tag + a colon (index 9)
-  std::string payload = buf_cpp.substr(9, sizeof(buf));
-  msg.data = payload;
+  
+
+
+  std::stringstream ss;
+  ss << buf_cpp;
+
+  std::string word;
+  std::getline(ss, word, ':');
+
+  msg.tag = word;
+
+  std::getline(ss, word);
+
+  msg.data = word;
+
+
+  return true;
 }
