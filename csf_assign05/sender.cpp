@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
         std::cerr << received.data << std::endl;
-        return 3; 
+        continue;
       } else {
         joined = true;
       }
