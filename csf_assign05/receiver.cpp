@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
 
   //check if connection opened
-  if (!conn.is_open) {
+  if (!conn.is_open()) {
     std::cerr << "Could not connect to server" << std::endl;
     return 5;
   }

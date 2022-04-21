@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
 
   //check if connection opened
-  if (!conn.is_open) {
+  if (!conn.is_open()) {
     std::cerr << "Could not connect to server" << std::endl;
     return 5;
   }
@@ -90,14 +90,7 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(quit); 
       Message received = Message();
       conn.receive(received);
-<<<<<<< HEAD
-      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         std::cerr << received.data;
-         continue; 
-      } else if(strcmp(received.tag.c_str(), "err") == 0){
-=======
      if(strcmp(received.tag.c_str(),"ok") == 0){
->>>>>>> af587fd75a33d792b6f3fe5e0b5437785fc05c80
         return 0; 
       } else if(strcmp(received.tag.c_str(),"err") == 0){
         std::cerr << received.data;
