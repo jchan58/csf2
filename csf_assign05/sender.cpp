@@ -32,6 +32,12 @@ int main(int argc, char **argv) {
   // connect to server
   conn.connect(server_hostname, server_port);
 
+  //check if connection opened
+  if (!conn.is_open) {
+    std::cerr << "Could not connect to server" << std::endl;
+    return 5;
+  }
+
   Message slogin =  Message("slogin", username);
   bool sloginSent = conn.send(slogin); 
   Message received = Message(); 
@@ -84,10 +90,10 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(quit); 
       Message received = Message();
       conn.receive(received);
-      if(sentMessage == false || received.tag.c_str() == "err"){
+      if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
          std::cerr << received.data;
          continue; 
-      } else if(received.tag.c_str() == "ok"){
+      } else if(strcmp(received.tag.c_str(), "err") == 0){
         return 0; 
       }
      }

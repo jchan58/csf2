@@ -26,6 +26,12 @@ int main(int argc, char **argv) {
 
   // connect to server
   conn.connect(server_hostname, server_port);
+
+  //check if connection opened
+  if (!conn.is_open) {
+    std::cerr << "Could not connect to server" << std::endl;
+    return 5;
+  }
   
   // send (is receive?) rlogin and join messages (expect a response from
   //       the server for each one)
@@ -40,7 +46,7 @@ int main(int argc, char **argv) {
 
   if (login == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
     //so print the server payload
-    std::cerr << fromServer.data;
+    std::cerr << fromServer.data << std::endl;
     //exit non-zero
     return 2;
   }
@@ -52,7 +58,7 @@ int main(int argc, char **argv) {
 
   //join resulted in error
   if(joined == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
-    std::cerr << fromServer.data;
+    std::cerr << fromServer.data << std::endl;
     return 3;
   }
 
