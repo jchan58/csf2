@@ -1,4 +1,6 @@
-Sample README.txt
+README.txt Milestone 1
 
-Eventually your report about how you implemented thread synchronization
-in the server should go here
+Joey Chan
+
+I worked on message.h and sender.cpp. 
+

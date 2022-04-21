@@ -21,8 +21,6 @@ int main(int argc, char **argv) {
   std::string server_hostname;
   int server_port;
   std::string username = argv[3]; 
-  char * host = argv[1];
-  char * port = argv[2]; 
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
@@ -37,7 +35,7 @@ int main(int argc, char **argv) {
     std::cerr << "Could not connect to server" << std::endl;
     return 5;
   }
-
+  //create an slogin message 
   Message slogin =  Message("slogin", username);
   bool sloginSent = conn.send(slogin); 
   Message received = Message(); 
@@ -50,13 +48,10 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  // TODO: loop reading commands from user, sending messages to
-  //       server as appropriate
-  string room; 
   string input = "";
-  bool joined = false; 
   char command = '/';
 
+  //loop
   while(true) {
     std::getline(cin, input); 
     //checks if the input has the join line 
@@ -66,13 +61,10 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(join);
       Message received = Message();
       conn.receive(received);
-      //check if message format was formatted correctly and if the recieve worked 
-
+      //check the message sent back 
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
         std::cerr << received.data << std::endl;
         continue;
-      } else {
-        joined = true;
       }
       //if the input is leave then we leave the room
     } else if(input == "/leave"){
@@ -84,14 +76,16 @@ int main(int argc, char **argv) {
          std::cerr << received.data << std::endl;
          continue; 
       } 
+      //compare the input to check if quit matches
     } else if (input.compare("/quit") == 0) {
       Message quit = Message("quit", "");
       bool sentMessage = conn.send(quit); 
       Message received = Message();
       conn.receive(received);
+      //if ok then go ahead return 
      if(strcmp(received.tag.c_str(),"ok") == 0){
         return 0; 
-      } else if(strcmp(received.tag.c_str(),"err") == 0){
+      } else if(sentMessage == false ||strcmp(received.tag.c_str(),"err") == 0){
         std::cerr << received.data << std::endl;
         continue; 
       }
@@ -102,13 +96,13 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(send_all); 
       Message received = Message();
       conn.receive(received);
+      //if connection failed or there was an error sent back then print out payload and continue loop
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
          std::cerr << received.data << std::endl;
          continue; 
       }
     }
   }
-
 
   return 0;
 }
