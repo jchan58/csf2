@@ -7,7 +7,6 @@
 #include "connection.h"
 #include "client_util.h"
 
-
 using std::cin; 
 using std::string;
 using std::cout; 
