@@ -57,9 +57,10 @@ bool Connection::send(const Message &msg) {
   //send to server fd, message
   //make sure that m_last_result is correct
   std::string message = msg.tag + ":" + msg.data + "\n";
+  ssize_t length = message.length(); 
 
-  ssize_t result = rio_writen(m_fd, (message).c_str(), message.length());
-  if(result != message.length()){
+  ssize_t result = rio_writen(m_fd, (message).c_str(), length);
+  if(result != length){
     //EOF or other err
     m_last_result = EOF_OR_ERROR;
     return false;
