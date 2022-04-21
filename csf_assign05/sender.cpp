@@ -84,11 +84,11 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(quit); 
       Message received = Message();
       conn.receive(received);
-      if(sentMessage == false || received.tag.c_str() == "err"){
-         std::cerr << received.data;
-         continue; 
-      } else if(received.tag.c_str() == "ok"){
+     if(strcmp(received.tag.c_str(),"ok") == 0){
         return 0; 
+      } else if(strcmp(received.tag.c_str(),"err") == 0){
+        std::cerr << received.data;
+        continue; 
       }
      }
     } else if(command != input.at(0)) {
