@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
-
   Connection conn;
 
   // connect to server
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
   //loop
   while(true) {
     std::getline(cin, input); 
-    //checks if the input has the join line 
+    //checks if the input has the '/' to see if its a command
     if(command == input.at(0)) {
       if(input.at(1) == 'j'){
       Message join = Message("join", input.substr(6, input.length()));
@@ -76,7 +75,6 @@ int main(int argc, char **argv) {
          std::cerr << received.data << std::endl;
          continue; 
       } 
-      //compare the input to check if quit matches
     } else if (input.compare("/quit") == 0) {
       Message quit = Message("quit", "");
       bool sentMessage = conn.send(quit); 
