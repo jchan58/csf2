@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     std::string username = received.data.substr(5, colon_two);
     std:: string message = received.data.substr(colon_two + 1, sizeof(received.data));
 
-    std::cout << username << ": " << message;
+    std::cout << username << ": " << message << std::endl;
 
   }
 
