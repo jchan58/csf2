@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
    if (sloginSent == false || strcmp(received.tag.c_str(), "err") == 0) {
     //so print the payload
-    std::cerr << slogin.data;
+    std::cerr << slogin.data << std::endl;
     //exit non-zero
     return 2;
   }
@@ -69,7 +69,6 @@ int main(int argc, char **argv) {
       //check if message format was formatted correctly and if the recieve worked 
 
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         joined = false;
          std::cerr << received.data;
          continue; 
       } else {
@@ -82,7 +81,7 @@ int main(int argc, char **argv) {
       Message received = Message();
       conn.receive(received);
        if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         std::cerr << received.data;
+         std::cerr << received.data << std::endl;
          continue; 
       } 
     } else if (input.compare("/quit") == 0) {
@@ -93,7 +92,7 @@ int main(int argc, char **argv) {
      if(strcmp(received.tag.c_str(),"ok") == 0){
         return 0; 
       } else if(strcmp(received.tag.c_str(),"err") == 0){
-        std::cerr << received.data;
+        std::cerr << received.data << std::endl;
         continue; 
       }
      }
@@ -104,7 +103,7 @@ int main(int argc, char **argv) {
       Message received = Message();
       conn.receive(received);
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-         std::cerr << received.data;
+         std::cerr << received.data << std::endl;
          continue; 
       }
     }
