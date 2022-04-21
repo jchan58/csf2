@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
    if (sloginSent == false || strcmp(received.tag.c_str(), "err") == 0) {
     //so print the payload
-    std::cerr << slogin.data << std::endl;
+    std::cerr << received.data << std::endl;
     //exit non-zero
     return 2;
   }
