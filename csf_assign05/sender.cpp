@@ -21,12 +21,12 @@ int main(int argc, char **argv) {
   std::string server_hostname;
   int server_port;
   std::string username = argv[3]; 
+  string input = "";
+  char command = '/';
 
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
   Connection conn;
-
-  // connect to server
   conn.connect(server_hostname, server_port);
 
   //check if connection opened
@@ -46,9 +46,6 @@ int main(int argc, char **argv) {
     //exit non-zero
     return 2;
   }
-
-  string input = "";
-  char command = '/';
 
   //loop
   while(true) {
