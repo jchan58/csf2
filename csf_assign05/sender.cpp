@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
       //check if message format was formatted correctly and if the recieve worked 
 
       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
-        std::cerr << received.data;
+        std::cerr << received.data << std::endl;
         return 3; 
       } else {
         joined = true;
