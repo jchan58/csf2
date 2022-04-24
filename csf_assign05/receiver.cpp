@@ -27,25 +27,24 @@ int main(int argc, char **argv) {
   // connect to server
   conn.connect(server_hostname, server_port);
 
-  //check if connection opened
+  //check if connection opened, print error and fail if not
   if (!conn.is_open()) {
     std::cerr << "Could not connect to server" << std::endl;
     return 5;
   }
   
-  // send (is receive?) rlogin and join messages (expect a response from
+  //rlogin and join messages (expect a response from
   //       the server for each one)
   Message rlogin = Message("rlogin", username);
-
- //check if send worked
   bool login = conn.send(rlogin);
-  //check if server accepted send
+
   Message fromServer = Message();
-  
   conn.receive(fromServer);
 
+
+  //if an error is reported for rlogin
   if (login == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
-    //so print the server payload
+    //print the server response payload
     std::cerr << fromServer.data << std::endl;
     //exit non-zero
     return 2;
@@ -56,25 +55,22 @@ int main(int argc, char **argv) {
   conn.receive(fromServer);
   
 
-  //join resulted in error
+  //if an error is reported for join
   if(joined == false || strcmp(fromServer.tag.c_str(), "err") == 0) {
+    //print the server response payload and exit
     std::cerr << fromServer.data << std::endl;
     return 3;
   }
 
   // loop waiting for messages from server
-  //       (which should be tagged with TAG_DELIVERY)
-  
   while(true) {
     //is empty at first
     Message received = Message();
     conn.receive(received);
 
-    //sender is 1st word and message is second
+    //break the received message up and print the username and message
     std::stringstream ss;
     ss << received.data;
-    //std::getline(ss, word, ':');
-
 
     std::vector<std::string> split_msg;
     std::string word;
@@ -85,7 +81,6 @@ int main(int argc, char **argv) {
     std::cout << split_msg[1] << ": " << split_msg[2] << std::endl;
 
   }
-
 
   return 0;
 }
