@@ -47,15 +47,29 @@ void *worker(void *arg) {
 
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
+  bool sender = false;
+  bool receiver = false;
+  Conn conn;
+  conn.connect(info->webroot, m_port); 
+  Message received = Message();
+  conn.receive(received);
 
-  //how do we read from clients, is there a function ?
-  
+  if(strcmp(received.tag.c_str(), "slogin") == 0){
+    sender = true; 
+  } else if(strcmp(received.tag.c_str(), "slogin") == 0){
+    receiver = true; 
+  }
+
+
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
-
-  //how do we send messages to clients, is there a function?
+  if(sender){
+    chat_with_sender(); 
+  } else if(receiver){
+    chat_with_receiver(); 
+  }
 
   return nullptr;
 }
