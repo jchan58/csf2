@@ -68,11 +68,6 @@ void *worker(void *arg) {
 
   std::string username = received.data;
 
-  // TODO: depending on whether the client logged in as a sender or
-  //       receiver, communicate with the client (implementing
-  //       separate helper functions for each of these possibilities
-  //       is a good idea)
-
   //"infinite loops"
   if(sender){
     chat_with_sender(&conn, info->server, username); 
@@ -90,21 +85,26 @@ void *worker(void *arg) {
   return nullptr;
 }
 
-   void chat_with_sender(*conn, Server server, string username){
+void chat_with_sender(*conn, Server server, string username){
+  Message received = Message();
+  conn.receive(received);
+   if(strcmp(received.tag.c_str(), "join") == 0){
 
 
 
-
+   }
   }
 
 
-  void chat_with_receiver(*conn, Server server, string username){
+ void chat_with_receiver(*conn, Server server, string username){
+   Message received = Message();
+   conn.receive(received);
+   if(strcmp(received.tag.c_str(), "join") == 0){
+     
 
 
-
-
+   }
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////
