@@ -87,22 +87,30 @@ void *worker(void *arg) {
 
 void chat_with_sender(*conn, Server server, string username){
   Message received = Message();
+  bool joined = false; 
   conn.receive(received);
    if(strcmp(received.tag.c_str(), "join") == 0){
-
-
-
+     //add them to a room that already exists or doesn't 
+     joined = true; 
+   } else {
+    Message error = Message("err", "error");
+    bool err = conn.send(error);
    }
   }
+ }
 
 
  void chat_with_receiver(*conn, Server server, string username){
    Message received = Message();
    conn.receive(received);
+   bool joined = false; 
    if(strcmp(received.tag.c_str(), "join") == 0){
-     
+     //add them to a room that already exists or doesn't depending on the case
 
-
+     joined = true; 
+   } else {
+    Message error = Message("err", "error");
+    bool err = conn.send(error);
    }
   }
 }
