@@ -20,8 +20,6 @@
 
 // TODO: add any additional data types that might be helpful
 //       for implementing the Server member functions
-int server_fd, new_socket, valread;
-struct sockaddr_in address;
 Room * room_list;
 int num_rooms;
 
@@ -129,10 +127,6 @@ Server::~Server() {
   // TODO: destroy mutex
 }
 
-//?? the internet said we have to do this, but i don't understnad
-server_fd = Socket(AF_INET, SOCK_STREAM, 0);
-setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
-bind(server_fd, (struct sockaddr*) &address, sizeof(address));
 
 bool Server::listen() {
   //use open_listenfd to create the server socket, return true
@@ -152,25 +146,25 @@ bool Server::listen() {
 }
 
 //from lecture 30, slide 26 ???
-//what does accept do?
-//what is webroot?
 void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
-  int clientfd = Accept(serverfd, NULL, NULL);
-  if (clientfd < 0) {
-    fatal("Error accepting client connection");
-  }
+  while(true){
+   int clientfd = Accept(serverfd, NULL, NULL);
+   if (clientfd < 0) {
+     fatal("Error accepting client connection");
+   } 
 
-  ConnInfo *info = malloc(sizeof(ConnInfo));
-  info->clientfd = clientfd;
-  //where is this from?????????????????
-  info->webroot = webroot;
+   ConnInfo *info = malloc(sizeof(ConnInfo));
+   info->clientfd = clientfd;
+  
+   pthread_t thr id;
 
-  pthread_t thr id;
+   if(pthread_create(&thr_id, NULL, worker, info) != 0) {
+     fatal("pthread_create failed");
+   }
 
-  if(pthread_create(&thr_id, NULL, worker, info) != 0) {
-    fatal("pthread_create failed");
+   close(clientfd);
   }
 }
 
