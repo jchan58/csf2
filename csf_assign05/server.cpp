@@ -90,6 +90,21 @@ void *worker(void *arg) {
   return nullptr;
 }
 
+   void chat_with_sender(*conn, Server server, string username){
+
+
+
+
+  }
+
+
+  void chat_with_receiver(*conn, Server server, string username){
+
+
+
+
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////
