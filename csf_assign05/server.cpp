@@ -28,7 +28,8 @@ int num_rooms;
 //hold info about the connection object (from lecture 30, slide 24)
 typedef struct ConnInfo {
   int clientfd;
-  const char *webroot; //what is webroot, are we not passing in the whole object like the instructions say?
+  //const char *webroot; //what is webroot, are we not passing in the whole object like the instructions say?
+  Server *server;
 } ConnInfo;
 
 ////////////////////////////////////////////////////////////////////////
@@ -43,32 +44,47 @@ void *worker(void *arg) {
   //use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-  struct ConnInfo *info = arg;
+  struct ConnInfo *info = (ConnInfo *) arg;
+
+
 
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
   bool sender = false;
   bool receiver = false;
-  Conn conn;
-  conn.connect(info->webroot, m_port); 
+  Connection conn(info->cliendfd);
+  /*Conn conn;
+    conn.connect(info->webroot, m_port); */
   Message received = Message();
   conn.receive(received);
 
   if(strcmp(received.tag.c_str(), "slogin") == 0){
     sender = true; 
-  } else if(strcmp(received.tag.c_str(), "slogin") == 0){
+  } else if(strcmp(received.tag.c_str(), "rlogin") == 0){
     receiver = true; 
+  } else {
+    // TODO: send an error response back to the client and terminate the connection, and return
   }
 
+  std::string username = received.data;
 
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
+
+  //"infinite loops"
   if(sender){
-    chat_with_sender(); 
+    chat_with_sender(&conn, info->server, username); 
+    //check for join
+    //make room
+    //handle diff commands
   } else if(receiver){
-    chat_with_receiver(); 
+    chat_with_receiver(&conn, info->server, username); 
+    //make user
+    //check if it exists if client socket still exists
+    //handle diff commands
+    //deque messages from correct message queue
   }
 
   return nullptr;
@@ -103,7 +119,9 @@ bool Server::listen() {
  ss << m_port;
  std::string str_port = ss.str();
 
-  if(open_listenfd(str_port.c_str())) {
+ m_ssock = open_listenfd(str_port.c_str());
+ 
+  if(m_ssock >= 0) {
    return true; 
   } else {
    return false; 

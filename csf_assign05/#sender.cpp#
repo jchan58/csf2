@@ -1,5 +1,4 @@
-
-0;136;0c#include <iostream>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <stdexcept>
@@ -7,7 +6,6 @@
 #include "message.h"
 #include "connection.h"
 #include "client_util.h"
-
 
 using std::cin; 
 using std::string;
@@ -69,7 +67,7 @@ int main(int argc, char **argv) {
       bool sentMessage = conn.send(leave); 
       Message received = Message();
       conn.receive(received);
-       if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
+        if(sentMessage == false || strcmp(received.tag.c_str(), "err") == 0){
          std::cerr << received.data << std::endl;
          continue; 
       } 
