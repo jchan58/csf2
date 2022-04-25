@@ -52,9 +52,7 @@ void *worker(void *arg) {
   //       TAG_SLOGIN or TAG_RLOGIN), send response
   bool sender = false;
   bool receiver = false;
-  Connection conn(info->cliendfd);
-  /*Conn conn;
-    conn.connect(info->webroot, m_port); */
+  Connection conn(info->clientfd);
   Message received = Message();
   conn.receive(received);
 
@@ -63,7 +61,9 @@ void *worker(void *arg) {
   } else if(strcmp(received.tag.c_str(), "rlogin") == 0){
     receiver = true; 
   } else {
-    // TODO: send an error response back to the client and terminate the connection, and return
+    // TODO: send an error response back to the client
+    Message error = Message("err", "error");
+    bool err = conn.send(error);
   }
 
   std::string username = received.data;
