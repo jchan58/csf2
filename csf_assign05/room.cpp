@@ -42,8 +42,8 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   }
 }
 
-Message& Room::take_message() {
-  Message msg;
+Message* Room::take_message() {
+  Message* msg;
   // take the message out of every reciever's message queue in the room
   std::set<User *>::iterator it;
   for(it = members.begin(); it != members.end(); ++it){

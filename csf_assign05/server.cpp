@@ -109,8 +109,9 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   
   //deliver messages
     while(true){
-      Message& msg = room->take_message();
-      bool sent = conn->send(msg);
+      Message* msg = room->take_message();
+      //Message& msg_ref = msg;
+      bool sent = conn->send(*msg);
       if(sent){
 	 Message ok = Message("ok", username);
 	 conn->send(ok);
@@ -118,7 +119,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	 Message error = Message("err", "error");
 	 conn->send(error);
       }
-      delete(&msg);
+      delete(msg);
     }
 }
  
