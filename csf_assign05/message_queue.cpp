@@ -21,13 +21,13 @@ MessageQueue::~MessageQueue() {
 
 void MessageQueue::enqueue(Message *msg) {
   //lock/wait while the queue is being changed ?
-  sem_wait(msg.size());
-  lock_guard(m_lock);
+  //lock_Guard(m_lock);
+  //sem_wait(msg.size());
   //put the specified message on the queue
   m_messages.push_front(msg);
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
-  sem_post(msg.size());
+  //sem_post(msg.size());
 }
 
 Message *MessageQueue::dequeue() {

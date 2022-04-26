@@ -73,32 +73,30 @@ void chat_with_sender(Connection *conn, Server server, std::string username){
   }
 
 
-void chat_with_receiver(Connection *conn, Server server, std::string username){
-  //join room:
-  //if room exists, call join
-  //if not create and call join
-  //; now user is in room
-  //send ok if yes, err if no
+void chat_with_receiver(Connection *conn,  std::string username, std::string &room_name){
+  //find room/create one if it does not exists
+  Room* room = find_or_create_room(room);
+  //join room
+  room.add_member(room.user);
+  //now user is in room
 
-  //deliver messages(while):
-  //user.msg.deque()
-  //connection.send(m)
-  //send of if worked, err if not
-  //delete
+  Message ok = Message("ok", username);
+  conn.send(ok);
 
+  
+  //deliver messages
+    while(true){
+      bool sent = conn.send(room.user.deque());
+      if(sent){
+	 Message ok = Message("ok", username);
+	 conn.send(ok);
+      } else {
+	 Message error = Message("err", "error");
+	 conn.send(error);
+      }
+      delete(room.user.deque());
+    }
 
-
-  Message received = Message();
-   conn->receive(received);
-   bool joined = false;
-   if(strcmp(received.tag.c_str(), "join") == 0){
-     //add them to a room that already exists or doesn't depending on the case
-
-     joined = true;
-   } else {
-    Message error = Message("err", "error");
-    bool err = conn->send(error);
-   }
 }
 
 
@@ -128,7 +126,7 @@ void *worker(void *arg) {
   } else {
     //send an error response back to the client
     Message error = Message("err", "error");
-    bool err = conn.send(error);
+    conn.send(error);
   }
 
   std::string username = received.data;
@@ -141,7 +139,10 @@ void *worker(void *arg) {
     //make room
     //handle diff commands
   } else if(receiver){
-    chat_with_receiver(&conn, info->server, username); 
+    Message join = Message();
+    conn.receive(join);
+    //join.data is the room name
+    chat_with_receiver(&conn, username, join.data); 
   }
 
   return nullptr;
@@ -206,4 +207,3 @@ void Server::handle_client_requests() {
    close(clientfd);
   }
 }
-
