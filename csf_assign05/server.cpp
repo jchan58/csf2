@@ -110,8 +110,8 @@ void chat_with_sender(Connection *conn, Server server, string username){
     Message error = Message("err", "error");
     bool err = conn.send(error);
    }
-  }
-}
+ }
+
 
 ////////////////////////////////////////////////////////////////////////
 // Server member function implementation
@@ -152,16 +152,18 @@ void Server::handle_client_requests() {
   while(true){
    int clientfd = Accept(serverfd, NULL, NULL);
    if (clientfd < 0) {
-     fatal("Error accepting client connection");
+     std::cerr << "Error accepting client connection" << std::endl;
+     return;
    } 
 
    ConnInfo *info = malloc(sizeof(ConnInfo));
    info->clientfd = clientfd;
   
-   pthread_t thr id;
+   pthread_t thr_id;
 
    if(pthread_create(&thr_id, NULL, worker, info) != 0) {
-     fatal("pthread_create failed");
+     std::cerr << "pthread_create failed" << std::endl;
+     return;
    }
 
    close(clientfd);
@@ -173,19 +175,5 @@ void Server::handle_client_requests() {
 Room *Server::find_or_create_room(const std::string &room_name) {
   // TODO: return a pointer to the unique Room object representing
   //       the named chat room, creating a new one if necessary
-  Room * room;
-
-  for(int i = 0; i < num_rooms; i++) {
-    //write a get name funtion
-    if (strcmp(room_name.c_str(), room_list[i].get_name())) {
-	room = room_list[i];
-	break;
-    }
-  }
-
-  if(room == null) {
-    room = new Room(room_name);
-  }
-
-  return room;
+  
 }
