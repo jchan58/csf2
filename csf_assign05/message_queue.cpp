@@ -2,20 +2,31 @@
 #include <ctime>
 #include "message_queue.h"
 
+
+
 MessageQueue::MessageQueue() {
-  // TODO: initialize the mutex and the semaphore
+  //initialize the mutex and the semaphore
+  pthread_mutex_init m_lock();
+  //0 = private, 0 = starting value is 0 (what should it be?)
+  sem_init(&m_avail, 0, 0);
   
 }
 
 MessageQueue::~MessageQueue() {
-  // TODO: destroy the mutex and the semaphore
+  //destroy the mutex and the semaphore
+  pthread_mutex_destroy(m_lock);
+  sem_destroy(m_avail);
 }
 
 void MessageQueue::enqueue(Message *msg) {
-  // TODO: put the specified message on the queue
-
+  //lock/wait while the queue is being changed
+  sem_wait(msg.size());
+  lock_guard(m_lock);
+  //put the specified message on the queue
+  m_messages.push_front(msg);
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
+  sem_post(msg.size());
 }
 
 Message *MessageQueue::dequeue() {
@@ -30,10 +41,15 @@ Message *MessageQueue::dequeue() {
   // compute a time one second in the future
   ts.tv_sec += 1;
 
-  // TODO: call sem_timedwait to wait up to 1 second for a message
+  //call sem_timedwait to wait up to 1 second for a message
   //       to be available, return nullptr if no message is available
+  sem_timedwait(&m_avail, &ts);
 
+  if(m_messages.size() == 0){
+    return nullptr;
+  }
+  
   // TODO: remove the next message from the queue, return it
-  Message *msg = nullptr;
+  Message *msg = m_messages.pop_back();
   return msg;
 }
