@@ -123,11 +123,14 @@ void chat_with_receiver(Connection *conn, Server server, std::string username){
 Server::Server(int port)
   : m_port(port)
   , m_ssock(-1) {
-  // TODO: initialize mutex
+  //initialize mutex
+  //what is the other parameter?
+  pthread_mutex_init(m_lock, NULL);
 }
 
 Server::~Server() {
-  // TODO: destroy mutex
+  //destroy mutex
+  pthread_mutex_destroy(m_lock);
 }
 
 
