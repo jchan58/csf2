@@ -153,7 +153,7 @@ void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
   while(true){
-   int clientfd = Accept(serverfd, NULL, NULL);
+   int clientfd = Accept(m_ssock, NULL, NULL);
    if (clientfd < 0) {
      std::cerr << "Error accepting client connection" << std::endl;
      return;
