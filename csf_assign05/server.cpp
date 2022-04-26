@@ -35,6 +35,7 @@ typedef struct ConnInfo {
   Server *server;
 } ConnInfo;
 
+
 ////////////////////////////////////////////////////////////////////////
 // Client thread functions
 ////////////////////////////////////////////////////////////////////////
@@ -59,7 +60,7 @@ Room *Server::find_or_create_room(const std::string &room_name) {
 
 
 
-void chat_with_sender(Connection *conn, std::string username){
+void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   User* user;
   user->username = username;
   user->sender = true;
@@ -68,7 +69,7 @@ void chat_with_sender(Connection *conn, std::string username){
     Message received = Message();
     conn->receive(received);
     if(strcmp(received.tag.c_str(), "join") == 0 && user->room == NULL){
-      Room* room = find_or_create_room(received.data);
+      Room* room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
      user->room = room; 
@@ -94,11 +95,11 @@ void chat_with_sender(Connection *conn, std::string username){
  }
 
 
-void chat_with_receiver(Connection *conn,  std::string username, std::string &room_name){
+void chat_with_receiver(Connection *conn,  std::string username, std::string &room_name, ConnInfo* info){
   User* user;
   user->username = username;
   //find room/create one if it does not exists
-  Room* room = find_or_create_room(room_name);
+  Room* room = info->server->find_or_create_room(room_name);
   //join room
   room->add_member(user);
   //now user is in room
@@ -157,7 +158,7 @@ void *worker(void *arg) {
   conn.send(ok);
 
   if(sender){
-    chat_with_sender(&conn, username); 
+    chat_with_sender(&conn, username, info); 
     //check for join
     //make room
     //handle diff commands
@@ -165,7 +166,7 @@ void *worker(void *arg) {
     Message join = Message();
     conn.receive(join);
     //join.data is the room name
-    chat_with_receiver(&conn, username, join.data); 
+    chat_with_receiver(&conn, username, join.data, info); 
   }
 
   return nullptr;
