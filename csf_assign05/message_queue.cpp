@@ -6,7 +6,8 @@
 
 MessageQueue::MessageQueue() {
   //initialize the mutex and the semaphore
-  pthread_mutex_init m_lock();
+  //what is the other parameter?
+  pthread_mutex_init(m_lock);
   //0 = private, 0 = starting value is 0 (what should it be?)
   sem_init(&m_avail, 0, 0);
   
