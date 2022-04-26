@@ -18,7 +18,7 @@ Room::Room(const std::string &room_name)
 
 Room::~Room() {
    //destroy mutex
-   pthread_mutex_destroy(lock);
+   pthread_mutex_destroy(&lock);
 }
 
 void Room::add_member(User *user) {
