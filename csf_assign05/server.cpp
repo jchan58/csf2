@@ -63,31 +63,29 @@ void chat_with_sender(Connection *conn, std::string username){
   User* user;
   user->username = username;
   user->sender = true;
-  bool joined = false;
   
   while(true){
     Message received = Message();
     conn->receive(received);
-    if(strcmp(received.tag.c_str(), "join") == 0 && joined == false){
+    if(strcmp(received.tag.c_str(), "join") == 0 && user->room == NULL){
      Room* room = find_or_create_room(room);
      //have the user join the room
      room->add_member(user);
      user->room = room; 
      Message ok = Message("ok", username);
      conn->send(ok);
-     joined = true;
      //broadcast the message to all the queues
-   } else if(strcmp(received.tag.c_str(), "sendall") == 0 && joined == true){
+   } else if(strcmp(received.tag.c_str(), "sendall") == 0 && user->room != NULL){
       user->room->broadcast_message(username, received.data.c_str());
-   } else if(strcmp(received.tag.c_str(), "leave") == 0 && joined == true){
-     joined = false; 
+   } else if(strcmp(received.tag.c_str(), "leave") == 0 && user->room != NULL){
      user->room->remove_member(user);
+     user->room = NULL;  
      Message ok = Message("ok", "");
      conn->send(ok);
      //in order to quit must leave the room first 
    } else if(strcmp(received.tag.c_str(), "quit") == 0){
-     joined = false; 
      user->room->remove_member(user);
+     user->room = NULL;
      Message ok = Message("ok", "");
      conn->send(ok);
      return; 
