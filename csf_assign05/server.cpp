@@ -153,7 +153,7 @@ void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
   while(true){
-   int clientfd = Accept(m_ssock, NULL, NULL);
+   int clientfd = Accept(serverfd, NULL, NULL);
    if (clientfd < 0) {
      std::cerr << "Error accepting client connection" << std::endl;
      return;
@@ -185,7 +185,7 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   } else {
     //create a new room and add it to the map
       Room* new_room = new Room(room_name);
-      m_rooms.insert(room_name, &new_room);
-    //  return new_room; 
+      m_rooms.emplace(room_name, new_room);
+      return new_room; 
   }
 }
