@@ -185,7 +185,7 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   } else {
     //create a new room and add it to the map
       Room* new_room = new Room(room_name);
-      m_rooms.insert(room_name, &new_room);
-    //  return new_room; 
+      m_rooms.insert(room_name, new_room);
+      //return new_room; 
   }
 }
