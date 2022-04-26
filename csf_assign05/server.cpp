@@ -68,7 +68,7 @@ void chat_with_sender(Connection *conn, std::string username){
     Message received = Message();
     conn->receive(received);
     if(strcmp(received.tag.c_str(), "join") == 0 && user->room == NULL){
-     Room* room = find_or_create_room(room);
+      Room* room = find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
      user->room = room; 
@@ -95,31 +95,33 @@ void chat_with_sender(Connection *conn, std::string username){
 
 
 void chat_with_receiver(Connection *conn,  std::string username, std::string &room_name){
+  User* user;
+  user->username = username;
   //find room/create one if it does not exists
-  Room* room = find_or_create_room(room);
+  Room* room = find_or_create_room(room_name);
   //join room
-  room.add_member(room.user);
+  room->add_member(user);
   //now user is in room
 
   Message ok = Message("ok", username);
-  conn.send(ok);
+  conn->send(ok);
 
   
   //deliver messages
     while(true){
-      Message msg = room.user.deque();
-      bool sent = conn.send(msg);
+      Message& msg = room->take_message();
+      bool sent = conn->send(msg);
       if(sent){
 	 Message ok = Message("ok", username);
-	 conn.send(ok);
+	 conn->send(ok);
       } else {
 	 Message error = Message("err", "error");
-	 conn.send(error);
+	 conn->send(error);
       }
-      delete(msg);
+      delete(&msg);
     }
 }
-
+ 
 
 namespace {
 
