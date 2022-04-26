@@ -59,21 +59,38 @@ Room *Server::find_or_create_room(const std::string &room_name) {
 
 
 
-void chat_with_sender(Connection *conn, Server server, std::string username){
-  Message received = Message();
+void chat_with_sender(Connection *conn, std::string username){
+  User* user;
+  user->username = username;
+  user->sender = true;
   bool joined = false;
-  conn->receive(received);
+  
   while(true){
-   if(strcmp(received.tag.c_str(), "join") == 0){
-     Room* room = find_or_create_room(received.data.c_str());
-     //create the user and then have them join the room
-     User user;
-     user.username = username;
-     user.sender = true; 
+    Message received = Message();
+    conn->receive(received);
+    if(strcmp(received.tag.c_str(), "join") == 0 && joined == false){
+     Room* room = find_or_create_room(room);
+     //have the user join the room
+     room->add_member(user);
+     user->room = room; 
+     Message ok = Message("ok", username);
+     conn->send(ok);
      joined = true;
-   } else {
-    Message error = Message("err", "error");
-    bool err = conn->send(error);
+     //broadcast the message to all the queues
+   } else if(strcmp(received.tag.c_str(), "sendall") == 0 && joined == true){
+      user->room->broadcast_message(username, received.data.c_str());
+   } else if(strcmp(received.tag.c_str(), "leave") == 0 && joined == true){
+     joined = false; 
+     user->room->remove_member(user);
+     Message ok = Message("ok", "");
+     conn->send(ok);
+     //in order to quit must leave the room first 
+   } else if(strcmp(received.tag.c_str(), "quit") == 0){
+     joined = false; 
+     user->room->remove_member(user);
+     Message ok = Message("ok", "");
+     conn->send(ok);
+     return; 
    }
   }
  }
@@ -140,7 +157,7 @@ void *worker(void *arg) {
   conn.send(ok);
 
   if(sender){
-    chat_with_sender(&conn, info->server, username); 
+    chat_with_sender(&conn, username); 
     //check for join
     //make room
     //handle diff commands
