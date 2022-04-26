@@ -63,16 +63,20 @@ void chat_with_sender(Connection *conn, Server server, std::string username){
   Message received = Message();
   bool joined = false;
   conn->receive(received);
+  while(true){
    if(strcmp(received.tag.c_str(), "join") == 0){
      Room* room = find_or_create_room(received.data.c_str());
      //create the user and then have them join the room
-    
+     User user;
+     user.username = username;
+     user.sender = true; 
      joined = true;
    } else {
     Message error = Message("err", "error");
     bool err = conn->send(error);
    }
   }
+ }
 
 
 void chat_with_receiver(Connection *conn, Server server, std::string username){
