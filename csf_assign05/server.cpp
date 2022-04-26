@@ -38,6 +38,34 @@ typedef struct ConnInfo {
 ////////////////////////////////////////////////////////////////////////
 // Client thread functions
 ////////////////////////////////////////////////////////////////////////
+ void chat_with_sender(Connection *conn, Server server, std::string username){
+  Message received = Message();
+  bool joined = false;
+  conn->receive(received);
+   if(strcmp(received.tag.c_str(), "join") == 0){
+     //add them to a room that already exists or doesn't
+     joined = true;
+   } else {
+    Message error = Message("err", "error");
+    bool err = conn->send(error);
+   }
+  }
+
+
+void chat_with_receiver(Connection *conn, Server server, std::string username){
+   Message received = Message();
+   conn->receive(received);
+   bool joined = false;
+   if(strcmp(received.tag.c_str(), "join") == 0){
+     //add them to a room that already exists or doesn't depending on the case
+
+     joined = true;
+   } else {
+    Message error = Message("err", "error");
+    bool err = conn->send(error);
+   }
+}
+
 
 namespace {
 
@@ -85,37 +113,8 @@ void *worker(void *arg) {
   }
 
   return nullptr;
-}
-
-  void chat_with_sender(Connection *conn, Server server, std::string username){
-  Message received = Message();
-  bool joined = false; 
-  conn->receive(received);
-   if(strcmp(received.tag.c_str(), "join") == 0){
-     //add them to a room that already exists or doesn't 
-     joined = true; 
-   } else {
-    Message error = Message("err", "error");
-    bool err = conn->send(error);
-   }
-  }
-
-
-void chat_with_receiver(Connection *conn, Server server, std::string username){
-   Message received = Message();
-   conn->receive(received);
-   bool joined = false; 
-   if(strcmp(received.tag.c_str(), "join") == 0){
-     //add them to a room that already exists or doesn't depending on the case
-     
-     joined = true; 
-   } else {
-    Message error = Message("err", "error");
-    bool err = conn->send(error);
-   }
  }
 }
-
 ////////////////////////////////////////////////////////////////////////
 // Server member function implementation
 ////////////////////////////////////////////////////////////////////////
@@ -125,12 +124,12 @@ Server::Server(int port)
   , m_ssock(-1) {
   //initialize mutex
   //what is the other parameter?
-  pthread_mutex_init(m_lock, NULL);
+  pthread_mutex_init(&m_lock, NULL);
 }
 
 Server::~Server() {
   //destroy mutex
-  pthread_mutex_destroy(m_lock);
+  pthread_mutex_destroy(&m_lock);
 }
 
 
@@ -156,7 +155,7 @@ void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
   while(true){
-   int clientfd = Accept(serverfd, NULL, NULL);
+   int clientfd = Accept(m_ssock, NULL, NULL);
    if (clientfd < 0) {
      std::cerr << "Error accepting client connection" << std::endl;
      return;
