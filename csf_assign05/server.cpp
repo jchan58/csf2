@@ -83,7 +83,7 @@ void *worker(void *arg) {
   return nullptr;
 }
 
-void chat_with_sender(*conn, Server server, string username){
+void chat_with_sender(Connection *conn, Server server, string username){
   Message received = Message();
   bool joined = false; 
   conn.receive(received);
@@ -98,7 +98,7 @@ void chat_with_sender(*conn, Server server, string username){
  }
 
 
- void chat_with_receiver(*conn, Server server, string username){
+ void chat_with_receiver(Connection *conn, Server server, string username){
    Message received = Message();
    conn.receive(received);
    bool joined = false; 
