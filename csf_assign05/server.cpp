@@ -95,9 +95,8 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
  }
 
 
-void chat_with_receiver(Connection *conn,  std::string username, std::string &room_name, ConnInfo* info){
-  User* user;
-  user->username = username;
+void chat_with_receiver(Connection *conn,  std::string& username, std::string &room_name, ConnInfo* info){
+  User* user = new User(username);
   //find room/create one if it does not exists
   Room* room = info->server->find_or_create_room(room_name);
   //join room

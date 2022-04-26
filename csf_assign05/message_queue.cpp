@@ -16,7 +16,7 @@ MessageQueue::MessageQueue() {
 MessageQueue::~MessageQueue() {
   //destroy the mutex and the semaphore
   pthread_mutex_destroy(&m_lock);
-  sem_destroy(m_avail);
+  sem_destroy(&m_avail);
 }
 
 void MessageQueue::enqueue(Message *msg) {
@@ -51,6 +51,7 @@ Message *MessageQueue::dequeue() {
   }
   
   // TODO: remove the next message from the queue, return it
-  Message *msg = m_messages.pop_back();
+  Message *msg = m_messages.back();
+  m_messages.pop_back();
   return msg;
 }
