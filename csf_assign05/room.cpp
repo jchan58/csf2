@@ -6,6 +6,7 @@
 #include <iterator>
 #include <set>
 #include <iostream>
+#include <cstring>
 
 using std::iterator;
 using std::set; 
@@ -35,8 +36,8 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   // TODO: send a message to every (receiver) User in the room
   std::set<User *>::iterator it;
   for(it = members.begin(); it != members.end(); ++it){
-    if(*(it)->sender == false && strcmp(*(it)->username, sender_username) != 0){
-      *(it)->mqueue.enqueue(message_text); 
+    if((it)->sender == false && strcmp((it)->username, sender_username) != 0){
+      (it)->mqueue->enqueue(message_text); 
     }
   }
 }
@@ -45,8 +46,8 @@ Message& Room::take_message() {
   // take the message out of every reciever's message queue in the room
   std::set<User *>::iterator it;
   for(it = members.begin(); it != members.end(); ++it){
-    if(*(it)->sender == false){
-      *(it)->mqueue.deque();
+    if((it)->sender == false){
+      (it)->mqueue->deque();
     }
   }
 }
