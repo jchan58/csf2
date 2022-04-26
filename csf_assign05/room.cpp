@@ -35,8 +35,8 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   // TODO: send a message to every (receiver) User in the room
   std::set<User *>::iterator it;
   for(it = members.begin(); it != members.end(); ++it){
-    if(it->sender == false && it->username != sender_username){
-      it->mqueue.enqueue(message_text); 
+    if(*(it)->sender == false && *(it)->username != sender_username){
+      *(it)->mqueue.enqueue(message_text); 
     }
   }
 }
