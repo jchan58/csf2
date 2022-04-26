@@ -43,7 +43,9 @@ typedef struct ConnInfo {
   bool joined = false;
   conn->receive(received);
    if(strcmp(received.tag.c_str(), "join") == 0){
-     //add them to a room that already exists or doesn't
+     Room* room = find_or_create_room(received.data.c_str());
+     //create the user and then have them join the room
+    
      joined = true;
    } else {
     Message error = Message("err", "error");
@@ -58,7 +60,6 @@ void chat_with_receiver(Connection *conn, Server server, std::string username){
    bool joined = false;
    if(strcmp(received.tag.c_str(), "join") == 0){
      //add them to a room that already exists or doesn't depending on the case
-
      joined = true;
    } else {
     Message error = Message("err", "error");
@@ -87,7 +88,7 @@ void *worker(void *arg) {
   conn.receive(received);
 
   if(strcmp(received.tag.c_str(), "slogin") == 0){
-    sender = true; 
+    sender = true;
   } else if(strcmp(received.tag.c_str(), "rlogin") == 0){
     receiver = true; 
   } else {

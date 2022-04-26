@@ -18,7 +18,7 @@ void Room::add_member(User *user) {
 }
 
 void Room::remove_member(User *user) {
-  // TODO: remove User from the room
+  // remove user from collection 
 }
 
 void Room::broadcast_message(const std::string &sender_username, const std::string &message_text) {
