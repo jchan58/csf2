@@ -6,11 +6,13 @@
 
 Room::Room(const std::string &room_name)
   : room_name(room_name) {
-  // TODO: initialize the mutex
+  //initialize the mutex
+  pthread_mutex_init(&lock, NULL);
 }
 
 Room::~Room() {
-  // TODO: destroy the mutex
+   //destroy mutex
+   pthread_mutex_destroy(lock);
 }
 
 void Room::add_member(User *user) {
