@@ -92,7 +92,8 @@ void chat_with_receiver(Connection *conn,  std::string username, std::string &ro
   
   //deliver messages
     while(true){
-      bool sent = conn.send(room.user.deque());
+      Message msg = room.user.deque();
+      bool sent = conn.send(msg);
       if(sent){
 	 Message ok = Message("ok", username);
 	 conn.send(ok);
@@ -100,7 +101,7 @@ void chat_with_receiver(Connection *conn,  std::string username, std::string &ro
 	 Message error = Message("err", "error");
 	 conn.send(error);
       }
-      delete(room.user.deque());
+      delete(msg);
     }
 }
 
