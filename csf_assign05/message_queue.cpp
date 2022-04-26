@@ -20,7 +20,7 @@ MessageQueue::~MessageQueue() {
 }
 
 void MessageQueue::enqueue(Message *msg) {
-  //lock/wait while the queue is being changed
+  //lock/wait while the queue is being changed ?
   sem_wait(msg.size());
   lock_guard(m_lock);
   //put the specified message on the queue
