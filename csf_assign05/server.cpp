@@ -30,6 +30,7 @@ using std::iterator;
 
 //hold info about the connection object (from lecture 30, slide 24)
 typedef struct ConnInfo {
+  //hold info about the connection object
   Connection *conn;
   Server *server;
 
@@ -48,7 +49,7 @@ typedef struct ConnInfo {
 
 
 Room *Server::find_or_create_room(const std::string &room_name) {
-  // TODO: return a pointer to the unique Room object representing
+  //return a pointer to the unique Room object representing
   //       the named chat room, creating a new one if necessary
   //first find if the room exists already - if not create a room
   //create an iterator to iterate over the map
@@ -217,7 +218,7 @@ bool Server::listen() {
  
 }
 
-//from lecture 30, slide 26 ???
+
 void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
