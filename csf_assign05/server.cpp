@@ -144,6 +144,8 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 namespace {
 
 void *worker(void *arg) {
+  bool sender, receiver;
+
   pthread_detach(pthread_self());
   //use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
@@ -175,22 +177,27 @@ Message msg;
     return nullptr;
   }
 
-  // Just loop reading messages and sending an ok response for each one
-  while (true) {
-    if (!info->conn->receive(msg)) {
-      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
-        info->conn->send(Message(TAG_ERR, "invalid message"));
-      }
-      break;
-    }
 
-    if (!info->conn->send(Message(TAG_OK, "this is just a dummy response"))) {
-      break;
-    }
+  //ours
+  if(strcmp(msg.tag.c_str(), TAG_SLOGIN) == 0){
+    sender = true;
+  } else if(strcmp(msg.tag.c_str(), TAG_RLOGIN) == 0){
+    receiver = true; 
+  }
+
+  if(sender){
+    chat_with_sender(&(*info->conn), username, &(*info)); 
+    //check for join
+    //make room
+    //handle diff commands
+  } else if(receiver){
+    Message join = Message();
+    info->conn->receive(join);
+    //join.data is the room name
+    chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
   }
 
   return nullptr;
-
  }
 }
 ////////////////////////////////////////////////////////////////////////
