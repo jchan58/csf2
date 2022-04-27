@@ -21,7 +21,7 @@ public:
   void remove_member(User *user);
 
   void broadcast_message(const std::string &sender_username, const std::string &message_text);
-  Message* take_message();
+  
 
 private:
   std::string room_name;

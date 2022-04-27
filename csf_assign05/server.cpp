@@ -126,7 +126,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   
   //deliver messages
     while(true){
-      Message* msg = room->take_message();
+      Message* msg = user->mqueue.dequeue();
       //Message& msg_ref = msg;
       bool sent = conn->send(*msg);
       if(sent){
@@ -185,16 +185,18 @@ Message msg;
     receiver = true; 
   }
 
-  if(sender){
-    chat_with_sender(&(*info->conn), username, &(*info)); 
-    //check for join
-    //make room
-    //handle diff commands
-  } else if(receiver){
-    Message join = Message();
-    info->conn->receive(join);
-    //join.data is the room name
-    chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
+  while(true){
+    if(sender){
+      chat_with_sender(&(*info->conn), username, &(*info)); 
+      //check for join
+      //make room
+      //handle diff commands
+    } else if(receiver){
+      Message join = Message();
+      info->conn->receive(join);
+      //join.data is the room name
+      chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
+    }
   }
 
   return nullptr;

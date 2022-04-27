@@ -27,7 +27,7 @@ void MessageQueue::enqueue(Message *msg) {
   m_messages.push_front(msg);
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
-  //sem_post(msg.size());
+  sem_post(&m_avail);
 }
 
 Message *MessageQueue::dequeue() {
@@ -44,13 +44,13 @@ Message *MessageQueue::dequeue() {
 
   //call sem_timedwait to wait up to 1 second for a message
   //       to be available, return nullptr if no message is available
-  sem_timedwait(&m_avail, &ts);
+  sem_wait(&m_avail);
 
   if(m_messages.size() == 0){
     return nullptr;
   }
   
-  // TODO: remove the next message from the queue, return it
+  //remove the next message from the queue, return it
   Message *msg = m_messages.back();
   m_messages.pop_back();
   return msg;
