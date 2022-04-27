@@ -14,7 +14,7 @@ using std::set;
 Room::Room(const std::string &room_name)
   : room_name(room_name) {
   //initialize the mutex
-  pthread_mutex_init(&lock, NULL);
+  pthread_mutex_init(&lock, nullptr);
 }
 
 Room::~Room() {

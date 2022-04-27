@@ -30,9 +30,15 @@ using std::iterator;
 
 //hold info about the connection object (from lecture 30, slide 24)
 typedef struct ConnInfo {
-  int clientfd;
-  //const char *webroot; //what is webroot, are we not passing in the whole object like the instructions say?
+  Connection *conn;
   Server *server;
+
+  ConnInfo(Connection *conn, Server *server) : conn(conn), server(server) { }
+  ~ConnInfo() {
+    // destroy connection when ConnInfo object is destroyed
+    delete conn;
+  }
+
 } ConnInfo;
 
 
@@ -46,16 +52,26 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   //       the named chat room, creating a new one if necessary
   //first find if the room exists already - if not create a room
   //create an iterator to iterate over the map
-  std::map<std::string, Room *>::iterator it;
-  it = m_rooms.find(room_name);
-  if(it != m_rooms.end()){
-    return it->second;
+
+
+  // this function can be called from multiple threads, so
+  // make sure the mutex is held while accessing the shared
+  // data (the map of room names to room objects)
+  Guard g(m_lock);
+
+  Room *room;
+
+  auto i = m_rooms.find(room_name);
+  if (i == m_rooms.end()) {
+    // room does not exist yet, so create it and add it to the map
+    room = new Room(room_name);
+    m_rooms[room_name] = room;
   } else {
-    //create a new room and add it to the map
-      Room* new_room = new Room(room_name);
-      m_rooms.emplace(room_name, new_room);
-      return new_room;
+    room = i->second;
   }
+
+  return room;
+  
 }
 
 
@@ -131,45 +147,49 @@ void *worker(void *arg) {
   //use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-  struct ConnInfo *info = (ConnInfo *) arg;
+  ConnInfo *info_ = static_cast<ConnInfo *>(arg);
+
+  // use a std::unique_ptr to automatically destroy the ConnInfo object
+  // when the worker function finishes; this will automatically ensure
+  // that the Connection object is destroyed
+  std::unique_ptr<ConnInfo> info(info_);
 
 
+Message msg;
 
-  // TODO: read login message (should be tagged either with
-  //       TAG_SLOGIN or TAG_RLOGIN), send response
-  bool sender = false;
-  bool receiver = false;
-  Connection conn(info->clientfd);
-  Message received = Message();
-  conn.receive(received);
-
-  if(strcmp(received.tag.c_str(), "slogin") == 0){
-    sender = true;
-  } else if(strcmp(received.tag.c_str(), "rlogin") == 0){
-    receiver = true; 
-  } else {
-    //send an error response back to the client
-    Message error = Message("err", "error");
-    conn.send(error);
+  if (!info->conn->receive(msg)) {
+    if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+      info->conn->send(Message(TAG_ERR, "invalid message"));
+    }
+    return nullptr;
   }
 
-  std::string username = received.data;
-  Message ok = Message("ok", username);
-  conn.send(ok);
+  if (msg.tag != TAG_SLOGIN && msg.tag != TAG_RLOGIN) {
+    info->conn->send(Message(TAG_ERR, "first message should be slogin or rlogin"));
+    return nullptr;
+  }
 
-  if(sender){
-    chat_with_sender(&conn, username, info); 
-    //check for join
-    //make room
-    //handle diff commands
-  } else if(receiver){
-    Message join = Message();
-    conn.receive(join);
-    //join.data is the room name
-    chat_with_receiver(&conn, username, join.data, info); 
+  std::string username = msg.data;
+  if (!info->conn->send(Message(TAG_OK, "welcome " + username))) {
+    return nullptr;
+  }
+
+  // Just loop reading messages and sending an ok response for each one
+  while (true) {
+    if (!info->conn->receive(msg)) {
+      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+        info->conn->send(Message(TAG_ERR, "invalid message"));
+      }
+      break;
+    }
+
+    if (!info->conn->send(Message(TAG_OK, "this is just a dummy response"))) {
+      break;
+    }
   }
 
   return nullptr;
+
  }
 }
 ////////////////////////////////////////////////////////////////////////
@@ -190,44 +210,34 @@ Server::~Server() {
 }
 
 
-bool Server::listen() {
-  //use open_listenfd to create the server socket, return true
-  //       if successful, false if not
-
- std::stringstream ss;
- ss << m_port;
- std::string str_port = ss.str();
-
- m_ssock = open_listenfd(str_port.c_str());
+bool Server::listen() { 
+  std::string port = std::to_string(m_port);
+  m_ssock = open_listenfd(port.c_str());
+  return m_ssock >= 0;  
  
-  if(m_ssock >= 0) {
-   return true; 
-  } else {
-   return false; 
-  }
 }
 
 //from lecture 30, slide 26 ???
 void Server::handle_client_requests() {
   //infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
+
+  assert(m_ssock >= 0);
   while(true){
-   int clientfd = Accept(m_ssock, NULL, NULL);
+   int clientfd = Accept(m_ssock, nullptr, nullptr);
    if (clientfd < 0) {
      std::cerr << "Error accepting client connection" << std::endl;
      return;
    } 
 
-   ConnInfo *info = (ConnInfo *) malloc(sizeof(ConnInfo));
-   info->clientfd = clientfd;
+   ConnInfo *info = new ConnInfo(new Connection(clientfd), this);
+   
   
    pthread_t thr_id;
 
-   if(pthread_create(&thr_id, NULL, worker, info) != 0) {
+   if(pthread_create(&thr_id, nullptr, worker, static_cast<void *>(info)) != 0) {
      std::cerr << "pthread_create failed" << std::endl;
      return;
    }
-
-   close(clientfd);
   }
 }
