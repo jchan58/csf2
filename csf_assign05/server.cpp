@@ -185,19 +185,19 @@ Message msg;
     receiver = true; 
   }
 
-  while(true){
-    if(sender){
-      chat_with_sender(&(*info->conn), username, &(*info)); 
-      //check for join
-      //make room
-      //handle diff commands
-    } else if(receiver){
-      Message join = Message();
-      info->conn->receive(join);
-      //join.data is the room name
-      chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
-    }
+  
+  if(sender){
+    chat_with_sender(&(*info->conn), username, &(*info)); 
+    //check for join
+    //make room
+    //handle diff commands
+  } else if(receiver){
+    Message join = Message();
+    info->conn->receive(join);
+    //join.data is the room name
+    chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
   }
+    
 
   return nullptr;
  }
