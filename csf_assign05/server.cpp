@@ -103,8 +103,12 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      conn->send(ok);
      //in order to quit must leave the room first 
    } else if(strcmp(received.tag.c_str(), TAG_QUIT) == 0){
-     user->room->remove_member(user);
-     delete(room);
+      if(user->room != nullptr){
+	user->room->remove_member(user);
+      }
+      if(room != nullptr){
+	delete(room);
+      }
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
