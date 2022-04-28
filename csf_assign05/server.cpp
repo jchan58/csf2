@@ -82,6 +82,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   user->username = username;
   user->sender = true;
   Room* room = nullptr;
+  bool joined = false; 
   
   while(true){
     Message received = Message();
@@ -90,17 +91,21 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
       room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
-     user->room = room; 
+     user->room = room;
+     joined = true; 
      Message ok = Message(TAG_OK, username);
      conn->send(ok);
      //broadcast the message to all the queues
-   } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && user->room != nullptr){
+   } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && joined == true){
       user->room->broadcast_message(username, received.data.c_str());
-   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0 && user->room != nullptr){
+      Message ok = Message(TAG_OK, username);
+     conn->send(ok);
+   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0 && joined == true){
      user->room->remove_member(user);
      user->room = nullptr;  
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
+     joined = false; 
      //in order to quit must leave the room first 
    } else if(strcmp(received.tag.c_str(), TAG_QUIT) == 0){
       if(user->room != nullptr){
@@ -112,6 +117,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
+     joined = false; 
      delete(user);
      break; 
    }
