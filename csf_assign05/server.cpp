@@ -83,6 +83,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   user->sender = true;
   Room* room = nullptr;
   bool joined = false; 
+  user->room = nullptr;
   
   while(true){
     Message received = Message();
@@ -111,6 +112,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
       if(user->room != nullptr){
 	user->room->remove_member(user);
       }
+      
       if(room != nullptr){
 	delete(room);
       }
@@ -119,18 +121,10 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      conn->send(ok);
      joined = false; 
      delete(user);
+     //delete(info);
      break; 
    }
   }
-
-  if(room != nullptr){
-    delete(room);
-  }
-  
-  delete(user);
-  delete(info);
-  delete(conn);
-  return;
  }
 
 
@@ -157,24 +151,14 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	 conn->send(ok);
       } else {
 	 delete(user);
-	 if(msg != nullptr){
-	   delete(msg);
-	 }
 	 delete(room);
-	 
-
-	  delete(info);
-	  delete(conn);
-	  break;
-
+	 //delete(info);
+	 break;	 
       }
-      delete(msg);
-    }
-
-    delete(room);
-
-    if(msg != nullptr){
-      delete(msg);
+      
+      if(msg != nullptr){
+	delete(msg);
+      }
     }
 }
  
@@ -235,8 +219,8 @@ Message msg;
     //join.data is the room name
     chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
   }
-    
 
+  delete(info_);
   return nullptr;
  }
 }
