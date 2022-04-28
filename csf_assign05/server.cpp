@@ -113,14 +113,18 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      delete(user);
-     return; 
+     break; 
    }
   }
 
   if(room != nullptr){
     delete(room);
   }
+  
   delete(user);
+  delete(info);
+  delete(conn);
+  return;
  }
 
 
@@ -146,13 +150,17 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	 Message ok = Message("ok", username);
 	 conn->send(ok);
       } else {
-	 Message error = Message("err", "error");
 	 delete(user);
 	 if(msg != nullptr){
 	   delete(msg);
 	 }
 	 delete(room);
-	 conn->send(error);
+	 
+
+	  delete(info);
+	  delete(conn);
+	  break;
+
       }
       delete(msg);
     }
