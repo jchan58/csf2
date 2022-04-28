@@ -81,12 +81,12 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   User* user = new User(username); 
   user->username = username;
   user->sender = true;
-  Room* room;
+  Room* room = nullptr;
   
   while(true){
     Message received = Message();
     conn->receive(received);
-    if(strcmp(received.tag.c_str(), TAG_JOIN) == 0 && user->room == NULL){
+    if(strcmp(received.tag.c_str(), TAG_JOIN) == 0 && user->room == nullptr){
       room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
@@ -94,26 +94,29 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      Message ok = Message(TAG_OK, username);
      conn->send(ok);
      //broadcast the message to all the queues
-   } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && user->room != NULL){
+   } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && user->room != nullptr){
       user->room->broadcast_message(username, received.data.c_str());
-   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0 && user->room != NULL){
+   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0 && user->room != nullptr){
      user->room->remove_member(user);
-     user->room = NULL;  
-     Message ok = Message(TAG_OK, "");
+     user->room = nullptr;  
+     Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      //in order to quit must leave the room first 
    } else if(strcmp(received.tag.c_str(), TAG_QUIT) == 0){
      user->room->remove_member(user);
-     user->room = NULL;
-     Message ok = Message(TAG_OK, "");
+     delete(room);
+     user->room = nullptr;
+     Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      delete(user);
-     delete(room);
      return; 
    }
   }
+
+  if(room != nullptr){
+    delete(room);
+  }
   delete(user);
-  delete(room);
  }
 
 
@@ -128,7 +131,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   Message ok = Message("ok", username);
   conn->send(ok);
 
-  Message* msg;
+  Message* msg = nullptr;
   
   //deliver messages
     while(true){
@@ -141,7 +144,9 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
       } else {
 	 Message error = Message("err", "error");
 	 delete(user);
-	 delete(msg);
+	 if(msg != nullptr){
+	   delete(msg);
+	 }
 	 delete(room);
 	 conn->send(error);
       }
@@ -149,7 +154,10 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
     }
 
     delete(room);
-    delete(msg);
+
+    if(msg != nullptr){
+      delete(msg);
+    }
 }
  
 
