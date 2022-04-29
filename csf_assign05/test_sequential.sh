@@ -75,7 +75,7 @@ mkdir temp/
 # start server
 echo "spawning server"
 if [[ ${VALGRIND_ENABLE} -eq 1 ]]; then
-    valgrind --leak-check=full --track-origins=yes ./server ${PORT} &
+    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./server ${PORT} &
     SERVER_PID=$!
 else
     ./server ${PORT} &
