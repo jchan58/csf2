@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iostream>
 
+
 Connection::Connection()
   : m_fd(-1)
   , m_last_result(SUCCESS) {
@@ -98,6 +99,13 @@ bool Connection::receive(Message &msg) {
   //store the tag and payload properly into the message
   std::string word;
   std::getline(ss, word, ':');
+
+  //invalid message
+  if(strcmp(word.c_str(), ss.str().c_str()) == 0){
+    m_last_result = EOF_OR_ERROR;
+    return false;
+  }
+  
   msg.tag = word;
 
   std::getline(ss, word);
