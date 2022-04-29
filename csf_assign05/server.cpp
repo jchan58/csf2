@@ -153,12 +153,11 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
     while(true){
       msg = user->mqueue.dequeue();
       bool sent = conn->send(*msg);
-      if(sent){
-      } else {
-	 room->remove_member(user);
-	 delete(user);
-	 joined = false; 
-	 break;	 
+      if(!sent){
+	room->remove_member(user);
+	delete(user);
+	joined = false; 
+	break;	 
       }
       
       if(msg != nullptr){
@@ -166,6 +165,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	delete(msg);
       }
     }
+
     if(joined == true){
       room->remove_member(user);
     }
