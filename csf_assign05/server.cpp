@@ -140,6 +140,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   Room* room = info->server->find_or_create_room(room_name);
   //join room
   room->add_member(user);
+  bool joined = true; 
   //now user is in room
 
   Message ok = Message("ok", username);
@@ -153,7 +154,9 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
       bool sent = conn->send(*msg);
       if(sent){
       } else {
+	 room->remove_member(user);
 	 delete(user);
+	 joined = false; 
 	 //delete(info);
 	 break;	 
       }
@@ -163,7 +166,9 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	delete(msg);
       }
     }
-     room->remove_member(user);
+    if(joined == true){
+      room->remove_member(user);
+    }
 }
 
 
