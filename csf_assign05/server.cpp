@@ -87,15 +87,14 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   while(true){
     Message received = Message();
     bool got = conn->receive(received);
-     
+
+    if(!got){
+      Message err = Message(TAG_ERR, "invalid message");
+      conn->send(err);
+      continue;
+    }
+    
     if(strcmp(received.tag.c_str(), TAG_JOIN) == 0 && user->room == nullptr){
-
-      if(strcmp(received.data.c_str(), "")){
-	Message err = Message(TAG_EMPTY, "message failed to send");
-	conn->send(err);
-	continue;
-      }
-
       room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
@@ -151,7 +150,6 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   //deliver messages
     while(true){
       msg = user->mqueue.dequeue();
-      //Message& msg_ref = msg;
       bool sent = conn->send(*msg);
       if(sent){
       } else {
