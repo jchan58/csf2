@@ -112,16 +112,20 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
       if(user->room != nullptr){
 	user->room->remove_member(user);
       }
-      
-      
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      joined = false; 
      delete(user);
      //delete(info);
-     break; 
-   }
+     break;
+    } else if(strlen(received.data.c_str()) > Message::MAX_LEN){
+      info->conn->send(Message(TAG_ERR, "invalid message"));
+      continue; 
+    } else {
+      info->conn->send(Message(TAG_ERR, "invalid message"));
+      continue;
+    }
   }
  }
 
@@ -145,9 +149,8 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
       //Message& msg_ref = msg;
       bool sent = conn->send(*msg);
       if(sent){
-	 Message ok = Message("ok", username);
-	 conn->send(ok);
       } else {
+	 info->conn->send(Message(TAG_ERR, "invalid message"));
 	 delete(user);
 	 //delete(info);
 	 break;	 
