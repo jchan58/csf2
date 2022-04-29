@@ -81,7 +81,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   User* user = new User(username); 
   user->username = username;
   user->sender = true;
-  Room* room = nullptr;
+  Room* room;
   bool joined = false; 
   user->room = nullptr;
   
@@ -217,7 +217,6 @@ Message msg;
     chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
   }
 
-  delete(info_);
   return nullptr;
  }
 }
