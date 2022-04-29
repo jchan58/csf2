@@ -109,25 +109,26 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
       user->room->broadcast_message(username, received.data.c_str());
       Message ok = Message(TAG_OK, username);
      conn->send(ok);
-   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0 && joined == true){
-     user->room->remove_member(user);
-     user->room = nullptr;  
-     Message ok = Message(TAG_OK, "ok");
-     conn->send(ok);
-     joined = false; 
+   } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0){
+      if(joined == true){
+	user->room->remove_member(user);
+        user->room = nullptr;
+        Message ok = Message(TAG_OK, "ok");
+        conn->send(ok);
+        joined = false;
+      } else {
+	 info->conn->send(Message(TAG_ERR, "invalid message"));
+      } 
      //in order to quit must leave the room first 
    } else if(strcmp(received.tag.c_str(), TAG_QUIT) == 0){
       if(user->room != nullptr){
 	user->room->remove_member(user);
-      }
-      
-      
+      }      
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      joined = false; 
      delete(user);
-     
      break; 
    }
   }
@@ -160,9 +161,11 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
       }
       
       if(msg != nullptr){
+	
 	delete(msg);
       }
     }
+     room->remove_member(user);
 }
 
 
