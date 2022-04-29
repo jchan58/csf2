@@ -113,9 +113,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
 	user->room->remove_member(user);
       }
       
-      if(room != nullptr){
-	delete(room);
-      }
+      
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
@@ -151,7 +149,6 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	 conn->send(ok);
       } else {
 	 delete(user);
-	 delete(room);
 	 //delete(info);
 	 break;	 
       }
