@@ -76,7 +76,6 @@ Room *Server::find_or_create_room(const std::string &room_name) {
 }
 
 
-
 void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   User* user = new User(username); 
   user->username = username;
@@ -87,8 +86,16 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
   
   while(true){
     Message received = Message();
-    conn->receive(received);
+    bool got = conn->receive(received);
+     
     if(strcmp(received.tag.c_str(), TAG_JOIN) == 0 && user->room == nullptr){
+
+      if(strcmp(received.data.c_str(), "")){
+	Message err = Message(TAG_EMPTY, "message failed to send");
+	conn->send(err);
+	continue;
+      }
+
       room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
@@ -98,6 +105,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      conn->send(ok);
      //broadcast the message to all the queues
    } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && joined == true){
+
       user->room->broadcast_message(username, received.data.c_str());
       Message ok = Message(TAG_OK, username);
      conn->send(ok);
@@ -112,37 +120,29 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
       if(user->room != nullptr){
 	user->room->remove_member(user);
       }
+      
+      
      user->room = nullptr;
      Message ok = Message(TAG_OK, "ok");
      conn->send(ok);
      joined = false; 
      delete(user);
-     //delete(info);
-     break;
-    } else if(strlen(received.data.c_str()) > Message::MAX_LEN){
-      info->conn->send(Message(TAG_ERR, "invalid message"));
-      continue; 
-    } else {
-      info->conn->send(Message(TAG_ERR, "invalid message"));
-      continue;
-    }
+     
      break; 
    }
->>>>>>> be36d5509c1b0547f461dac3302e3ba03473e5da
   }
  }
 
 
 void chat_with_receiver(Connection *conn,  std::string& username, std::string &room_name, ConnInfo* info){
-  User* user = nullptr;
-    user = new User(username);
+  User* user = new User(username);
   //find room/create one if it does not exists
   Room* room = info->server->find_or_create_room(room_name);
   //join room
   room->add_member(user);
   //now user is in room
 
-  Message ok = Message(TAG_OK, username);
+  Message ok = Message("ok", username);
   conn->send(ok);
 
   Message* msg = nullptr;
@@ -150,27 +150,22 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   //deliver messages
     while(true){
       msg = user->mqueue.dequeue();
+      //Message& msg_ref = msg;
       bool sent = conn->send(*msg);
       if(sent){
       } else {
-	 info->conn->send(Message(TAG_ERR, "invalid message"));
 	 delete(user);
 	 //delete(info);
 	 break;	 
-	 Message ok = Message(TAG_OK, username);
-	 conn->send(ok);
-      } else {
-	delete(user);
-
-	break; 
       }
       
       if(msg != nullptr){
 	delete(msg);
       }
     }
-
 }
+
+
  
 
 namespace {
