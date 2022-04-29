@@ -119,7 +119,6 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      conn->send(ok);
      joined = false; 
      delete(user);
-     //delete(info);
      break; 
    }
   }
@@ -127,14 +126,15 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
 
 
 void chat_with_receiver(Connection *conn,  std::string& username, std::string &room_name, ConnInfo* info){
-  User* user = new User(username);
+  User* user = nullptr;
+    user = new User(username);
   //find room/create one if it does not exists
   Room* room = info->server->find_or_create_room(room_name);
   //join room
   room->add_member(user);
   //now user is in room
 
-  Message ok = Message("ok", username);
+  Message ok = Message(TAG_OK, username);
   conn->send(ok);
 
   Message* msg = nullptr;
@@ -142,21 +142,21 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   //deliver messages
     while(true){
       msg = user->mqueue.dequeue();
-      //Message& msg_ref = msg;
       bool sent = conn->send(*msg);
       if(sent){
-	 Message ok = Message("ok", username);
+	 Message ok = Message(TAG_OK, username);
 	 conn->send(ok);
       } else {
-	 delete(user);
-	 //delete(info);
-	 break;	 
+	delete(user);
+
+	break;	 
       }
       
       if(msg != nullptr){
 	delete(msg);
       }
     }
+
 }
  
 
@@ -206,7 +206,7 @@ Message msg;
 
   
   if(sender){
-    chat_with_sender(&(*info->conn), username, &(*info)); 
+    chat_with_sender(info->conn, username, &(*info)); 
     //check for join
     //make room
     //handle diff commands
@@ -214,7 +214,7 @@ Message msg;
     Message join = Message();
     info->conn->receive(join);
     //join.data is the room name
-    chat_with_receiver(&(*info->conn), username, join.data, &(*info)); 
+    chat_with_receiver(info->conn, username, join.data, &(*info)); 
   }
 
   return nullptr;
@@ -235,6 +235,9 @@ Server::Server(int port)
 Server::~Server() {
   //destroy mutex
   pthread_mutex_destroy(&m_lock);
+  for(auto el: m_rooms){
+    delete(el.second);
+  }
 }
 
 
