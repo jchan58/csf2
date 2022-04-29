@@ -135,12 +135,13 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
 
 
 void chat_with_receiver(Connection *conn,  std::string& username, std::string &room_name, ConnInfo* info){
+  bool joined = false;
   User* user = new User(username);
   //find room/create one if it does not exists
   Room* room = info->server->find_or_create_room(room_name);
   //join room
   room->add_member(user);
-  bool joined = true; 
+  joined = true; 
   //now user is in room
 
   Message ok = Message("ok", username);
@@ -157,7 +158,6 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 	 room->remove_member(user);
 	 delete(user);
 	 joined = false; 
-	 //delete(info);
 	 break;	 
       }
       
@@ -249,9 +249,6 @@ Server::Server(int port)
 Server::~Server() {
   //destroy mutex
   pthread_mutex_destroy(&m_lock);
-  for(auto el: m_rooms){
-    delete(el.second);
-  }
 }
 
 
