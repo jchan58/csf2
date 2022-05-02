@@ -144,31 +144,34 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
   joined = true; 
   //now user is in room
 
+  //send ok for join
   Message ok = Message("ok", username);
   conn->send(ok);
 
   Message* msg = nullptr;
   
   //deliver messages
-    while(true){
-      msg = user->mqueue.dequeue();
-      bool sent = conn->send(*msg);
-      if(!sent){
-	room->remove_member(user);
-	delete(user);
-	joined = false; 
-	break;	 
-      }
-      
-      if(msg != nullptr){
-	
-	delete(msg);
-      }
+  while(true){
+    msg = user->mqueue.dequeue();
+    bool sent = conn->send(*msg);
+    if(!sent){
+      //if message send fails remove the user and delete it
+      room->remove_member(user);
+      delete(user);
+      joined = false; 
+      break;	 
     }
 
-    if(joined == true){
-      room->remove_member(user);
+    //cleanup sent messages
+    if(msg != nullptr){
+      delete(msg);
     }
+  }
+
+  //at the end remove the user
+  if(joined == true){
+    room->remove_member(user);
+  }
 }
 
  
