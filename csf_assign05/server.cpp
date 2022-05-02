@@ -177,7 +177,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
 namespace {
 
 void *worker(void *arg) {
-  bool sender, receiver;
+  bool sender = false, receiver = false;
 
   pthread_detach(pthread_self());
   //use a static cast to convert arg from a void* to
@@ -191,7 +191,7 @@ void *worker(void *arg) {
   std::unique_ptr<ConnInfo> info(info_);
 
 
-Message msg;
+  Message msg;
 
   if (!info->conn->receive(msg)) {
     if (info->conn->get_last_result() == Connection::INVALID_MSG) {
@@ -226,7 +226,11 @@ Message msg;
     //handle diff commands
   } else if(receiver){
     Message join = Message();
-    info->conn->receive(join);
+    bool good = info->conn->receive(join);
+    if(!good){
+      info->conn->send(Message(TAG_ERR, "invalid join"));
+      return nullptr;
+    }
     //join.data is the room name
     chat_with_receiver(info->conn, username, join.data, &(*info)); 
   }
