@@ -94,7 +94,7 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
     }
     //check if the tag is joined then find or create room 
     if(strcmp(received.tag.c_str(), TAG_JOIN) == 0 && user->room == nullptr){
-      room = info->server->find_or_create_room(received.data);
+     room = info->server->find_or_create_room(received.data);
      //have the user join the room
      room->add_member(user);
      user->room = room;
@@ -103,9 +103,9 @@ void chat_with_sender(Connection *conn, std::string username, ConnInfo* info){
      conn->send(ok);
      //broadcast the message to all the queues
     } else if(strcmp(received.tag.c_str(), TAG_SENDALL) == 0 && joined == true){
-    user->room->broadcast_message(username, received.data.c_str());
-    Message ok = Message(TAG_OK, username);
-    conn->send(ok);
+     user->room->broadcast_message(username, received.data.c_str());
+     Message ok = Message(TAG_OK, username);
+     conn->send(ok);
     //if the tag is leave then remove user from the room 
     } else if(strcmp(received.tag.c_str(), TAG_LEAVE) == 0){
       if(joined == true){
@@ -171,9 +171,7 @@ void chat_with_receiver(Connection *conn,  std::string& username, std::string &r
     }
 }
 
-
  
-
 namespace {
 
 void *worker(void *arg) {
@@ -274,7 +272,6 @@ void Server::handle_client_requests() {
 
    ConnInfo *info = new ConnInfo(new Connection(clientfd), this);
    
-  
    pthread_t thr_id;
 
    if(pthread_create(&thr_id, nullptr, worker, static_cast<void *>(info)) != 0) {
