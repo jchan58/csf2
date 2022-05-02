@@ -23,7 +23,7 @@ Room::~Room() {
 }
 
 void Room::add_member(User *user) {
-  // TODO: add User to the room
+  // add User to the room
   members.insert(user); 
 }
 
@@ -32,14 +32,15 @@ void Room::remove_member(User *user) {
   members.erase(user); 
 }
 
+// send a message to every (receiver) User in the room
 void Room::broadcast_message(const std::string &sender_username, const std::string &message_text) {
-  // TODO: send a message to every (receiver) User in the room
   std::set<User *>::iterator it;
   for(it = members.begin(); it != members.end(); ++it){
     if((*it)->sender == false){
 
       Guard g(lock);
       Message* message = new Message(TAG_DELIVERY, this->room_name + ":" + sender_username + ":" + message_text);
+      // add in the message into the queue 
       (*it)->mqueue.enqueue(message); 
     }
   }
